@@ -61,7 +61,7 @@ func _push_particles(type: int, dest: Cell, count: int):
 # Called every game step.
 func simulate():
 	_process_pressure()
-	_process_potential_recipes()
+	_process_recipes()
 	_display_debug()
 
 # Generate a random coordinate inside a cell (relative to its center)
@@ -101,7 +101,7 @@ func _process_pressure():
 				var demand_neighbor = demand_neighbors[n]
 				self._push_particles(t, n, round(budget * demand_neighbor / demand_total) as int)
 
-func _process_potential_recipes():
+func _process_recipes():
 	var recipes = Recipe.matches(particle_counts)
 	for c in $RecipeButtons.get_children():
 		var found = false
@@ -118,11 +118,15 @@ func _process_potential_recipes():
 		else:
 			recipes.remove(found_i)
 	for r in recipes:
-		# Add
-		var button = Button.new()
-		button.text = "Craft " + Globals.particle_type_get_name(r.output)
-		button.connect("pressed", self, "_craft", [r])
-		$RecipeButtons.add_child(button)
+		if r.automatic:
+			# Run recipe
+			_craft(r)
+		else:
+			# Add button
+			var button = Button.new()
+			button.text = "Craft " + Globals.particle_type_get_name(r.output)
+			button.connect("pressed", self, "_craft", [r])
+			$RecipeButtons.add_child(button)
 
 func _craft(r: Recipe):
 	print("Crafting %s" % Globals.particle_type_get_name(r.output))
