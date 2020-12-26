@@ -19,14 +19,21 @@ func _input(event):
 			dragging = event.is_pressed()
 			if event.is_pressed():
 				startPos = event.position
-		elif event.button_index == BUTTON_WHEEL_UP:
-			zoom /= 1.2
-			if zoom.x < ZOOM_MIN:
-				zoom = Vector2(ZOOM_MIN, ZOOM_MIN)
-		elif event.button_index == BUTTON_WHEEL_DOWN:
-			zoom *= 1.2
-			if zoom.x > ZOOM_MAX:
-				zoom = Vector2(ZOOM_MAX, ZOOM_MAX)
+		elif event.is_pressed() and (event.button_index == BUTTON_WHEEL_UP or event.button_index == BUTTON_WHEEL_DOWN):
+			var viewport = get_viewport()
+			#var origPos = get_camera_screen_center() + viewport.get_mouse_position() * zoom
+			var origPos = get_global_mouse_position()
+			if event.button_index == BUTTON_WHEEL_UP:
+				zoom /= 1.3
+				if zoom.x < ZOOM_MIN:
+					zoom = Vector2(ZOOM_MIN, ZOOM_MIN)
+			else:
+				zoom *= 1.3
+				if zoom.x > ZOOM_MAX:
+					zoom = Vector2(ZOOM_MAX, ZOOM_MAX)
+			#var newPos = get_camera_screen_center() + viewport.get_mouse_position() * zoom
+			var newPos = get_global_mouse_position()
+			position += origPos - newPos
 	elif event is InputEventMouseMotion:
 		if dragging:
 			position += (startPos - event.position) * zoom

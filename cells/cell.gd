@@ -150,6 +150,7 @@ func _process_recipes():
 func _craft(r: Recipe):
 	print("Crafting %s" % Globals.particle_type_get_name(r.output))
 	r.subtract_resources(particle_counts)
+	particle_counts[r.output] += 1
 
 func _input(event):
 	if event is InputEventMouseButton:
