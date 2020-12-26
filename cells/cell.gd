@@ -1,4 +1,4 @@
-extends StaticBody2D
+extends Node2D
 
 ##############################
 # TODO own Resources here (?)
