@@ -45,7 +45,7 @@ func get_undirected_node_connections():
 				known_connections[node_coords].append(neigh_coords)
 				var already_known = false
 				for vector_tuple in undirected_connections:
-					if neigh_coords in vector_tuple:
+					if neigh_coords in vector_tuple and node_coords in vector_tuple:
 						already_known = true
 				if not already_known:
 					undirected_connections.append([node_coords, neigh_coords])
