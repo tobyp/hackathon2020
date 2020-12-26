@@ -5,44 +5,83 @@ const size_y = hex_size * 3.0/4.0
 const size_x = hex_size * sin(60.0 /360.0*2*PI)
 
 var grid = {}
+var timer
 
 func _ready():
+	timer = Timer.new()
+	timer.autostart = true
+	timer.wait_time = 0.1
+	timer.one_shot = false
+	timer.connect("timeout", self, "_simulate_tick")
+	add_child(timer)
+	
 	create_cell(0,0)
 	create_cell(2,0)
 	create_cell(1,1)
 	create_cell(0,-1)
-	
-	print(get_neighbours(0,0))
+
+func _simulate_tick():
+	for node in self.grid.values():
+		print("Simulate %s" % node.cell)
+		# node.cell.simulate()
 
 # Creates a new cell or returns if it already exists
 func create_cell(x: int, y: int):
 	var pos = Vector2(x, y)
-	var cell = grid.get(pos, null)
-	if cell == null:
-		var node = preload("res://cells/cell.tscn").instance()
-		cell = GridNode.new(node, Vector2(x,y))
+	var node = grid.get(pos, null)
+	if node == null:
+		var cell = preload("res://cells/cell.tscn").instance()
+		print("Created %s" % cell)
+		node = GridNode.new(cell, Vector2(x,y))
 		var pos_x = size_x * (float(x) + 0.5 if y % 2 != 0 else float(x))
 		var pos_y = size_y * y - (size_y / 2)
-		add_child(node)
-		node.translate(Vector2(pos_x, pos_y))
-		grid[pos] = cell
-	return cell
+		add_child(cell)
+		cell.translate(Vector2(pos_x, pos_y))
+		grid[pos] = node
+	var to_update = get_neighbors_coord(x,y)
+	to_update.append(pos)
+	_update_neighbors(to_update)
+	return node.cell
+
+# Returns the cell or null if empty
+func get_cell(x: int, y: int):
+	var pos = Vector2(x, y)
+	var node = grid.get(pos, null)
+	if node == null:
+		return null
+	return node.cell
+
+func _update_neighbors(cells_idx: Array):
+	for cell_idx in cells_idx:
+		var cell = get_cell(cell_idx.x, cell_idx.y)
+		if cell == null:
+			continue
+		cell.neighbors = get_neighbors(cell_idx.x, cell_idx.y)
 
 func remove_cell(x: int, y: int):
 	var pos = Vector2(x, y)
 	if grid.has(pos):
 		var cell = grid.get(pos)
 		grid.remove(pos)
-		remove_child(cell.node)
+		remove_child(cell)
+		
+		var to_update = get_neighbors_coord(x,y)
+		_update_neighbors(to_update)
 
-const neighbours = [Vector2(-1, -1), Vector2(0, -1), Vector2(-1, 0), Vector2(1, 0), Vector2(-1, 1), Vector2(0, 1)]
-func get_neighbours(x: int, y: int):
+const neighbors = [Vector2(-1, -1), Vector2(0, -1), Vector2(-1, 0), Vector2(1, 0), Vector2(-1, 1), Vector2(0, 1)]
+func get_neighbors(x: int, y: int):
 	var cells = []
-	for n in neighbours:
+	for n in neighbors:
 		var pos = Vector2(x, y) + n
-		var cell = grid.get(pos, null)
-		if cell != null:
-			cells.append(cell)
+		var node = grid.get(pos, null)
+		if node != null:
+			cells.append(node.cell)
+	return cells
+
+func get_neighbors_coord(x: int, y: int):
+	var cells = []
+	for n in neighbors:
+		cells.append(Vector2(x, y) + n)
 	return cells
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -51,13 +90,13 @@ func get_neighbours(x: int, y: int):
 
 class GridNode:
 	# The GD node element
-	var node: Resource
+	var treenode: Resource
+	var cell: Cell
 	var pos: Vector2
-	# Whether the cell is already visible
-	var visible: bool = true
 
 	func _init(node: Resource, pos: Vector2):
-		self.node = node
+		self.treenode = node
+		self.cell = null #node.get_script() # TODO get correct reference here
 		self.pos = pos
 	
 	func _to_string():
