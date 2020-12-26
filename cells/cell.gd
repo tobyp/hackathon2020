@@ -1,13 +1,7 @@
 extends Node2D
 class_name Cell
-### TYPES
-enum ParticleType {
-	PARTICLE_PROTEIN_WHITE,
-	PARTICLE_ENZYME_PINK,
-	PARTICLE_ENZYME_PURPLE,
-	PARTICLE_ENZYME_GREEN,
-	PARTICLE_ENZYME_YELLOW,
-}
+
+#const Recipe = preload("recipe.gd")
 
 ### SIGNALS
 signal particle_count_changed(type, old_count, new_count)
@@ -35,19 +29,20 @@ func push_particles(type: int, dest: Object, count: int):
 #func simulate(): # TODO use this declaration instead of _physics_process once i know how to call it
 func _physics_process(delta):
 	_process_pressure()
+	_process_potential_recipes()
 	_display_debug()
 
 ### OVERRIDES
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	$Gfx.set_material($Gfx.get_material().duplicate())
-	for t in ParticleType:
+	for t in CellParticle.ParticleType:
 		self.particle_counts[t] = 0
 		self.output_rules.append({})
 
 
 func _process_pressure():
-	for t in ParticleType:
+	for t in CellParticle.ParticleType:
 		var supply = self.particle_counts.get(t, 0)
 		var demand_total = 0
 		var demand_neighbors = {}
@@ -62,6 +57,34 @@ func _process_pressure():
 			demand_total += demand_neighbor
 		# TODO: tobyp
 
+
+func _process_potential_recipes():
+	var recipes = Recipe.matches(particle_counts)
+	for c in $RecipeButtons.get_children():
+		var found = false
+		var i = 0
+		var found_i = 0
+		for r in recipes:
+			if str(r.output) == c.name:
+				found = true
+				found_i = i
+				break
+			i += 1
+		if not found:
+			$RecipeButtons.remove_child(c)
+		else:
+			recipes.remove(found_i)
+	for r in recipes:
+		# Add
+		var button = Button.new()
+		button.text = "Craft " + Recipe.get_particle_type_name(r.output)
+		button.connect("pressed", self, "_craft", [r])
+		$RecipeButtons.add_child(button)
+
+func _craft(r: Recipe):
+	print("Crafting " + Recipe.get_particle_type_name(r.output))
+	r.subtract_resources(particle_counts)
+
 func _input(event):
 	if event is InputEventMouseButton:
 		if event.is_pressed():
@@ -74,7 +97,7 @@ func _input(event):
 
 func _display_debug():
 	var dbg = "";
-	for particle in ParticleType:
+	for particle in CellParticle.ParticleType:
 		dbg += "[b]%s:[/b] %s\n" % [particle, particle_counts.get(particle, 0)]
 	$DebugLabel.bbcode_text = dbg
 

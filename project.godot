@@ -13,9 +13,21 @@ _global_script_classes=[ {
 "class": "Cell",
 "language": "GDScript",
 "path": "res://cells/cell.gd"
+}, {
+"base": "KinematicBody2D",
+"class": "CellParticle",
+"language": "GDScript",
+"path": "res://cells/cell_particle.gd"
+}, {
+"base": "Reference",
+"class": "Recipe",
+"language": "GDScript",
+"path": "res://cells/recipe.gd"
 } ]
 _global_script_class_icons={
-"Cell": ""
+"Cell": "",
+"CellParticle": "",
+"Recipe": ""
 }
 
 [application]
