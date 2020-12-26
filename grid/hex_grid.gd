@@ -22,7 +22,7 @@ func _simulate_tick():
 	for node in self.grid.values():
 		node.cell.simulate()
 		
-func print_connections():
+func get_undirected_node_connections():
 	# mappings of all "(start_x, start_y)" to lists of Vector2s [(end_x, end_y), (end_x2, end_y2)]]
 	var known_connections = {}
 	# lists of unique tuples (okay, lists) of Vector2s
@@ -43,6 +43,7 @@ func print_connections():
 					undirected_connections.append([node_coords, neigh_coords])
 	print("starts and stops:", known_connections)
 	print("unique edges: ",undirected_connections)
+	return undirected_connections
 
 # Creates a new cell or returns if it already exists
 func create_cell(x: int, y: int):
