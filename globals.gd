@@ -18,13 +18,24 @@ enum ParticleType {
 	RIBOSOME_ALCOHOL,
 	RIBOSOME_LYE,
 
-	# Uses the energy of your pc to create sugar, lives in sugar cells
-	ANTI_MITOCHONTRION,
+	# Uses the energy of your pc to create sugar, lives in sugar cells, but is very shy so you never see it
+	ANTI_MITOCHONDRION,
 }
 
-### CONSTANTS
-const BIOMASS_PER_PROTEIN_WHITE = 1.0 / 25.0
+enum PoisonType {
+	ANTI_BIOMASS,
+	ALCOHOL,
+	LYE,
+}
 
+enum TechType {
+	A
+	B
+	C
+	D
+	E
+	F
+}
 
 ### FUNCTIONS
 static func particle_type_get_name(particle: int) -> String:
@@ -59,7 +70,9 @@ static func particle_type_get_name(particle: int) -> String:
 			return "Alcohol Ribosome"
 		ParticleType.RIBOSOME_LYE:
 			return "Lye Ribosome"
-	return "Unknown"
+		ParticleType.ANTI_MITOCHONDRION:
+			return "Anti-Mitochondrion"
+	return "Unknown Particle"
 
 static func particle_type_is_factory(particle: int) -> bool:
 	match particle:
@@ -77,11 +90,34 @@ static func particle_type_is_factory(particle: int) -> bool:
 			return true
 	return false
 
-enum TechType {
-	A
-	B
-	C
-	D
-	E
-	F
-}
+static func particle_type_get_potency(particle: int, poison: int) -> float:
+	match particle:
+		ParticleType.ENZYME_ALCOHOL:
+			if poison == PoisonType.ALCOHOL:
+				return 1.0 / 50.0
+		ParticleType.ENZYME_LYE:
+			if poison == PoisonType.LYE:
+				return 1.0/100.0
+		ParticleType.PROTEIN_WHITE:
+			if poison == PoisonType.ANTI_BIOMASS:
+				return 1.0/25.0
+	return 0.0
+
+static func poison_type_get_name(poison: int) -> String:
+	match poison:
+		PoisonType.ALCOHOL:
+			return "Alcohol"
+		PoisonType.LYE:
+			return "Lye"
+		PoisonType.ANTI_BIOMASS:
+			return "Anti-Biomass"
+	return "Unknown Poison"
+	
+
+# Calculate how many particles to send, per tick, given a budget of cells that could be sent, and a demand weight from 0 to 1
+# There's a lot of tuning to be had on the constants here.
+static func diffuse_func(budget: int, demand: float) -> float:
+	# for debugging, here's a very slow and even diffuse function that makes it easily visible
+	return budget * demand * 0.1
+	# this exponential will make diffusion go faster if the differential pressure is higher
+	return budget * 0.55 * exp(-4 * demand)

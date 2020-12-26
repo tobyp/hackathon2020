@@ -16,7 +16,7 @@ var neighbors = []
 var particle_counts = {}
 var output_rules = {}  # Dict[ParticleType, Dict[Cell, bool]], output_rules[PARTICLE_*][<Neighbor Cell>] = true/false
 var discovered: bool = true
-var biomass = 0.0 setget _set_biomass, _get_biomass
+var poisons = {Globals.PoisonType.ANTI_BIOMASS: 1.0}  # Dict[PoisonType, float]
 # 0 = Ready
 var auto_recipe_cooldown = 0
 
@@ -37,16 +37,37 @@ func set_output_rule(type: int, neighbor: Cell, rule: bool):
 		output_rules[type] = {}
 	output_rules[type][neighbor] = rule
 
+func set_poison(poison: int, value: float):
+	if value <= 0.0:
+		self.poisons.erase(poison)
+	else:
+		self.poisons[poison] = value
+	if poison == Globals.PoisonType.ANTI_BIOMASS:
+		$Gfx.material.set_shader_param("percentage", 1.0 - clamp(value, 0, 1.0))
+
+func get_poison(poison: int) -> float:
+	return self.poisons.get(poison, 0.0)
+
 ### UTILTIY/PRIVATE
 # Add new particles
 func add_particles(type, count: int = 1):
-	print("Adding %s amount of %s" % [count, Globals.particle_type_get_name(type)])
-	if type == Globals.ParticleType.PROTEIN_WHITE and biomass < 1.0:
-		var delta_biomass = min(1.0 - biomass, count * Globals.BIOMASS_PER_PROTEIN_WHITE)
-		_set_biomass(biomass + delta_biomass)
-		var delta_biomass_proteins = ceil(delta_biomass / Globals.BIOMASS_PER_PROTEIN_WHITE)
-		print("Using %d proteins for biomass" % [delta_biomass_proteins])
-		count -= delta_biomass_proteins
+	var type_name = Globals.particle_type_get_name(type)
+	print("%s got %d %s" % [self, count, type_name])
+	if self.poisons.size() > 0:
+		for poison_type in self.poisons:
+			var potency = Globals.particle_type_get_potency(type, poison_type)
+			if potency <= 0.0:
+				continue
+			var poison_name = Globals.poison_type_get_name(poison_type)
+			var poison_value = self.poisons[poison_type]
+			var delta_poison = min(poison_value, count * potency)
+			self.set_poison(poison_type, poison_value - delta_poison)
+			var delta_particles = max(count, ceil(delta_poison / potency))  # rounding sometimes makes the max necessary
+			print("%s %d %s breaking down %f %s" % [self, delta_particles, type_name, delta_poison, poison_name])
+			count -= delta_particles
+	if self.poisons.size() > 0:
+		print("%s %d %s died due to %s" % [self, count, type_name, self.poisons])
+		return  # they dead :(
 	var old_count = particle_counts.get(type, 0)
 	var new_count = old_count + count
 	for i in count:
@@ -107,6 +128,7 @@ func _ready():
 
 func _process_pressure():
 	for t in Globals.ParticleType.values():
+		var particle_name = Globals.particle_type_get_name(t)
 		var supply_own = self.particle_counts.get(t, 0)
 		var demand_total = 0
 		var demand_neighbors = {}
@@ -117,19 +139,22 @@ func _process_pressure():
 			if supply_neighbor > supply_own:  # do they even want any?
 				continue
 			# The "demand" of a neighbor equals how many cells we would need to give them to end up equal.
-			var demand_neighbor = (supply_own - supply_neighbor) / 2
+			var demand_neighbor = ceil((supply_own - supply_neighbor) / 2)
+			print("%s neighbor %s has %d demand %d" % [self, n, supply_neighbor, demand_neighbor])
 			demand_neighbors[n] = demand_neighbor
 			demand_total += demand_neighbor
 		var budget = min(demand_total, supply_own)  # don't send more than the neighbors want, but also not more than we have
 		if demand_total > 0:
 			for n in demand_neighbors.keys():
 				var demand_neighbor = demand_neighbors[n] / demand_total
-				var transfer = budget * 0.55 * exp(-4 * demand_neighbor)
-				var valve_transfer = output_valves.get(n, 0) + transfer
-				if valve_transfer >= 1.0:
-					self._push_particles(t, n, floor(valve_transfer))
-					valve_transfer -= floor(valve_transfer)
-				output_valves[n] = valve_transfer
+				if demand_neighbor > 0:
+					var transfer = Globals.diffuse_func(budget, demand_neighbor)
+					print("%s neighbor %s demands %f %s, transfer %f" % [self, n, demand_neighbor, particle_name, transfer])
+					var valve_transfer = output_valves.get(n, 0) + transfer
+					if valve_transfer >= 1.0:
+						self._push_particles(t, n, floor(valve_transfer))
+						valve_transfer -= floor(valve_transfer)
+					output_valves[n] = valve_transfer
 
 func _process_recipes():
 	auto_recipe_cooldown = max(0, auto_recipe_cooldown - 1)
@@ -170,15 +195,9 @@ func _craft(r: Recipe):
 	particle_counts[r.output] += 1
 
 func _display_debug():
-	var dbg = "";
+	var dbg = "[b][i]%s[/i][/b]\n" % [self];
+	for poison in Globals.PoisonType:
+		dbg += "[b][u]%s:[/u][/b] %f\n" % [poison, self.poisons.get(Globals.PoisonType[poison], 0)]
 	for particle in Globals.ParticleType:
-		dbg += "[b][u]%s:[/u][/b] %s\n" % [particle, self.particle_counts.get(Globals.ParticleType[particle], 0)]
-	#print("Debug", self.particle_counts)
+		dbg += "[b][u]%s:[/u][/b] %d\n" % [particle, self.particle_counts.get(Globals.ParticleType[particle], 0)]
 	$DebugLabel.bbcode_text = dbg
-
-func _set_biomass(_biomass):
-	biomass = clamp(_biomass, 0.0, 1.0)
-	$Gfx.material.set_shader_param("percentage", self.biomass)
-
-func _get_biomass():
-	return biomass
