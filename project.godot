@@ -24,6 +24,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://globals.gd"
 }, {
+"base": "Node2D",
+"class": "HexGrid",
+"language": "GDScript",
+"path": "res://grid/hex_grid.gd"
+}, {
 "base": "Reference",
 "class": "Recipe",
 "language": "GDScript",
@@ -33,6 +38,7 @@ _global_script_class_icons={
 "Cell": "",
 "CellParticle": "",
 "Globals": "",
+"HexGrid": "",
 "Recipe": ""
 }
 

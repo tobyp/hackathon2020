@@ -1,4 +1,5 @@
 extends Node2D
+class_name HexGrid
 
 const hex_size = 1024.0
 const size_y = hex_size * 3.0/4.0
@@ -7,6 +8,8 @@ const size_x = hex_size * sin(60.0 /360.0*2*PI)
 var grid = {}
 var timer
 
+onready var CellTscn = load("res://cells/cell.tscn")
+
 func _ready():
 	timer = Timer.new()
 	timer.autostart = true
@@ -14,11 +17,6 @@ func _ready():
 	timer.one_shot = false
 	timer.connect("timeout", self, "_simulate_tick")
 	add_child(timer)
-	
-	create_cell(0,0)
-	create_cell(2,0)
-	create_cell(1,1)
-	create_cell(0,-1)
 
 func _simulate_tick():
 	for node in self.grid.values():
@@ -29,7 +27,7 @@ func create_cell(x: int, y: int):
 	var pos = Vector2(x, y)
 	var node = grid.get(pos, null)
 	if node == null:
-		var cell = preload("res://cells/cell.tscn").instance()
+		var cell = CellTscn.instance()
 		print("Created %s" % cell)
 		node = GridNode.new(cell, Vector2(x,y))
 		var pos_x = size_x * (float(x) + 0.5 if y % 2 != 0 else float(x))
@@ -68,7 +66,7 @@ func remove_cell(x: int, y: int):
 		_update_neighbors(to_update)
 
 const neighbors = [Vector2(-1, -1), Vector2(0, -1), Vector2(-1, 0), Vector2(1, 0), Vector2(-1, 1), Vector2(0, 1)]
-func get_neighbors(x: int, y: int):
+func get_neighbors(x: int, y: int) -> Array:
 	var cells = []
 	for n in neighbors:
 		var pos = Vector2(x, y) + n
@@ -89,12 +87,12 @@ func get_neighbors_coord(x: int, y: int):
 
 class GridNode:
 	# The GD node element
-	var cell: Cell
+	var cell  # : Cell
 	var pos: Vector2
 
 	func _init(cell: Node, pos: Vector2):
 		self.cell = cell
 		self.pos = pos
-	
+
 	func _to_string():
 		return "Cell %s" % pos
