@@ -13,9 +13,13 @@ enum ParticleType {
 	AMINO_LYS, # Cyan
 	AMINO_TYR, # Violet
 	AMINO_PRO, # Pink
+	SUGAR, # White
 	RIBOSOME_TRANSPORTER,
 	RIBOSOME_ALCOHOL,
 	RIBOSOME_LYE,
+
+	# Uses the energy of your pc to create sugar, lives in sugar cells
+	ANTI_MITOCHONTRION,
 }
 
 ### FUNCTIONS
@@ -43,6 +47,8 @@ static func particle_type_get_name(particle: int) -> String:
 			return "Tyrosin"
 		ParticleType.AMINO_PRO:
 			return "Prolin"
+		ParticleType.SUGAR:
+			return "Sugar"
 		ParticleType.RIBOSOME_TRANSPORTER:
 			return "Transporter Ribosome"
 		ParticleType.RIBOSOME_ALCOHOL:
@@ -62,5 +68,7 @@ static func particle_type_is_factory(particle: int) -> bool:
 		ParticleType.RIBOSOME_ALCOHOL:
 			return true
 		ParticleType.RIBOSOME_LYE:
+			return true
+		ParticleType.ANTI_MITOCHONTRION:
 			return true
 	return false
