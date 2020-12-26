@@ -17,10 +17,12 @@ var discovered: bool = true
 ### API
 # Are particles of type `type` allowed to be pushed to `neighbor`?
 # Note, there is no `input_rule(type, neighbor)`, use `neighbor.output_rule(type, self)` instead
-func output_rule(type, neighbor: Cell) -> bool:
+func output_rule(type: int, neighbor: Cell) -> bool:
 	return output_rules[type].get(neighbor, false)
 
-func set_output_rule(type, neighbor: Cell, rule: bool):
+func set_output_rule(type: int, neighbor: Cell, rule: bool):
+	if not output_rules.has(type):
+		output_rules[type] = {}
 	output_rules[type][neighbor] = rule
 
 ### UTILTIY/PRIVATE
@@ -36,7 +38,7 @@ func add_particles(type, count: int = 1):
 	particle_counts[type] = new_count
 	emit_signal("particle_count_changed", type, old_count, new_count)
 
-func remove_particles(type, count: int):
+func remove_particles(type: int, count: int) -> int:
 	var old_count = particle_counts.get(type, 0)
 	count = min(old_count, count)  # don't remove more than we have
 	var new_count = old_count - count;
@@ -48,11 +50,13 @@ func remove_particles(type, count: int):
 			break
 	particle_counts[type] = new_count
 	emit_signal("particle_count_changed", type, old_count, new_count)
+	return count
 
 # Transfer `count` particles of type `type` from this cell to `dest`.
 # This should take care of updating the particle_count dicts on both cells, and any actual particle 
 func _push_particles(type: int, dest: Cell, count: int):
-	pass  # TODO
+	count = remove_particles(type, count)
+	dest.add_particles(type, count)
 
 # Called every game step.
 func simulate():
@@ -92,9 +96,10 @@ func _process_pressure():
 			demand_neighbors[n] = demand_neighbor
 			demand_total += demand_neighbor
 		var budget = min(demand_total, supply_own)  # don't send more than the neighbors want, but also not more than we have
-		for n in demand_neighbors.keys():
-			var demand_neighbor = demand_neighbors[n]
-			self._push_particles(t, n, round(budget * demand_neighbor / demand_total) as int)
+		if demand_total > 0:
+			for n in demand_neighbors.keys():
+				var demand_neighbor = demand_neighbors[n]
+				self._push_particles(t, n, round(budget * demand_neighbor / demand_total) as int)
 
 func _process_potential_recipes():
 	var recipes = Recipe.matches(particle_counts)
