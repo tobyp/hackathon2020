@@ -86,7 +86,7 @@ static func particle_type_is_factory(particle: int) -> bool:
 			return true
 		ParticleType.RIBOSOME_LYE:
 			return true
-		ParticleType.ANTI_MITOCHONTRION:
+		ParticleType.ANTI_MITOCHONDRION:
 			return true
 	return false
 
