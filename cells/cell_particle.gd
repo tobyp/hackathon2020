@@ -11,7 +11,6 @@ onready var collision_radius = collision_shape.radius setget _set_collision_radi
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	rng.randomize()
-	print(typeof(collision_shape))
 
 func _physics_process(delta):
 	var motion = velocity * delta

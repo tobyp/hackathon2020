@@ -20,13 +20,13 @@ func _init(inputs: Dictionary, output: int):
 	self.output = output
 
 func recipe_matches(particle_counts: Dictionary) -> bool:
-	for t in Globals.ParticleType:
+	for t in Globals.ParticleType.values():
 		if inputs.has(int(t)) or particle_counts[t] < inputs[t]:
 			return false
 	return true
 	
 func subtract_resources(particle_counts: Dictionary):
-	for t in Globals.ParticleType:
+	for t in Globals.ParticleType.values():
 		if inputs.has(int(t)) or particle_counts[t] < inputs[t]:
 			print("Cannot craft…")
 		else:

@@ -26,6 +26,7 @@ func set_output_rule(type, neighbor: Cell, rule: bool):
 ### UTILTIY/PRIVATE
 # Add new particles
 func add_particles(type, count: int = 1):
+	print("Adding %s amount of %s" % [count, type])
 	var old_count = particle_counts.get(type, 0)
 	var new_count = old_count + count
 	for i in count:
@@ -71,19 +72,12 @@ func _random_coord_in_cell(clearance: float):
 func _ready():
 	rng.randomize()
 	$Gfx.set_material($Gfx.get_material().duplicate())
-	for t in Globals.ParticleType:
+	for t in Globals.ParticleType.values():
 		self.particle_counts[t] = 0
 		self.output_rules[t] = {}
 
-# Called every game step.
-#func simulate(): # TODO use this declaration instead of _physics_process once i know how to call it
-func _physics_process(delta):
-	_process_pressure()
-	_process_potential_recipes()
-	_display_debug()
-
 func _process_pressure():
-	for t in Globals.ParticleType:
+	for t in Globals.ParticleType.values():
 		var supply_own = self.particle_counts.get(t, 0)
 		var demand_total = 0
 		var demand_neighbors = {}
@@ -126,7 +120,7 @@ func _process_potential_recipes():
 		$RecipeButtons.add_child(button)
 
 func _craft(r: Recipe):
-	print("Crafting " + Globals.get_particle_type_name(r.output))
+	print("Crafting %s" % Globals.get_particle_type_name(r.output))
 	r.subtract_resources(particle_counts)
 
 func _input(event):
@@ -142,5 +136,6 @@ func _input(event):
 func _display_debug():
 	var dbg = "";
 	for particle in Globals.ParticleType:
-		dbg += "[b][u]%s:[/u][/b] %s\n" % [particle, particle_counts.get(particle, 0)]
+		dbg += "[b][u]%s:[/u][/b] %s\n" % [particle, self.particle_counts.get(Globals.ParticleType[particle], 0)]
+	#print("Debug", self.particle_counts)
 	$DebugLabel.bbcode_text = dbg

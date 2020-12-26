@@ -28,7 +28,6 @@ func create_cell(x: int, y: int):
 	var node = grid.get(pos, null)
 	if node == null:
 		var cell = CellTscn.instance()
-		print("Created %s" % cell)
 		node = GridNode.new(cell, Vector2(x,y))
 		var pos_x = size_x * (float(x) + 0.5 if y % 2 != 0 else float(x))
 		var pos_y = size_y * y - (size_y / 2)
