@@ -22,8 +22,7 @@ func _ready():
 
 func _simulate_tick():
 	for node in self.grid.values():
-		print("Simulate %s" % node.cell)
-		# node.cell.simulate()
+		node.cell.simulate()
 
 # Creates a new cell or returns if it already exists
 func create_cell(x: int, y: int):
@@ -61,9 +60,9 @@ func _update_neighbors(cells_idx: Array):
 func remove_cell(x: int, y: int):
 	var pos = Vector2(x, y)
 	if grid.has(pos):
-		var cell = grid.get(pos)
+		var node = grid.get(pos)
 		grid.remove(pos)
-		remove_child(cell)
+		remove_child(node.cell)
 		
 		var to_update = get_neighbors_coord(x,y)
 		_update_neighbors(to_update)
@@ -90,13 +89,11 @@ func get_neighbors_coord(x: int, y: int):
 
 class GridNode:
 	# The GD node element
-	var treenode: Node
 	var cell: Cell
 	var pos: Vector2
 
-	func _init(node: Node, pos: Vector2):
-		self.treenode = node
-		self.cell = node.get_script()
+	func _init(cell: Node, pos: Vector2):
+		self.cell = cell
 		self.pos = pos
 	
 	func _to_string():

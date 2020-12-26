@@ -25,8 +25,7 @@ func push_particles(type: int, dest: Object, count: int):
 	pass  # TODO
 
 # Called every game step.
-#func simulate(): # TODO use this declaration instead of _physics_process once i know how to call it
-func _physics_process(delta):
+func simulate():
 	_process_pressure()
 	_process_potential_recipes()
 	_display_debug()
@@ -97,7 +96,7 @@ func _input(event):
 func _display_debug():
 	var dbg = "";
 	for particle in Globals.ParticleType:
-		dbg += "[b]%s:[/b] %s\n" % [particle, particle_counts.get(particle, 0)]
+		dbg += "[b][u]%s:[/u][/b] %s\n" % [particle, particle_counts.get(particle, 0)]
 	$DebugLabel.bbcode_text = dbg
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
