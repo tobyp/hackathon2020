@@ -13,10 +13,13 @@ enum ParticleType {
 	AMINO_LYS, # Cyan
 	AMINO_TYR, # Violet
 	AMINO_PRO, # Pink
+	RIBOSOME_TRANSPORTER,
+	RIBOSOME_ALCOHOL,
+	RIBOSOME_LYE,
 }
 
 ### FUNCTIONS
-static func get_particle_type_name(particle: int) -> String:
+static func particle_type_get_name(particle: int) -> String:
 	match particle:
 		ParticleType.PROTEIN_WHITE:
 			return "Generic Protein"
@@ -40,4 +43,24 @@ static func get_particle_type_name(particle: int) -> String:
 			return "Tyrosin"
 		ParticleType.AMINO_PRO:
 			return "Prolin"
+		ParticleType.RIBOSOME_TRANSPORTER:
+			return "Transporter Ribosome"
+		ParticleType.RIBOSOME_ALCOHOL:
+			return "Alcohol Ribosome"
+		ParticleType.RIBOSOME_LYE:
+			return "Lye Ribosome"
 	return "Unknown"
+
+static func particle_type_is_factory(particle: int) -> bool:
+	match particle:
+		ParticleType.QUEEN:
+			return true
+		ParticleType.PRO_QUEEN:
+			return true
+		ParticleType.RIBOSOME_TRANSPORTER:
+			return true
+		ParticleType.RIBOSOME_ALCOHOL:
+			return true
+		ParticleType.RIBOSOME_LYE:
+			return true
+	return false

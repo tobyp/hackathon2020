@@ -120,12 +120,12 @@ func _process_potential_recipes():
 	for r in recipes:
 		# Add
 		var button = Button.new()
-		button.text = "Craft " + Recipe.get_particle_type_name(r.output)
+		button.text = "Craft " + Globals.particle_type_get_name(r.output)
 		button.connect("pressed", self, "_craft", [r])
 		$RecipeButtons.add_child(button)
 
 func _craft(r: Recipe):
-	print("Crafting %s" % Globals.get_particle_type_name(r.output))
+	print("Crafting %s" % Globals.particle_type_get_name(r.output))
 	r.subtract_resources(particle_counts)
 
 func _input(event):
