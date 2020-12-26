@@ -1,14 +1,13 @@
 extends Node2D
 class_name Cell
 
-#const Recipe = preload("recipe.gd")
-
 ### SIGNALS
 signal particle_count_changed(type, old_count, new_count)
 
 ### MEMBERS
 # A list of all existing neighbors (Will be modified from the hexgrid manager)
 var neighbors = []
+# Amino acid counts include a transporter, transporter count only means free transporter
 var particle_counts = {}
 var output_rules = []  # List[Dict[Cell, bool]]
 var discovered: bool = true
@@ -36,13 +35,13 @@ func _physics_process(delta):
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	$Gfx.set_material($Gfx.get_material().duplicate())
-	for t in CellParticle.ParticleType:
+	for t in Globals.ParticleType:
 		self.particle_counts[t] = 0
 		self.output_rules.append({})
 
 
 func _process_pressure():
-	for t in CellParticle.ParticleType:
+	for t in Globals.ParticleType:
 		var supply = self.particle_counts.get(t, 0)
 		var demand_total = 0
 		var demand_neighbors = {}
@@ -82,7 +81,7 @@ func _process_potential_recipes():
 		$RecipeButtons.add_child(button)
 
 func _craft(r: Recipe):
-	print("Crafting " + Recipe.get_particle_type_name(r.output))
+	print("Crafting " + Globals.get_particle_type_name(r.output))
 	r.subtract_resources(particle_counts)
 
 func _input(event):
@@ -97,7 +96,7 @@ func _input(event):
 
 func _display_debug():
 	var dbg = "";
-	for particle in CellParticle.ParticleType:
+	for particle in Globals.ParticleType:
 		dbg += "[b]%s:[/b] %s\n" % [particle, particle_counts.get(particle, 0)]
 	$DebugLabel.bbcode_text = dbg
 

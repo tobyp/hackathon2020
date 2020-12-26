@@ -20,6 +20,11 @@ _global_script_classes=[ {
 "path": "res://cells/cell_particle.gd"
 }, {
 "base": "Reference",
+"class": "Globals",
+"language": "GDScript",
+"path": "res://globals.gd"
+}, {
+"base": "Reference",
 "class": "Recipe",
 "language": "GDScript",
 "path": "res://cells/recipe.gd"
@@ -27,6 +32,7 @@ _global_script_classes=[ {
 _global_script_class_icons={
 "Cell": "",
 "CellParticle": "",
+"Globals": "",
 "Recipe": ""
 }
 

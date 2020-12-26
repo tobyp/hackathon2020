@@ -1,16 +1,6 @@
 extends KinematicBody2D
 class_name CellParticle
 
-### TYPES
-enum ParticleType {
-	PARTICLE_PROTEIN_WHITE,
-	PARTICLE_ENZYME_PINK,
-	PARTICLE_ENZYME_PURPLE,
-	PARTICLE_ENZYME_GREEN,
-	PARTICLE_ENZYME_YELLOW,
-}
-
-### MEMBERS
 var velo_abs = 1000;
 var velocity = Vector2(-1000, 0)
 var rng = RandomNumberGenerator.new()
