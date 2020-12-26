@@ -120,9 +120,9 @@ class GridNode:
 	var cell  # : Cell
 	var pos: Vector2
 
-	func _init(cell: Node, pos: Vector2):
-		self.cell = cell
-		self.pos = pos
+	func _init(_cell: Node, _pos: Vector2):
+		self.cell = _cell
+		self.pos = _pos
 
 	func _to_string():
 		return "Cell %s" % pos

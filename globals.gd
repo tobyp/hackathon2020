@@ -76,3 +76,12 @@ static func particle_type_is_factory(particle: int) -> bool:
 		ParticleType.ANTI_MITOCHONTRION:
 			return true
 	return false
+
+enum TechType {
+	A
+	B
+	C
+	D
+	E
+	F
+}

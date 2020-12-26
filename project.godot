@@ -33,13 +33,19 @@ _global_script_classes=[ {
 "class": "Recipe",
 "language": "GDScript",
 "path": "res://cells/recipe.gd"
+}, {
+"base": "Reference",
+"class": "Tech",
+"language": "GDScript",
+"path": "res://cells/tech.gd"
 } ]
 _global_script_class_icons={
 "Cell": "",
 "CellParticle": "",
 "Globals": "",
 "HexGrid": "",
-"Recipe": ""
+"Recipe": "",
+"Tech": ""
 }
 
 [application]
@@ -47,6 +53,10 @@ _global_script_class_icons={
 config/name="hackathon2020"
 run/main_scene="res://main.tscn"
 config/icon="res://icon.png"
+
+[autoload]
+
+Rules="*res://rules.gd"
 
 [rendering]
 
