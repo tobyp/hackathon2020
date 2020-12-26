@@ -1,7 +1,9 @@
 [gd_scene load_steps=3 format=2]
 
-[ext_resource path="res://Cells/cell.tscn" type="PackedScene" id=2]
-[ext_resource path="res://Cells/particle.tscn" type="PackedScene" id=3]
+[ext_resource path="res://cells/cell.tscn" type="PackedScene" id=2]
+[ext_resource path="res://cells/particle.tscn" type="PackedScene" id=3]
+
+
 
 [node name="Node2D" type="Node2D"]
 
