@@ -41,6 +41,12 @@ func set_output_rule(type: int, neighbor: Cell, rule: bool):
 # Add new particles
 func add_particles(type, count: int = 1):
 	print("Adding %s amount of %s" % [count, type])
+	if type == Globals.ParticleType.PROTEIN_WHITE and biomass < 1.0:
+		var delta_biomass = min(1.0 - biomass, count * Globals.BIOMASS_PER_PROTEIN_WHITE)
+		_set_biomass(biomass + delta_biomass)
+		var delta_biomass_proteins = ceil(delta_biomass / Globals.BIOMASS_PER_PROTEIN_WHITE)
+		print("Using %d proteins for biomass" % [delta_biomass_proteins])
+		count -= delta_biomass_proteins
 	var old_count = particle_counts.get(type, 0)
 	var new_count = old_count + count
 	for i in count:

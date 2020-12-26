@@ -22,6 +22,10 @@ enum ParticleType {
 	ANTI_MITOCHONTRION,
 }
 
+### CONSTANTS
+const BIOMASS_PER_PROTEIN_WHITE = 1.0 / 25.0
+
+
 ### FUNCTIONS
 static func particle_type_get_name(particle: int) -> String:
 	match particle:

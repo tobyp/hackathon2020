@@ -7,7 +7,6 @@ func _ready():
 	cell0.add_particles(Globals.ParticleType.PROTEIN_WHITE, 40)
 	cell0.biomass = 1.0
 	var cell1 = $HexGrid.create_cell(1,0)
-	cell1.biomass = 1.0
 	var cell2 = $HexGrid.create_cell(0,1)
 	cell2.add_particles(Globals.ParticleType.PROTEIN_WHITE, 20)
 	cell2.biomass = 1.0
