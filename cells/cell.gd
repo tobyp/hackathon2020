@@ -6,6 +6,9 @@ var rng = RandomNumberGenerator.new()
 ### SIGNALS
 signal particle_count_changed(type, old_count, new_count)
 
+# Allow one automatic recipe every 10 ticks
+const AUTO_RECIPE_COOLDOWN = 10
+
 ### MEMBERS
 # A list of all existing neighbors (Will be modified from the hexgrid manager)
 var neighbors = []
@@ -14,6 +17,8 @@ var particle_counts = {}
 var output_rules = {}  # Dict[ParticleType, Dict[Cell, bool]], output_rules[PARTICLE_*][<Neighbor Cell>] = true/false
 var discovered: bool = true
 var biomass = 0.0 setget _set_biomass, _get_biomass
+# 0 = Ready
+var auto_recipe_cooldown = 0
 
 ### PRIVATE MEMBERS
 # since transferring an integer number of particles each tick makes it impossible to see any changes,
@@ -121,6 +126,7 @@ func _process_pressure():
 				output_valves[n] = valve_transfer
 
 func _process_recipes():
+	auto_recipe_cooldown = max(0, auto_recipe_cooldown - 1)
 	var recipes = Recipe.matches(particle_counts)
 	for c in $RecipeButtons.get_children():
 		var found = false
@@ -138,8 +144,10 @@ func _process_recipes():
 			recipes.remove(found_i)
 	for r in recipes:
 		if r.automatic:
-			# Run recipe
-			_craft(r)
+			if auto_recipe_cooldown == 0:
+				auto_recipe_cooldown = AUTO_RECIPE_COOLDOWN
+				# Run recipe
+				_craft(r)
 		else:
 			# Add button
 			var button = Button.new()
