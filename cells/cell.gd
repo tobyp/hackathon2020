@@ -14,6 +14,12 @@ var particle_counts = {}
 var output_rules = {}  # Dict[ParticleType, Dict[Cell, bool]], output_rules[PARTICLE_*][<Neighbor Cell>] = true/false
 var discovered: bool = true
 
+### PRIVATE MEMBERS
+# since transferring an integer number of particles each tick makes it impossible to see any changes,
+# and random()-gating any transfers is sad, this will keep track of "partial" transfers, letting them
+# accumulate, and then transferring while numbers whenever the counter >= 1.
+var output_valves = {}  # Dict[Cell, float]
+
 ### API
 # Are particles of type `type` allowed to be pushed to `neighbor`?
 # Note, there is no `input_rule(type, neighbor)`, use `neighbor.output_rule(type, self)` instead
@@ -50,7 +56,7 @@ func remove_particles(type: int, count: int) -> int:
 			break
 	particle_counts[type] = new_count
 	emit_signal("particle_count_changed", type, old_count, new_count)
-	return count
+	return old_count - new_count
 
 # Transfer `count` particles of type `type` from this cell to `dest`.
 # This should take care of updating the particle_count dicts on both cells, and any actual particle 
@@ -98,8 +104,13 @@ func _process_pressure():
 		var budget = min(demand_total, supply_own)  # don't send more than the neighbors want, but also not more than we have
 		if demand_total > 0:
 			for n in demand_neighbors.keys():
-				var demand_neighbor = demand_neighbors[n]
-				self._push_particles(t, n, round(budget * demand_neighbor / demand_total) as int)
+				var demand_neighbor = demand_neighbors[n] / demand_total
+				var transfer = budget * 0.55 * exp(-4 * demand_neighbor)
+				var valve_transfer = output_valves.get(n, 0) + transfer
+				if valve_transfer >= 1.0:
+					self._push_particles(t, n, floor(valve_transfer))
+					valve_transfer -= floor(valve_transfer)
+				output_valves[n] = valve_transfer
 
 func _process_recipes():
 	var recipes = Recipe.matches(particle_counts)

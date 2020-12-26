@@ -4,11 +4,16 @@ var Cell = preload("res://cells/cell.gd")
 
 func _ready():
 	var cell0 = $HexGrid.create_cell(0, 0) as Cell
-	cell0.add_particles(Globals.ParticleType.PROTEIN_WHITE, 20)
+	cell0.add_particles(Globals.ParticleType.PROTEIN_WHITE, 40)
 	var cell1 = $HexGrid.create_cell(1,0)
-	cell0.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell1, true)
+	var cell2 = $HexGrid.create_cell(0,1)
+	cell2.add_particles(Globals.ParticleType.PROTEIN_WHITE, 20)
+	var cell3 = $HexGrid.create_cell(1,1)
+	cell3.add_particles(Globals.ParticleType.PROTEIN_WHITE, 60)
 	
-	var cell2 = $HexGrid.create_cell(2,-1)
+	cell0.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell1, true)
+	cell0.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell2, true)
+	cell0.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell3, true)
 	
 	var edges = $HexGrid.get_undirected_node_connections()
 	for connection in edges:
