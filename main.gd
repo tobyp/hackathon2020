@@ -5,6 +5,8 @@ var Cell = preload("res://cells/cell.gd")
 func _ready():
 	var cell0 = $HexGrid.create_cell(0, 0) as Cell
 	cell0.add_particles(Globals.ParticleType.PROTEIN_WHITE, 40)
+	cell0.add_particles(Globals.ParticleType.QUEEN, 1)
+	cell0.add_particles(Globals.ParticleType.AMINO_PHE, 1)
 	cell0.biomass = 1.0
 	var cell1 = $HexGrid.create_cell(1,0)
 	var cell2 = $HexGrid.create_cell(0,1)

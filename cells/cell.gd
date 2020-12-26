@@ -53,7 +53,7 @@ func add_particles(type, count: int = 1):
 		var particle = preload("res://cells/particle.tscn").instance()
 		particle.translate(_random_coord_in_cell(particle.collision_radius))
 		particle.velocity = _random_velocity()
-		add_child(particle)
+		$Particles.add_child(particle)
 	particle_counts[type] = new_count
 	emit_signal("particle_count_changed", type, old_count, new_count)
 
@@ -61,9 +61,9 @@ func remove_particles(type: int, count: int) -> int:
 	var old_count = particle_counts.get(type, 0)
 	count = min(old_count, count)  # don't remove more than we have
 	var new_count = old_count - count;
-	for c in self.get_children():
+	for c in $Particles.get_children():
 		if c is CellParticle:
-			self.remove_child(c)
+			$Particles.remove_child(c)
 			count -= 1
 		if count == 0:
 			break
@@ -133,8 +133,9 @@ func _process_pressure():
 
 func _process_recipes():
 	auto_recipe_cooldown = max(0, auto_recipe_cooldown - 1)
+	var buttonContainer = $RecipeButtons.get_child(0)
 	var recipes = Recipe.matches(particle_counts)
-	for c in $RecipeButtons.get_children():
+	for c in buttonContainer.get_children():
 		var found = false
 		var i = 0
 		var found_i = 0
@@ -145,7 +146,7 @@ func _process_recipes():
 				break
 			i += 1
 		if not found:
-			$RecipeButtons.remove_child(c)
+			buttonContainer.remove_child(c)
 		else:
 			recipes.remove(found_i)
 	for r in recipes:
@@ -159,20 +160,14 @@ func _process_recipes():
 			var button = Button.new()
 			button.text = "Craft " + Globals.particle_type_get_name(r.output)
 			button.connect("pressed", self, "_craft", [r])
-			$RecipeButtons.add_child(button)
+			button.mouse_filter = Control.MOUSE_FILTER_STOP
+			button.name = str(r.output)
+			buttonContainer.add_child(button)
 
 func _craft(r: Recipe):
 	print("Crafting %s" % Globals.particle_type_get_name(r.output))
 	r.subtract_resources(particle_counts)
 	particle_counts[r.output] += 1
-
-func _input(event):
-	if event is InputEventMouseButton:
-		if event.is_pressed():
-			if event.button_index == BUTTON_LEFT:
-				self._set_biomass(self.biomass + 0.2)
-			elif  event.button_index == BUTTON_RIGHT:
-				self._set_biomass(self.biomass - 0.2)
 
 func _display_debug():
 	var dbg = "";
