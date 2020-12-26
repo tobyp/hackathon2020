@@ -7,3 +7,7 @@ func _ready():
 	cell0.add_particles(Globals.ParticleType.PROTEIN_WHITE, 20)
 	var cell1 = $HexGrid.create_cell(1,0)
 	cell0.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell1, true)
+	
+	var cell2 = $HexGrid.create_cell(2,-1)
+	
+	$HexGrid.print_connections()
