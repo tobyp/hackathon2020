@@ -41,6 +41,7 @@ func add_particles(type, count: int = 1):
 	for i in count:
 		var particle = preload("res://cells/particle.tscn").instance()
 		particle.translate(_random_coord_in_cell(particle.collision_radius))
+		particle.velocity = _random_velocity()
 		add_child(particle)
 	particle_counts[type] = new_count
 	emit_signal("particle_count_changed", type, old_count, new_count)
@@ -73,9 +74,15 @@ func simulate():
 
 # Generate a random coordinate inside a cell (relative to its center)
 # this doesn't reach the corners, but that's okay for now
-func _random_coord_in_cell(clearance: float):
+# clearance is how far inside the edge the point must be (to avoid generating particles intersecting the cell border)
+func _random_coord_in_cell(clearance: float) -> Vector2:
 	var phi = rng.randf_range(0, 2*PI)
 	var dist = rng.randf_range(0, sqrt(HexGrid.size_x / 2 - clearance))
+	return Vector2(dist * cos(phi), dist * sin(phi));
+
+func _random_velocity() -> Vector2:
+	var phi = rng.randf_range(0, 2*PI)
+	var dist = rng.randf_range(750, 1250)
 	return Vector2(dist * cos(phi), dist * sin(phi));
 
 ### OVERRIDES
