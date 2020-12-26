@@ -90,13 +90,13 @@ func get_neighbors_coord(x: int, y: int):
 
 class GridNode:
 	# The GD node element
-	var treenode: Resource
+	var treenode: Node
 	var cell: Cell
 	var pos: Vector2
 
-	func _init(node: Resource, pos: Vector2):
+	func _init(node: Node, pos: Vector2):
 		self.treenode = node
-		self.cell = null #node.get_script() # TODO get correct reference here
+		self.cell = node.get_script()
 		self.pos = pos
 	
 	func _to_string():
