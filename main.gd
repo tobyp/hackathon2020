@@ -5,11 +5,15 @@ var Cell = preload("res://cells/cell.gd")
 func _ready():
 	var cell0 = $HexGrid.create_cell(0, 0) as Cell
 	cell0.add_particles(Globals.ParticleType.PROTEIN_WHITE, 40)
+	cell0.biomass = 1.0
 	var cell1 = $HexGrid.create_cell(1,0)
+	cell1.biomass = 1.0
 	var cell2 = $HexGrid.create_cell(0,1)
 	cell2.add_particles(Globals.ParticleType.PROTEIN_WHITE, 20)
+	cell2.biomass = 1.0
 	var cell3 = $HexGrid.create_cell(1,1)
 	cell3.add_particles(Globals.ParticleType.PROTEIN_WHITE, 60)
+	cell3.biomass = 1.0
 	
 	cell0.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell1, true)
 	cell0.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell2, true)

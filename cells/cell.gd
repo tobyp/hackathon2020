@@ -13,6 +13,7 @@ var neighbors = []
 var particle_counts = {}
 var output_rules = {}  # Dict[ParticleType, Dict[Cell, bool]], output_rules[PARTICLE_*][<Neighbor Cell>] = true/false
 var discovered: bool = true
+var biomass = 0.0 setget _set_biomass, _get_biomass
 
 ### PRIVATE MEMBERS
 # since transferring an integer number of particles each tick makes it impossible to see any changes,
@@ -146,12 +147,10 @@ func _craft(r: Recipe):
 func _input(event):
 	if event is InputEventMouseButton:
 		if event.is_pressed():
-			# More biomass
-			var cur = $Gfx.material.get_shader_param("percentage")
 			if event.button_index == BUTTON_LEFT:
-				$Gfx.material.set_shader_param("percentage", min(1.0, cur + 0.2))
+				self._set_biomass(self.biomass + 0.2)
 			elif  event.button_index == BUTTON_RIGHT:
-				$Gfx.material.set_shader_param("percentage", max(0.0, cur - 0.2))
+				self._set_biomass(self.biomass - 0.2)
 
 func _display_debug():
 	var dbg = "";
@@ -159,3 +158,10 @@ func _display_debug():
 		dbg += "[b][u]%s:[/u][/b] %s\n" % [particle, self.particle_counts.get(Globals.ParticleType[particle], 0)]
 	#print("Debug", self.particle_counts)
 	$DebugLabel.bbcode_text = dbg
+
+func _set_biomass(_biomass):
+	biomass = clamp(_biomass, 0.0, 1.0)
+	$Gfx.material.set_shader_param("percentage", self.biomass)
+
+func _get_biomass():
+	return biomass
