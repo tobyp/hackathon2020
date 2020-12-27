@@ -12,7 +12,7 @@ func _ready():
 var ALL_RECIPES
 func _init_recipes():
 	self.ALL_RECIPES = [
-		Recipe.new({ Globals.ParticleType.QUEEN: 1, Globals.ParticleType.PROTEIN_WHITE: 1, }, { Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }),
+		#Recipe.new({ Globals.ParticleType.QUEEN: 1, Globals.ParticleType.PROTEIN_WHITE: 1, }, { Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }),
 		Recipe.new({ Globals.ParticleType.PROTEIN_WHITE: 1, Globals.ParticleType.AMINO_PHE: 1, }, { Globals.ParticleType.RIBOSOME_TRANSPORTER: 1, }),
 		Recipe.new({ Globals.ParticleType.PROTEIN_WHITE: 1, Globals.ParticleType.AMINO_LYS: 1, }, { Globals.ParticleType.RIBOSOME_LYE: 1, }),
 

@@ -1,9 +1,10 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://cells/cell.gd" type="Script" id=1]
 [ext_resource path="res://blend_shader.shader" type="Shader" id=2]
 [ext_resource path="res://textures/hex2.png" type="Texture" id=3]
 [ext_resource path="res://textures/hex.png" type="Texture" id=4]
+[ext_resource path="res://textures/sugar.png" type="Texture" id=5]
 
 [sub_resource type="SegmentShape2D" id=1]
 a = Vector2( 0, -512 )
@@ -35,6 +36,34 @@ shader_param/percentage = 0.0
 shader_param/wobbleSpeed = 1.0
 shader_param/blend_tex = ExtResource( 3 )
 
+[sub_resource type="Animation" id=8]
+resource_name = "Warning"
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("WarningAnimationSprite:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = false
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector2( 1, 1 ), Vector2( 8, 8 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("WarningAnimationSprite:self_modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = false
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.5 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0.588235 ), Color( 1, 1, 1, 0 ) ]
+}
+
 [node name="CellBody" type="Node2D"]
 script = ExtResource( 1 )
 
@@ -65,6 +94,14 @@ one_way_collision_margin = 0.0
 material = SubResource( 7 )
 scale = Vector2( 0.85, 0.85 )
 texture = ExtResource( 4 )
+
+[node name="WarningAnimationPlayer" type="AnimationPlayer" parent="."]
+anims/Warning = SubResource( 8 )
+
+[node name="WarningAnimationSprite" type="Sprite" parent="."]
+visible = false
+self_modulate = Color( 1, 1, 1, 0.705882 )
+texture = ExtResource( 5 )
 
 [node name="Particles" type="Node2D" parent="."]
 

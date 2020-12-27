@@ -128,17 +128,17 @@ static func _create_particle_nodes(type: int, count: int = 1) -> Array:
 		_particle_init(particle)
 		particles.append(particle)
 	return particles
-	
+
 static func _free_particle_nodes(particles: Array):
 	for p in particles:
 		p.free()
-		
+
 func _put_particle_nodes(particles: Array):
 	# print("%s: adding %d particles" % [self, particles.size()])
 	for p in particles:
 		# assert(p.type == type)
 		$Particles.add_child(p)
-	
+
 func _take_particle_nodes(type: int, count: int = 1) -> Array:
 	# print("%s: taking %d %s" % [self, count, Globals.particle_type_get_name(type)])
 	var result = [];
@@ -252,6 +252,8 @@ func _process_sugar_usage(delta):
 	# For non-whole sugars, use probability
 	if thisTick - float(sugarUsage) > Rules.rng.randf():
 		sugarUsage += 1
+	if sugarUsage == 0:
+		return
 
 	var ORDER = [
 		Globals.ParticleType.SUGAR,
@@ -269,10 +271,13 @@ func _process_sugar_usage(delta):
 		Globals.ParticleType.RIBOSOME_LYE,
 		Globals.ParticleType.PRO_QUEEN,
 	];
+
 	# Kill things according to order
+	var notEnoughSugar = false
 	for t in ORDER:
 		if sugarUsage == 0:
 			break
+		notEnoughSugar = t != Globals.ParticleType.SUGAR
 		var elemCount = particle_counts[t]
 		if elemCount == 0:
 			continue
@@ -291,6 +296,14 @@ func _process_sugar_usage(delta):
 			assert(removing == 0, "Did not find particles to change")
 		else:
 			remove_particles(t, removing)
+
+	if $WarningAnimationSprite.visible != notEnoughSugar:
+		print("Change ", $WarningAnimationSprite, " Current cell ", self, " ", notEnoughSugar)
+		$WarningAnimationSprite.visible = notEnoughSugar
+		if notEnoughSugar:
+			$WarningAnimationPlayer.play("Warning")
+		else:
+			$WarningAnimationPlayer.stop()
 
 func _process_recipes(delta):
 	auto_recipe_cooldown = max(0, auto_recipe_cooldown - delta)
