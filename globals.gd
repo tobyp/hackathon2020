@@ -52,6 +52,10 @@ enum TechType {
 
 ### CONSTANTS
 const SIMULATION_TICK_PERIOD = 0.1
+# By tran5ient under CC-0, https://freesound.org/people/tran5ient/sounds/190112/
+const PARTICLE_DIE_SOUND = "res://sounds/Flail.ogg"
+# By szegvari under CC-0, https://freesound.org/people/szegvari/sounds/530699/
+const PARTICLE_CRAFT_SOUND = "res://sounds/Water-wave.ogg"
 
 ### FUNCTIONS
 static func particle_type_get_name(particle: int) -> String:

@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/Flail.ogg-f1702f874341c3075cdc627cd7864d90.oggstr"
+
+[deps]
+
+source_file="res://sounds/Flail.ogg"
+dest_files=[ "res://.import/Flail.ogg-f1702f874341c3075cdc627cd7864d90.oggstr" ]
+
+[params]
+
+loop=false
+loop_offset=0

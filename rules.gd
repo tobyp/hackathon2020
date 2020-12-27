@@ -18,6 +18,8 @@ func _init_recipes():
 		# Building Queens
 		Recipe.new({ Globals.ParticleType.PROTEIN_WHITE: 100, Globals.ParticleType.AMINO_TYR: 1, }, { Globals.ParticleType.QUEEN: 1, }),
 		Recipe.new({ Globals.ParticleType.PROTEIN_WHITE: 1000, Globals.ParticleType.AMINO_PRO: 1, }, { Globals.ParticleType.PRO_QUEEN: 1, }),
+		# Bootstrap by creating a transporter from a queen
+		Recipe.new({ Globals.ParticleType.QUEEN: 1, }, { Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }),
 
 		# Auto recipes
 		# Creating White Protein

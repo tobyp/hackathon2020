@@ -331,6 +331,8 @@ func _process_sugar_usage(delta):
 		else:
 			remove_particles(t, removing)
 	_enable_sugar_warning(notEnoughSugar)
+	if notEnoughSugar:
+		_add_sound(Globals.PARTICLE_DIE_SOUND)
 
 func _enable_sugar_warning(enable: bool):
 	if $WarningAnimationSprite.visible != enable:
@@ -368,10 +370,14 @@ func _process_recipes(delta):
 			# Add button
 			var button = Button.new()
 			button.text = "Craft " + r.get_name()
-			button.connect("pressed", self, "_craft", [r])
+			button.connect("pressed", self, "_manual_craft", [r])
 			button.mouse_filter = Control.MOUSE_FILTER_STOP
 			button.name = r.get_name()
 			buttonContainer.add_child(button)
+
+func _manual_craft(r: Recipe):
+	_craft(r)
+	_add_sound(Globals.PARTICLE_CRAFT_SOUND)
 
 func _craft(r: Recipe):
 	for t in r.inputs:
@@ -387,6 +393,18 @@ func _on_cell_click(viewport, event, shape_idx):
 		if event.button_index == BUTTON_LEFT and event.is_pressed():
 			print("Clicked: %s ev: %s" % [self, event])
 			emit_signal("discover", self)
+
+func _add_sound(path: String):
+	var sound = AudioStreamPlayer2D.new()
+	sound.stream = load(path)
+	sound.play()
+	sound.connect("finished", self, "_remove_sound", [sound])
+	add_child(sound)
+
+func _remove_sound(sound: AudioStreamPlayer2D):
+	remove_child(sound)
+	sound.stop()
+	sound.queue_free()
 
 func _display_debug():
 	$DebugLabel.visible = Rules.debug_visual
