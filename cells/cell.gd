@@ -68,17 +68,13 @@ func add_particles(type, count: int = 1):
 		return  # they dead :(
 	var old_count = particle_counts.get(type, 0)
 	var new_count = old_count + count
-	for i in count:
-		var particle = preload("res://cells/particle.tscn").instance()
-		particle.translate(_random_coord_in_cell(particle.collision_radius))
-		particle.velocity = _random_velocity()
-		$Particles.add_child(particle)
+	self._create_particles(type, count)
 	particle_counts[type] = new_count
 	emit_signal("particle_count_changed", type, old_count, new_count)
 
 func remove_particles(type: int, count: int) -> int:
 	var old_count = particle_counts.get(type, 0)
-	count = min(old_count, count)  # don't remove more than we have
+	count = min(old_count, count) as int  # don't remove more than we have
 	var new_count = old_count - count;
 	for c in $Particles.get_children():
 		if c is CellParticle:
@@ -115,6 +111,22 @@ static func _random_velocity() -> Vector2:
 func _push_particles(type: int, dest: Cell, count: int):
 	count = remove_particles(type, count)
 	dest.add_particles(type, count)
+
+static func _particle_init(particle: CellParticle):
+	match particle.type:
+		Globals.ParticleType.PROTEIN_WHITE:
+			particle.translate(_random_coord_in_cell(particle.collision_radius))
+			particle.velocity = _random_velocity()
+		Globals.ParticleType.RIBOSOME_TRANSPORTER, Globals.ParticleType.RIBOSOME_ALCOHOL, Globals.ParticleType.RIBOSOME_LYE:
+			particle.translate(Vector2.ZERO)
+			particle.velocity = Vector2.ZERO
+
+func _create_particles(type: int, count: int = 1):
+	for i in count:
+		var particle = preload("res://cells/particle.tscn").instance()
+		particle.type = type
+		_particle_init(particle)
+		$Particles.add_child(particle)
 
 ### OVERRIDES
 # Called when the node enters the scene tree for the first time.
