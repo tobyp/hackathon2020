@@ -4,8 +4,10 @@ class_name Cell
 ### SIGNALS
 signal particle_count_changed(type, old_count, new_count)
 
-# Allow one automatic recipe every 10 ticks
-const AUTO_RECIPE_COOLDOWN = 10
+# Allow one automatic recipe every second
+const AUTO_RECIPE_COOLDOWN = 1
+# How much sugar a particle needs per second
+const SUGAR_USAGE_PER_PARTICLE = 0.1
 
 ### MEMBERS
 # Own index position. Just for debugging
@@ -79,7 +81,8 @@ func remove_particles(type: int, count: int) -> int:
 func simulate(delta):
 	_process_poison_recovery(delta)
 	_process_pressure(delta)
-	_process_recipes()
+	_process_sugar_usage(delta)
+	_process_recipes(delta)
 	_display_debug()
 
 ### PRIVATE/UTILITY FUNCTIONS
@@ -229,8 +232,57 @@ func _process_pressure(delta):
 						valve_transfer -= floor(valve_transfer)
 					output_valves[n] = valve_transfer
 
-func _process_recipes():
-	auto_recipe_cooldown = max(0, auto_recipe_cooldown - 1)
+func _process_sugar_usage(delta):
+	var particleCount = 0
+	for c in particle_counts.values():
+		particleCount += c
+	var thisTick = particleCount * SUGAR_USAGE_PER_PARTICLE * delta
+	var sugarUsage = int(thisTick)
+	# For non-whole sugars, use probability
+	if thisTick - float(sugarUsage) > Rules.rng.randf():
+		sugarUsage += 1
+
+	var ORDER = [
+		Globals.ParticleType.SUGAR,
+		Globals.ParticleType.PROTEIN_WHITE,
+		Globals.ParticleType.AMINO_PHE,
+		Globals.ParticleType.AMINO_ALA,
+		Globals.ParticleType.AMINO_LYS,
+		Globals.ParticleType.AMINO_TYR,
+		Globals.ParticleType.AMINO_PRO,
+		Globals.ParticleType.ENZYME_ALCOHOL,
+		Globals.ParticleType.ENZYME_LYE,
+		Globals.ParticleType.PROTEIN_TRANSPORTER,
+		Globals.ParticleType.RIBOSOME_TRANSPORTER,
+		Globals.ParticleType.RIBOSOME_ALCOHOL,
+		Globals.ParticleType.RIBOSOME_LYE,
+		Globals.ParticleType.PRO_QUEEN,
+	];
+	# Kill things according to order
+	for t in ORDER:
+		if sugarUsage == 0:
+			break
+		var elemCount = particle_counts[t]
+		if elemCount == 0:
+			continue
+		var removing = min(elemCount, sugarUsage)
+		sugarUsage -= removing
+		if Globals.particle_type_is_in_transporter(t):
+			# Change type instead
+			particle_counts[t] -= removing
+			particle_counts[Globals.ParticleType.PROTEIN_TRANSPORTER] += removing
+			for c in $Particles.get_children():
+				if removing == 0:
+					break
+				if c is CellParticle and c.type == t:
+					c.type = Globals.ParticleType.PROTEIN_TRANSPORTER
+					removing -= 1
+			assert(removing == 0, "Did not find particles to change")
+		else:
+			remove_particles(t, removing)
+
+func _process_recipes(delta):
+	auto_recipe_cooldown = max(0, auto_recipe_cooldown - delta)
 	var buttonContainer = $RecipeButtons.get_child(0)
 	var recipes = Recipe.matches(particle_counts)
 	for c in buttonContainer.get_children():
@@ -264,10 +316,8 @@ func _process_recipes():
 
 func _craft(r: Recipe):
 	for t in r.inputs:
-		if particle_counts[t] < r.inputs[t]:
-			print("Cannot craft…")
-			return
-		elif !Globals.particle_type_is_factory(t):
+		assert(particle_counts[t] >= r.inputs[t], "Cannot craft…")
+		if !Globals.particle_type_is_factory(t):
 			# Factories are not used
 			remove_particles(t, r.inputs[t])
 	for t in r.outputs:
