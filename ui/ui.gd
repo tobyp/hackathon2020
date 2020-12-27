@@ -7,6 +7,8 @@ var shaft_png
 var start_cell
 var end_cell
 
+var possible_particle_types
+
 enum TunnelState {
 	OPEN_LEFT,
 	OPEN_RIGHT,
@@ -35,7 +37,7 @@ func _ready():
 	head_png = preload("res://ui/arrowhead.png")
 	shaft_png = preload("res://ui/arrowshaft.png")
 	
-	var possible_particle_types = [
+	possible_particle_types = [
 		[Globals.ParticleType.PROTEIN_WHITE, Color.gray],
 		[Globals.ParticleType.PROTEIN_TRANSPORTER, Color.green],
 		[Globals.ParticleType.ENZYME_ALCOHOL, Color.yellow],
@@ -68,7 +70,7 @@ func _ready():
 		else:
 			leftarrow_texture.texture_normal = shaft_png
 		
-		tunnels[x].leftarrow.get_child(0).connect("button_down", self, "_iterate_state", [x,"left"])
+		tunnels[x].leftarrow.get_child(0).connect("button_down", self, "_iterate_state", [x])
 		
 		var rightarrow = preload("res://ui/arrow.tscn").instance()
 		tunnels[x].rightarrow = rightarrow
@@ -76,7 +78,7 @@ func _ready():
 		rightarrow.rotation += 3.14159
 		
 		rightarrow.position.x += 32
-		rightarrow.scale.x = 2
+		rightarrow.scale.x = 3
 		rightarrow.scale.y = 2
 		
 		rightarrow.position.y += 44*x - 200
@@ -89,8 +91,20 @@ func _ready():
 			rightarrow_texture.texture_normal = shaft_png
 
 func _iterate_state(h):
-	print("button clicked")
-	print(h)
+	# todo use toby's fancy getter instead of illegally accessing the dict directly
+	print("inverting the output rule from ",start_cell," to ",end_cell," for type ",h)
+	var global_particle_type = possible_particle_types[h][0]
+	# print("particle type is ", global_particle_type)
+	print(start_cell.output_rules[global_particle_type])
+
+	var rules_for_type = start_cell.output_rules[global_particle_type]
+	# if there are no rules for the particle type, or no rule for the end_cell, we add one
+	if rules_for_type == {} or not rules_for_type.has(end_cell):
+		start_cell.set_output_rule(global_particle_type, end_cell, false)
+	else: # flip it! (for now..) TODO: iterate state, don't just flip the bools
+		start_cell.set_output_rule(global_particle_type, end_cell, !rules_for_type[end_cell])
+	print("  value is now ",start_cell.output_rules[global_particle_type][end_cell])
+	print("todo: update the opposite output rule (from end to start)")
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
