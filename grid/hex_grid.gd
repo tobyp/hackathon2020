@@ -41,7 +41,7 @@ func get_undirected_node_connections():
 		var local_neighbors = get_neighbors_coord(node_coords.x, node_coords.y)
 		for neigh_coords in local_neighbors:
 			if neigh_coords in grid: # if the neighbor actually exists
-				print(str(cell) + " is connected to " + str(neigh_coords) + ".")
+				# print(str(cell) + " is connected to " + str(neigh_coords) + ".")
 				known_connections[node_coords].append(neigh_coords)
 				var already_known = false
 				for vector_tuple in undirected_connections:
@@ -49,7 +49,7 @@ func get_undirected_node_connections():
 						already_known = true
 				if not already_known:
 					undirected_connections.append([node_coords, neigh_coords])
-	print("starts and stops:", known_connections)
+	# print("starts and stops:", known_connections)
 	print("unique edges: ",undirected_connections)
 	return undirected_connections
 
