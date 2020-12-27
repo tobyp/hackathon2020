@@ -35,13 +35,15 @@ b = Vector2( 0, -512 )
 [sub_resource type="ShaderMaterial" id=7]
 shader = ExtResource( 2 )
 shader_param/percentage = 0.0
-shader_param/wobbleSpeed = 1.0
+shader_param/wobbleSpeed = 1.5
+shader_param/wobbleScale = 7.0
 shader_param/blend_tex = ExtResource( 3 )
 
 [sub_resource type="ShaderMaterial" id=8]
 shader = ExtResource( 2 )
 shader_param/percentage = 0.0
 shader_param/wobbleSpeed = 1.5
+shader_param/wobbleScale = 7.0
 shader_param/blend_tex = ExtResource( 6 )
 
 [sub_resource type="Animation" id=9]
@@ -106,7 +108,7 @@ texture = ExtResource( 4 )
 [node name="GfxResource" type="Sprite" parent="."]
 visible = false
 material = SubResource( 8 )
-scale = Vector2( 0.87, 0.87 )
+scale = Vector2( 0.85, 0.85 )
 texture = ExtResource( 6 )
 
 [node name="CellSelector" parent="." instance=ExtResource( 7 )]
