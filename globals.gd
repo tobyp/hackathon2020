@@ -2,18 +2,22 @@ class_name Globals
 
 ### TYPES
 enum ParticleType {
-	PROTEIN_WHITE,  # ... White
+	## These can travel:
+	PROTEIN_WHITE,  # Gray
 	PROTEIN_TRANSPORTER,  # Green
+	### note from here, these are technically "Transporter carrying X" particles, because none of these particles are allowed to float around alone
+	SUGAR,  # White
 	ENZYME_ALCOHOL,  # Yellow
 	ENZYME_LYE,  # Cyan
-	QUEEN,  # Violet
-	PRO_QUEEN,  # Pink
 	AMINO_PHE,  # Green (Transporter)
 	AMINO_ALA,  # Yellow (Alcohol)
 	AMINO_LYS,  # Cyan (Lye)
 	AMINO_TYR,  # Violet (Queen)
 	AMINO_PRO,  # Pink (Pro Queen)
-	SUGAR,  # White
+	
+	## These are factories, can't travel, and are limited to one per cell:
+	QUEEN,  # Violet
+	PRO_QUEEN,  # Pink
 	RIBOSOME_TRANSPORTER,  # Green 
 	RIBOSOME_ALCOHOL,  # Yellow
 	RIBOSOME_LYE,  # Cyan
