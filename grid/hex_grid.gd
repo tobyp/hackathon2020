@@ -21,7 +21,7 @@ func _ready():
 
 func _simulate_tick():
 	for node in self.grid.values():
-		node.cell.simulate()
+		node.cell.simulate(timer.wait_time)  # TODO: can we get the actual elapsed time?
 
 func draw_tunnels(position, rotation):
 	var tunnelCollection = TunnelsTscn.instance()

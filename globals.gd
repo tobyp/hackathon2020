@@ -114,10 +114,10 @@ static func poison_type_get_name(poison: int) -> String:
 	return "Unknown Poison"
 	
 
-# Calculate how many particles to send, per tick, given a budget of cells that could be sent, and a demand weight from 0 to 1
+# Calculate how many particles to send, in `delta` seconds, given a `budget` of cells that could be sent, and a `demand` weight from 0 to 1
 # There's a lot of tuning to be had on the constants here.
-static func diffuse_func(budget: int, demand: float) -> float:
+static func diffuse_func(budget: int, demand: float, delta: float) -> float:
 	# for debugging, here's a very slow and even diffuse function that makes it easily visible
-	return budget * demand * 0.1
+	return budget * demand * 0.1 * delta
 	# this exponential will make diffusion go faster if the differential pressure is higher
-	return budget * 0.55 * exp(-4 * demand)
+	# return budget * 0.55 * exp(-4 * demand) * delta

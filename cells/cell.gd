@@ -15,6 +15,7 @@ var particle_counts = {}  # Dict[ParticleType, int]
 var output_rules = {}  # Dict[ParticleType, Dict[Cell, bool]], output_rules[PARTICLE_*][<Neighbor Cell>] = true/false
 var discovered: bool = true
 var poisons = {Globals.PoisonType.ANTI_BIOMASS: 1.0}  # Dict[PoisonType, float]
+var poison_recoveries = {}  # Dict[PoisonType, [float rate, float ceiling]]
 # 0 = Ready
 var auto_recipe_cooldown = 0
 
@@ -38,6 +39,7 @@ func set_output_rule(type: int, neighbor: Cell, rule: bool):
 func set_poison(poison: int, value: float):
 	if value <= 0.0:
 		self.poisons.erase(poison)
+		self.poison_recoveries.erase(poison)
 	else:
 		self.poisons[poison] = value
 	if poison == Globals.PoisonType.ANTI_BIOMASS:
@@ -87,8 +89,9 @@ func remove_particles(type: int, count: int) -> int:
 	return old_count - new_count
 
 # Called every game step.
-func simulate():
-	_process_pressure()
+func simulate(delta):
+	_process_poison_recovery(delta)
+	_process_pressure(delta)
 	_process_recipes()
 	_display_debug()
 
@@ -136,7 +139,13 @@ func _ready():
 		self.particle_counts[t] = 0
 		self.output_rules[t] = {}
 
-func _process_pressure():
+func _process_poison_recovery(delta):
+	for t in self.poison_recoveries:
+		var rate_and_ceil = self.poison_recoveries[t]
+		self.set_poison(t, min(self.get_poison(t) + delta * rate_and_ceil[0], rate_and_ceil[1]))
+	pass
+
+func _process_pressure(delta):
 	for t in Globals.ParticleType.values():
 		var particle_name = Globals.particle_type_get_name(t)
 		var supply_own = self.particle_counts.get(t, 0)
@@ -158,11 +167,11 @@ func _process_pressure():
 			for n in demand_neighbors.keys():
 				var demand_neighbor = demand_neighbors[n] / demand_total
 				if demand_neighbor > 0:
-					var transfer = Globals.diffuse_func(budget, demand_neighbor)
+					var transfer = Globals.diffuse_func(budget, demand_neighbor, delta)
 					print("%s neighbor %s demands %f %s, transfer %f" % [self, n, demand_neighbor, particle_name, transfer])
 					var valve_transfer = output_valves.get(n, 0) + transfer
 					if valve_transfer >= 1.0:
-						self._push_particles(t, n, floor(valve_transfer))
+						self._push_particles(t, n, floor(valve_transfer) as int)
 						valve_transfer -= floor(valve_transfer)
 					output_valves[n] = valve_transfer
 

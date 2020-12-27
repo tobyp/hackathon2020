@@ -8,11 +8,12 @@ func _ready():
 	var cell0 = $HexGrid.create_cell(0, 0) as Cell
 	# remove poison first, else any particles you add will just die :(
 	cell0.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
-	cell0.add_particles(Globals.ParticleType.PROTEIN_WHITE, 40)
+	cell0.add_particles(Globals.ParticleType.PROTEIN_WHITE, 19)
 	cell0.add_particles(Globals.ParticleType.QUEEN, 1)
 	cell0.add_particles(Globals.ParticleType.AMINO_PHE, 1)
 
 	var cell1 = $HexGrid.create_cell(1,0)
+	cell1.poison_recoveries = {Globals.PoisonType.ANTI_BIOMASS: [0.001, 1.0]}
 
 	var cell2 = $HexGrid.create_cell(0,1)
 	cell2.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
