@@ -6,7 +6,7 @@ const size_y = hex_size * 3.0/4.0
 const size_x = hex_size * sin(60.0 /360.0*2*PI)
 
 var grid = {}
-var timer
+var timer: Timer
 
 onready var CellTscn = load("res://cells/cell.tscn")
 onready var TunnelsTscn = load("res://ui/ui.tscn")

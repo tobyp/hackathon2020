@@ -20,8 +20,6 @@ func _input(event):
 			if event.is_pressed():
 				startPos = event.position
 		elif event.is_pressed() and (event.button_index == BUTTON_WHEEL_UP or event.button_index == BUTTON_WHEEL_DOWN):
-			var viewport = get_viewport()
-			#var origPos = get_camera_screen_center() + viewport.get_mouse_position() * zoom
 			var origPos = get_global_mouse_position()
 			if event.button_index == BUTTON_WHEEL_UP:
 				zoom /= 1.3

@@ -1,8 +1,6 @@
 extends Node2D
 class_name Cell
 
-var rng = RandomNumberGenerator.new()
-
 ### SIGNALS
 signal particle_count_changed(type, old_count, new_count)
 
@@ -13,7 +11,7 @@ const AUTO_RECIPE_COOLDOWN = 10
 # A list of all existing neighbors (Will be modified from the hexgrid manager)
 var neighbors = []
 # Amino acid counts include a transporter, transporter count only means free transporter
-var particle_counts = {}
+var particle_counts = {}  # Dict[ParticleType, int]
 var output_rules = {}  # Dict[ParticleType, Dict[Cell, bool]], output_rules[PARTICLE_*][<Neighbor Cell>] = true/false
 var discovered: bool = true
 var poisons = {Globals.PoisonType.ANTI_BIOMASS: 1.0}  # Dict[PoisonType, float]
@@ -92,35 +90,35 @@ func remove_particles(type: int, count: int) -> int:
 	emit_signal("particle_count_changed", type, old_count, new_count)
 	return old_count - new_count
 
-# Transfer `count` particles of type `type` from this cell to `dest`.
-# This should take care of updating the particle_count dicts on both cells, and any actual particle 
-func _push_particles(type: int, dest: Cell, count: int):
-	count = remove_particles(type, count)
-	dest.add_particles(type, count)
-
 # Called every game step.
 func simulate():
 	_process_pressure()
 	_process_recipes()
 	_display_debug()
 
+### PRIVATE/UTILITY FUNCTIONS
 # Generate a random coordinate inside a cell (relative to its center)
 # this doesn't reach the corners, but that's okay for now
 # clearance is how far inside the edge the point must be (to avoid generating particles intersecting the cell border)
-func _random_coord_in_cell(clearance: float) -> Vector2:
-	var phi = rng.randf_range(0, 2*PI)
-	var dist = rng.randf_range(0, sqrt(HexGrid.size_x / 2 - clearance))
+static func _random_coord_in_cell(clearance: float) -> Vector2:
+	var phi = Rules.rng.randf_range(0, 2*PI)
+	var dist = Rules.rng.randf_range(0, sqrt(HexGrid.size_x / 2 - clearance))
 	return Vector2(dist * cos(phi), dist * sin(phi));
 
-func _random_velocity() -> Vector2:
-	var phi = rng.randf_range(0, 2*PI)
-	var dist = rng.randf_range(750, 1250)
+static func _random_velocity() -> Vector2:
+	var phi = Rules.rng.randf_range(0, 2*PI)
+	var dist = Rules.rng.randf_range(350, 500)
 	return Vector2(dist * cos(phi), dist * sin(phi));
+
+# Transfer `count` particles of type `type` from this cell to `dest`.
+# This should take care of updating the particle_count dicts on both cells, and any actual particle 
+func _push_particles(type: int, dest: Cell, count: int):
+	count = remove_particles(type, count)
+	dest.add_particles(type, count)
 
 ### OVERRIDES
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	rng.randomize()
 	$Gfx.set_material($Gfx.get_material().duplicate())
 	for t in Globals.ParticleType.values():
 		self.particle_counts[t] = 0
@@ -192,7 +190,7 @@ func _process_recipes():
 func _craft(r: Recipe):
 	print("Crafting %s" % Globals.particle_type_get_name(r.output))
 	r.subtract_resources(particle_counts)
-	particle_counts[r.output] += 1
+	add_particles(r.output)
 
 func _display_debug():
 	var dbg = "[b][i]%s[/i][/b]\n" % [self];

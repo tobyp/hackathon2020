@@ -1,8 +1,12 @@
 extends Node
 
+var rng
+
 func _ready():
 	_init_recipes()
 	_init_tech()
+	rng = RandomNumberGenerator.new()
+	rng.randomize()
 
 var ALL_RECIPES
 func _init_recipes():
