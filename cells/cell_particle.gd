@@ -1,7 +1,6 @@
 extends KinematicBody2D
 class_name CellParticle
 
-var velo_abs = 1000;
 var velocity = Vector2(-1000, 0)
 var origin = null
 var _time = 0.0
@@ -17,7 +16,7 @@ func _physics_process(delta):
 		var collision = move_and_collide(motion)
 		if collision != null:
 			var reflect = collision.remainder.bounce(collision.normal)
-			velocity = (velocity.bounce(collision.normal) + Vector2(Rules.rng.randf(), Rules.rng.randf()) * velocity.length() / 2).normalized() * velo_abs
+			velocity = (velocity.bounce(collision.normal) + Vector2(Rules.rng.randf(), Rules.rng.randf()) * velocity.length() / 2).normalized() * velocity.length()
 			collision = move_and_collide(reflect)
 	else:
 		# Move a little random
@@ -65,6 +64,9 @@ func _set_type(type_: int):
 			image_name = "yellow_ribosome"
 		Globals.ParticleType.RIBOSOME_LYE:
 			image_name = "blue_ribosome"
+		Globals.ParticleType.ANTI_MITOCHONDRION:
+			image_name = "sugar"
+
 	if Globals.particle_type_is_in_transporter(type):
 		$InnerSprite.texture = load("res://textures/%s.png" % image_name)
 		$Sprite.texture = load("res://textures/transporter.png")
