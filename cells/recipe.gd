@@ -3,6 +3,8 @@ class_name Recipe
 var inputs = {}
 var outputs = {}
 var automatic: bool
+# Cooldown of the recipe in seconds
+var cooldown: float
 var _output_has_factory: bool = false
 
 static func matches(particle_counts: Dictionary) -> Array:
@@ -12,10 +14,11 @@ static func matches(particle_counts: Dictionary) -> Array:
 			rs.push_back(r)
 	return rs
 
-func _init(input: Dictionary, output: Dictionary, auto: bool = false):
+func _init(input: Dictionary, output: Dictionary, auto: bool = false, cool: float = 1):
 	self.inputs = input
 	self.outputs = output
 	self.automatic = auto
+	self.cooldown = cool
 	for t in outputs:
 		if Globals.particle_type_is_factory(t):
 			_output_has_factory = true

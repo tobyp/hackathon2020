@@ -4,8 +4,6 @@ class_name Cell
 ### SIGNALS
 signal particle_count_changed(type, old_count, new_count)
 
-# Allow one automatic recipe every second
-const AUTO_RECIPE_COOLDOWN = 1
 # How much sugar a particle needs per second
 const SUGAR_USAGE_PER_PARTICLE = 0.1
 
@@ -326,7 +324,7 @@ func _process_recipes(delta):
 	for r in recipes:
 		if r.automatic:
 			if auto_recipe_cooldown == 0:
-				auto_recipe_cooldown = AUTO_RECIPE_COOLDOWN
+				auto_recipe_cooldown = r.cooldown
 				# Run recipe
 				_craft(r)
 		else:
