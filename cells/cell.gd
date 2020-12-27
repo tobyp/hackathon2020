@@ -3,10 +3,15 @@ class_name Cell
 
 ### SIGNALS
 signal particle_count_changed(type, old_count, new_count)
+# Gets called when a cell gets visible, so that the hexgrid manager can
+# initialize it with the tech scripting engine
+signal discover(cell)
 
 ### MEMBERS
 # Own index position. Just for debugging
 var pos = Vector2.ZERO
+# How far away the cell is from the root cell
+var ring_level = 0
 # A list of all existing neighbors (Will be modified from the hexgrid manager)
 var neighbors = []
 # Amino acid counts include a transporter, transporter count only means free transporter

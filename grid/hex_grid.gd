@@ -121,46 +121,75 @@ func get_neighbors_coord(x: int, y: int) -> Array:
 		cells.append(Vector2(n[0] + x, n[1] + y))
 	return cells
 
+var tech_tree;
+func generate_grid(size: int):
+	tech_tree = Rules.new_tech_tree()
 
-func _cube_to_oddr(cube: Cube) -> Hex:
-	var col = cube.x + (cube.z - (cube.z&1)) / 2
-	var row = cube.z
-	return Hex.new(col, row)
+	# Generate Basic Space
+	var root = create_cell(0,0)
 
-func _oddr_to_cube(hex: Hex) -> Cube:
-	var x = hex.col - (hex.row - (hex.row&1)) / 2
-	var z = hex.row
-	var y = -x-z
-	return Cube.new(x, y, z)
+	for s in range(1, size):
+		var ring = _get_ring(s)
+		for hex in ring:
+			var cell = create_cell(hex.x, hex.y)
+			cell.ring_level = s
+			cell.connect("discover", self, "discover_cell")
+	
+	discover_cell(root)
 
-func generate_grid():
-	#var rng = RandomNumberGenerator.new()
-	#rng.randomize()
-	#var start = rng.randi_range(0, 5)
+func discover_cell(cell):
+	var rng = RandomNumberGenerator.new()
+	rng.randomize()
+	
+	print("Discovered %s on ring %d" % [cell, cell.ring_level])
+	if cell.ring_level >= tech_tree.size():
+		print("No tech for ", cell)
+		return # we are out of technologies
+	var tech_ring = tech_tree[cell.ring_level]
+	var fields_in_ring = _ring_size(cell.ring_level)
+	var discovered = 0
+	var to_fill = 0
+	for tech in tech_ring:
+		discovered += tech.current
+		if tech.current < tech.amount_min:
+			to_fill += tech.amount_min - tech.current
+	var remaining_empty = fields_in_ring - discovered
+	for tech in tech_ring:
+		if tech.amount_max != -1 and tech.current >= tech.amount_max:
+			continue
+		if to_fill >= remaining_empty or rng.randf() <= tech.probability:
+			tech.current += 1
+			Rules.apply_tech(tech.tech_type, cell)
+			print("Applying %s to cell %s" % [tech, cell])
+			if tech.is_final:
+				break
+	print("Tech on %s done" % cell)
+
+func _get_ring(size: int) -> Array:
+	if size == 0:
+		return []
+	var coords = []
+	var hex = Hex.new(0,0)
+	for r in range(size):
+		hex = hex.plus(Dirs.BL)
 	for dir in Dirs.values():
-		var pos = Hex.new(0, 0)
-		for star in range(6):
-			pos = pos.plus(dir)
-			create_cell(pos.row, pos.col)
+		for r in range(size):
+			coords.append(hex.as_vec())
+			hex = hex.plus(dir)
+	return coords
+
+func _ring_size(size: int) -> int:
+	return size * 6
 
 class Hex:
-	var row
-	var col
-	func _init(_row, _col):
-		self.row = _row
-		self.col = _col
-	func as_vec() -> Vector2:
-		return Vector2(self.row, self.row)
-	func plus(dir: int) -> Hex:
-		var mset = oddr_directions[col & 1]
-		var vec = mset[dir]
-		return Hex.new(row + vec[0], col + vec[1])
-
-class Cube:
 	var x
 	var y
-	var z
-	func _init(_x, _y, _z):
+	func _init(_x, _y):
 		self.x = _x
 		self.y = _y
-		self.z = _z
+	func as_vec() -> Vector2:
+		return Vector2(self.x, self.y)
+	func plus(dir: int) -> Hex:
+		var mset = oddr_directions[y & 1]
+		var vec = mset[dir]
+		return Hex.new(x + vec[0], y + vec[1])

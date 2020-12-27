@@ -34,8 +34,10 @@ enum PoisonType {
 }
 
 enum TechType {
-	A
-	B
+	NONE
+	INIT,
+	INIT_SUGAR
+	BASIC_STUFF
 	C
 	D
 	E
@@ -131,3 +133,9 @@ static func cell_type_get_name(type: int) -> String:
 		CellType.RESOURCE:
 			return "Resource"
 	return "Unknown Cell Type"
+
+static func get_enum_name(enu, value) -> String:
+	for key in enu.keys():
+		if enu[key] == value:
+			return key
+	return "<Unknown>"

@@ -5,7 +5,6 @@ var debug_visual: bool = false
 
 func _ready():
 	_init_recipes()
-	_init_tech()
 	rng = RandomNumberGenerator.new()
 	rng.randomize()
 
@@ -33,18 +32,33 @@ func _init_recipes():
 		Recipe.new({ Globals.ParticleType.ANTI_MITOCHONDRION: 1, Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }, { Globals.ParticleType.SUGAR: 1, }, true),
 	];
 
-var TECH_LIST
-var TECH_DICT
-func _init_tech():
-	self.TECH_LIST = [
-		Tech.new(Globals.TechType.A, [Globals.TechType.B, Globals.TechType.C]),
-		Tech.new(Globals.TechType.B, [Globals.TechType.D]),
-		Tech.new(Globals.TechType.C, [Globals.TechType.E, Globals.TechType.F]),
+static func new_tech_tree() -> Array:
+	var ring_list = [
+		# Ring 0 (Our starting cell)
+		[Tech.new(Globals.TechType.INIT, 1, 1, 1, true)],
+		# Ring 1
+		[Tech.new(Globals.TechType.INIT_SUGAR, 1, 1, 1, true)],
+		# Ring 2
+		[Tech.new(Globals.TechType.BASIC_STUFF, 1, 2, 0.5)  ],
 	];
-	self.TECH_DICT = {}
-	for tech in TECH_LIST:
-		TECH_DICT[tech.tech] = tech
+	for ring in ring_list:
+		ring.append(Tech.new(Globals.TechType.NONE, -1, -1, 1))
+	return ring_list
 
+# Gets called to initialize an undiscovered/uncaptured Cell
+static func apply_tech(tech_type: int, cell: Cell):
+	match tech_type:
+		Globals.TechType.INIT:
+			cell.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
+			cell.add_particles(Globals.ParticleType.PROTEIN_WHITE, 40)
+			cell.add_particles(Globals.ParticleType.AMINO_PHE, 1)
+		Globals.TechType.INIT_SUGAR:
+			cell.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
+			cell.add_particles(Globals.ParticleType.ANTI_MITOCHONDRION, 1)
+			cell.type = Globals.CellType.RESOURCE
+		Globals.TechType.BASIC_STUFF:
+			cell.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
+			cell.add_particles(Globals.ParticleType.PROTEIN_WHITE, 20)
 
 static func sugar_requirement(type: int) -> float:
 	return 0.01
