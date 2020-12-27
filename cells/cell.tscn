@@ -38,6 +38,7 @@ shader_param/blend_tex = ExtResource( 3 )
 
 [sub_resource type="Animation" id=8]
 resource_name = "Warning"
+length = 2.0
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath("WarningAnimationSprite:scale")

@@ -61,6 +61,7 @@ func create_cell(x: int, y: int):
 	if cell == null:
 		cell = CellTscn.instance()
 		cell.pos = pos
+		cell.visible = false
 		var pos_x = size_x * (float(x) + 0.5 if y % 2 != 0 else float(x))
 		var pos_y = size_y * y - (size_y / 2)
 		add_child(cell)
@@ -143,6 +144,7 @@ func discover_cell(cell):
 	rng.randomize()
 	
 	print("Discovered %s on ring %d" % [cell, cell.ring_level])
+	cell.visible = true
 	if cell.ring_level >= tech_tree.size():
 		print("No tech for ", cell)
 		return # we are out of technologies
