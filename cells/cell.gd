@@ -85,7 +85,7 @@ func get_poison(poison: int) -> float:
 	return self.poisons.get(poison, 0.0)
 
 # Add *new* particles - particle nodes will be created as necessary
-func add_particles(type: int, count: int = 1):
+func add_particles(type: int, count: int = 1, anywhere: bool = true):
 	var recv_result = self._recv_particles(type, count)
 	if recv_result[1] > 0:
 		var type_name = Globals.particle_type_get_name(type)
@@ -95,7 +95,7 @@ func add_particles(type: int, count: int = 1):
 	var new_count = old_count + count
 	particle_counts[type] = new_count
 	if self.type == Globals.CellType.NORMAL:
-		self._put_particle_nodes(self._create_particle_nodes(type, count))
+		self._put_particle_nodes(self._create_particle_nodes(type, count, anywhere))
 	emit_signal("particle_count_changed", self, type, old_count, new_count)
 
 func remove_particles(type: int, count: int) -> int:
@@ -137,11 +137,15 @@ func simulate(delta):
 
 ### PRIVATE/UTILITY FUNCTIONS
 # Generate a random coordinate inside a cell (relative to its center)
+# with anywhere=true, anywhere in the cell, and with anywhere=false, near the center (moving outwards)
 # this doesn't reach the corners, but that's okay for now
 # clearance is how far inside the edge the point must be (to avoid generating particles intersecting the cell border)
-static func _random_coord_in_cell(clearance: float) -> Vector2:
+static func _random_coord_in_cell(clearance: float, anywhere: bool = true) -> Vector2:
 	var phi = Rules.rng.randf_range(0, 2*PI)
-	var dist = Rules.rng.randf_range(0, sqrt(HexGrid.size_x / 2 - clearance))
+	var dist = 0
+	if anywhere:
+		Rules.rng.randf_range(0, sqrt(HexGrid.size_x / 2 - clearance))
+		dist = dist * dist
 	return Vector2(dist * cos(phi), dist * sin(phi));
 
 static func _random_velocity() -> Vector2:
@@ -150,21 +154,21 @@ static func _random_velocity() -> Vector2:
 	return Vector2(dist * cos(phi), dist * sin(phi));
 
 ### UTILTIY/PRIVATE
-static func _particle_init(particle: CellParticle):
+static func _particle_init(particle: CellParticle, anywhere: bool = true):
 	if Globals.particle_type_is_factory(particle.type):
 		particle.translate(Vector2.ZERO)
 		particle.velocity = Vector2.ZERO
 	else:
-		particle.translate(_random_coord_in_cell(particle.collision_radius))
+		particle.translate(_random_coord_in_cell(particle.collision_radius, anywhere))
 		particle.velocity = _random_velocity()
 
 ## PARTICLE NODE FUNCTIONS - these do not modify `particle_counts`!
-static func _create_particle_nodes(type: int, count: int = 1) -> Array:
+static func _create_particle_nodes(type: int, count: int = 1, anywhere: bool = true) -> Array:
 	var particles = []
 	for i in count:
 		var particle = preload("res://cells/particle.tscn").instance()
 		particle.type = type
-		_particle_init(particle)
+		_particle_init(particle, anywhere)
 		particles.append(particle)
 	return particles
 
@@ -405,7 +409,7 @@ func _craft(r: Recipe):
 			# Factories are not used
 			remove_particles(t, r.inputs[t])
 	for t in r.outputs:
-		add_particles(t, r.outputs[t])
+		add_particles(t, r.outputs[t], false)
 
 func _on_cell_click(viewport, event, shape_idx):
 	if event is InputEventMouseButton:
