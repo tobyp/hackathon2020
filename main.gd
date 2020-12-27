@@ -58,3 +58,14 @@ func debug_populate():
 	cell4.set_output_rule(Globals.ParticleType.ENZYME_ALCOHOL, cell5, true)
 	cell1.set_output_rule(Globals.ParticleType.PROTEIN_TRANSPORTER, cell6, true)
 	cell6.set_output_rule(Globals.ParticleType.SUGAR, cell1, true)
+	
+	var edges = $HexGrid.get_undirected_node_connections()
+	for connection in edges:
+		var start_cell = $HexGrid.create_cell(connection[0].x, connection[0].y)
+		var start_pos = start_cell.position
+		var end_cell = $HexGrid.create_cell(connection[1].x, connection[1].y)
+		var end_pos = end_cell.position
+		var middle = 0.5 * (start_pos + end_pos)
+		var the_angle = (start_pos.direction_to(end_pos)).angle()
+		# print("the middle of "+str(start_pos)+" and "+str(end_pos)+" is "+str(middle)+ ", angl "+str(the_angle))
+		$HexGrid.create_tunnels(middle, the_angle, start_cell, end_cell)
