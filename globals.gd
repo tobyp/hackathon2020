@@ -92,6 +92,12 @@ static func particle_type_get_name(particle: int) -> String:
 			return "Lye Ribosome"
 		ParticleType.ANTI_MITOCHONDRION:
 			return "Anti-Mitochondrion"
+		ParticleType.POISON_ALCOHOL:
+			return "Alcohol"
+		ParticleType.POISON_LYE:
+			return "Lye"
+		ParticleType.POISON_PLUTONIUM:
+			return "Plutonium"
 	return "Unknown Particle"
 
 static func particle_type_is_factory(particle: int) -> bool:

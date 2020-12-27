@@ -94,7 +94,7 @@ func add_particles(type: int, count: int = 1, anywhere: bool = true):
 	var old_count = particle_counts.get(type, 0)
 	var new_count = old_count + count
 	particle_counts[type] = new_count
-	if self.type == Globals.CellType.NORMAL:
+	if self.type == Globals.CellType.NORMAL or Globals.particle_type_is_factory(type):
 		self._put_particle_nodes(self._create_particle_nodes(type, count, anywhere))
 	emit_signal("particle_count_changed", self, type, old_count, new_count)
 
