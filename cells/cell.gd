@@ -71,7 +71,6 @@ func add_particles(type, count: int = 1):
 	var old_count = particle_counts.get(type, 0)
 	var new_count = old_count + count
 	self._create_particles(type, count)
-		particle.set_type(type)
 	particle_counts[type] = new_count
 	emit_signal("particle_count_changed", type, old_count, new_count)
 
@@ -80,7 +79,7 @@ func remove_particles(type: int, count: int) -> int:
 	count = min(old_count, count) as int  # don't remove more than we have
 	var new_count = old_count - count;
 	for c in $Particles.get_children():
-		if c is CellParticle:
+		if c is CellParticle and c.type == type:
 			$Particles.remove_child(c)
 			count -= 1
 		if count == 0:
@@ -117,13 +116,12 @@ func _push_particles(type: int, dest: Cell, count: int):
 	dest.add_particles(type, count)
 
 static func _particle_init(particle: CellParticle):
-	match particle.type:
-		Globals.ParticleType.PROTEIN_WHITE:
-			particle.translate(_random_coord_in_cell(particle.collision_radius))
-			particle.velocity = _random_velocity()
-		Globals.ParticleType.RIBOSOME_TRANSPORTER, Globals.ParticleType.RIBOSOME_ALCOHOL, Globals.ParticleType.RIBOSOME_LYE:
-			particle.translate(Vector2.ZERO)
-			particle.velocity = Vector2.ZERO
+	if Globals.particle_type_is_factory(particle.type):
+		particle.translate(Vector2.ZERO)
+		particle.velocity = Vector2.ZERO
+	else:
+		particle.translate(_random_coord_in_cell(particle.collision_radius))
+		particle.velocity = _random_velocity()
 
 func _create_particles(type: int, count: int = 1):
 	for i in count:
