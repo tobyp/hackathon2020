@@ -92,26 +92,75 @@ func remove_cell(x: int, y: int):
 		var to_update = get_neighbors_coord(x,y)
 		_update_neighbors(to_update)
 
-const neighbors = [Vector2(-1, -1), Vector2(0, -1), Vector2(-1, 0), Vector2(1, 0), Vector2(-1, 1), Vector2(0, 1)]
 func get_neighbors(x: int, y: int) -> Array:
 	var cells = []
-	for n in neighbors:
-		var pos = Vector2(x, y) + n
+	for pos in get_neighbors_coord(x, y):
 		var cell = grid.get(pos, null)
 		if cell != null:
 			cells.append(cell)
 	return cells
 
-func get_neighbors_coord(x: int, y: int):
+enum Dirs {
+	R
+	TR
+	TL
+	L
+	BL
+	BR
+}
+const oddr_directions = [
+	[[+1,  0], [ 0, -1], [-1, -1],
+	 [-1,  0], [-1, +1], [ 0, +1]],
+	[[+1,  0], [+1, -1], [ 0, -1],
+	 [-1,  0], [ 0, +1], [+1, +1]],
+]
+func get_neighbors_coord(x: int, y: int) -> Array:
+	var parity = y & 1
 	var cells = []
-	for n in neighbors:
-		cells.append(Vector2(x, y) + n)
+	for n in oddr_directions[parity]:
+		cells.append(Vector2(n[0] + x, n[1] + y))
 	return cells
 
 
-const gen_dirs = [Vector2(0, -1), Vector2(-1, -1), Vector2(-1, 0), Vector2(-1, 1), Vector2(0, 1), Vector2(1, 0)]
+func _cube_to_oddr(cube: Cube) -> Hex:
+	var col = cube.x + (cube.z - (cube.z&1)) / 2
+	var row = cube.z
+	return Hex.new(col, row)
+
+func _oddr_to_cube(hex: Hex) -> Cube:
+	var x = hex.col - (hex.row - (hex.row&1)) / 2
+	var z = hex.row
+	var y = -x-z
+	return Cube.new(x, y, z)
+
 func generate_grid():
-	var rng = RandomNumberGenerator.new()
-	rng.randomize()
-	var start = rng.randi_range(0, 5)
-	
+	#var rng = RandomNumberGenerator.new()
+	#rng.randomize()
+	#var start = rng.randi_range(0, 5)
+	for dir in Dirs.values():
+		var pos = Hex.new(0, 0)
+		for star in range(6):
+			pos = pos.plus(dir)
+			create_cell(pos.row, pos.col)
+
+class Hex:
+	var row
+	var col
+	func _init(_row, _col):
+		self.row = _row
+		self.col = _col
+	func as_vec() -> Vector2:
+		return Vector2(self.row, self.row)
+	func plus(dir: int) -> Hex:
+		var mset = oddr_directions[col & 1]
+		var vec = mset[dir]
+		return Hex.new(row + vec[0], col + vec[1])
+
+class Cube:
+	var x
+	var y
+	var z
+	func _init(_x, _y, _z):
+		self.x = _x
+		self.y = _y
+		self.z = _z

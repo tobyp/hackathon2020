@@ -5,7 +5,10 @@ var Cell = preload("res://cells/cell.gd")
 func _ready():
 	OS.set_window_title("Hackathon 2020")
 
+	$HexGrid.generate_grid()
+
 	var cell1 = $HexGrid.create_cell(0, 0)  # 1-indexed becase that matches get_index() on the cells, in this case
+
 	# remove poison first, else any particles you add will just die :(
 	cell1.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
 	cell1.add_particles(Globals.ParticleType.PROTEIN_WHITE, 40)

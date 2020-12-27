@@ -227,6 +227,7 @@ func _craft(r: Recipe):
 
 func _display_debug():
 	var dbg = "[b][i]%s[/i][/b]\n" % [self];
+	dbg += "[i]Neighbors:[/i] %s\n" % [self.neighbors];
 	for poison in Globals.PoisonType:
 		dbg += "[b][u]%s:[/u][/b] %f\n" % [poison, self.poisons.get(Globals.PoisonType[poison], 0)]
 	for particle in Globals.ParticleType:
