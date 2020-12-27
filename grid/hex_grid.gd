@@ -61,7 +61,6 @@ func create_cell(x: int, y: int):
 	if cell == null:
 		cell = CellTscn.instance()
 		cell.pos = pos
-		cell.visible = false
 		var pos_x = size_x * (float(x) + 0.5 if y % 2 != 0 else float(x))
 		var pos_y = size_y * y - (size_y / 2)
 		add_child(cell)
@@ -143,8 +142,14 @@ func discover_cell(cell):
 	var rng = RandomNumberGenerator.new()
 	rng.randomize()
 	
+	if cell.type != Globals.CellType.UNDISCOVERED:
+		print("Cell %s already discovered" % [cell])
+		return
+
 	print("Discovered %s on ring %d" % [cell, cell.ring_level])
-	cell.visible = true
+	# Set normal by default, the tech events can override this
+	cell.type = Globals.CellType.NORMAL
+	
 	if cell.ring_level >= tech_tree.size():
 		print("No tech for ", cell)
 		return # we are out of technologies
@@ -176,7 +181,7 @@ func _get_ring(size: int) -> Array:
 	for r in range(size):
 		hex = hex.plus(Dirs.BL)
 	for dir in Dirs.values():
-		for r in range(size):
+		for _r in range(size):
 			coords.append(hex.as_vec())
 			hex = hex.plus(dir)
 	return coords

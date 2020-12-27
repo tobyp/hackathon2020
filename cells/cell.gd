@@ -21,7 +21,7 @@ var poisons: Dictionary = {Globals.PoisonType.ANTI_BIOMASS: 1.0}  # Dict[PoisonT
 var poison_recoveries: Dictionary = {}  # Dict[PoisonType, [float rate, float ceiling]]
 # 0 = Ready
 var auto_recipe_cooldown = 0
-export var type = Globals.CellType.NORMAL setget _set_type, _get_type
+export var type = Globals.CellType.UNDISCOVERED setget _set_type, _get_type
 
 ### PRIVATE MEMBERS
 # since transferring an integer number of particles each tick makes it impossible to see any changes,
@@ -108,11 +108,12 @@ func _set_type(type_: int):
 
 # Called every game step.
 func simulate(delta):
-	if type == Globals.CellType.NORMAL:
-		_process_poison_recovery(delta)
-		_process_sugar_usage(delta)
-	_process_pressure(delta)
-	_process_recipes(delta)
+	if type != Globals.CellType.UNDISCOVERED:
+		if type == Globals.CellType.NORMAL:
+			_process_poison_recovery(delta)
+			_process_sugar_usage(delta)
+		_process_pressure(delta)
+		_process_recipes(delta)
 	_display_debug()
 
 ### PRIVATE/UTILITY FUNCTIONS
@@ -238,6 +239,8 @@ func _send_particles(type: int, dest: Cell, count: int):
 
 ### OVERRIDES
 func _ready():
+	$ClickArea.connect("input_event", self, "_on_cell_click")
+	$Gfx.visible = false
 	$Gfx.set_material($Gfx.get_material().duplicate())
 	for t in Globals.ParticleType.values():
 		self.particle_counts[t] = 0
@@ -378,6 +381,12 @@ func _craft(r: Recipe):
 			remove_particles(t, r.inputs[t])
 	for t in r.outputs:
 		add_particles(t, r.outputs[t])
+
+func _on_cell_click(viewport, event, shape_idx):
+	if event is InputEventMouseButton:
+		if event.button_index == BUTTON_LEFT and event.is_pressed():
+			print("Clicked: %s ev: %s" % [self, event])
+			emit_signal("discover", self)
 
 func _display_debug():
 	$DebugLabel.visible = Rules.debug_visual

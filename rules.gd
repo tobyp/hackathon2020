@@ -37,9 +37,11 @@ static func new_tech_tree() -> Array:
 		# Ring 0 (Our starting cell)
 		[Tech.new(Globals.TechType.INIT, 1, 1, 1, true)],
 		# Ring 1
-		[Tech.new(Globals.TechType.INIT_SUGAR, 1, 1, 1, true)],
+		[Tech.new(Globals.TechType.SUGAR_CELL, 1, 1, 1, true)],
 		# Ring 2
-		[Tech.new(Globals.TechType.BASIC_STUFF, 1, 2, 0.5)  ],
+		[Tech.new(Globals.TechType.SUGAR_CELL, 1, 1, 0.2, true), Tech.new(Globals.TechType.DEBUG_PARTICLES, 1, 2, 0.4) ],
+		# Ring 3
+		[Tech.new(Globals.TechType.SUGAR_CELL, 1, 2, 0.1, true)],
 	];
 	for ring in ring_list:
 		ring.append(Tech.new(Globals.TechType.NONE, -1, -1, 1))
@@ -52,11 +54,11 @@ static func apply_tech(tech_type: int, cell: Cell):
 			cell.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
 			cell.add_particles(Globals.ParticleType.PROTEIN_WHITE, 40)
 			cell.add_particles(Globals.ParticleType.AMINO_PHE, 1)
-		Globals.TechType.INIT_SUGAR:
+		Globals.TechType.SUGAR_CELL:
 			cell.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
 			cell.add_particles(Globals.ParticleType.ANTI_MITOCHONDRION, 1)
 			cell.type = Globals.CellType.RESOURCE
-		Globals.TechType.BASIC_STUFF:
+		Globals.TechType.DEBUG_PARTICLES:
 			cell.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
 			cell.add_particles(Globals.ParticleType.PROTEIN_WHITE, 20)
 

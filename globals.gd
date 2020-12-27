@@ -31,6 +31,7 @@ enum ParticleType {
 }
 
 enum CellType {
+	UNDISCOVERED,
 	NORMAL,
 	RESOURCE,
 }
@@ -44,13 +45,9 @@ enum PoisonType {
 
 enum TechType {
 	NONE
-	INIT,
-	INIT_SUGAR
-	BASIC_STUFF
-	C
-	D
-	E
-	F
+	INIT
+	SUGAR_CELL
+	DEBUG_PARTICLES
 }
 
 ### CONSTANTS
