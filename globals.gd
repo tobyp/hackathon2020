@@ -90,6 +90,22 @@ static func particle_type_is_factory(particle: int) -> bool:
 			return true
 	return false
 
+static func particle_type_is_in_transporter(particle: int) -> bool:
+	match particle:
+		ParticleType.AMINO_PHE:
+			return true
+		ParticleType.AMINO_ALA:
+			return true
+		ParticleType.AMINO_LYS:
+			return true
+		ParticleType.AMINO_TYR:
+			return true
+		ParticleType.AMINO_PRO:
+			return true
+		ParticleType.SUGAR:
+			return true
+	return false
+
 static func particle_type_get_potency(particle: int, poison: int) -> float:
 	match particle:
 		ParticleType.ENZYME_ALCOHOL:

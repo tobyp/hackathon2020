@@ -223,7 +223,8 @@ func _craft(r: Recipe):
 		elif !Globals.particle_type_is_factory(t):
 			# Factories are not used
 			remove_particles(t, r.inputs[t])
-	add_particles(r.output, 1)
+	for t in r.outputs:
+		add_particles(t, r.outputs[t])
 
 func _display_debug():
 	var dbg = "[b][i]%s[/i][/b]\n" % [self];

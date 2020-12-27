@@ -24,37 +24,42 @@ func _get_collision_radius():
 
 func _set_type(type_: int):
 	type = type_
+	var image_name = "white_prot"
 	match type:
 		Globals.ParticleType.PROTEIN_TRANSPORTER:
-			$Sprite.texture = load("res://textures/green_enzyme.png")
+			image_name = "transporter"
 		Globals.ParticleType.ENZYME_ALCOHOL:
-			$Sprite.texture = load("res://textures/yellow_enzyme.png")
+			image_name = "yellow_enzyme"
 		Globals.ParticleType.ENZYME_LYE:
-			$Sprite.texture = load("res://textures/blue_enzyme.png")
+			image_name = "blue_enzyme"
 		Globals.ParticleType.QUEEN:
-			$Sprite.texture = load("res://textures/purple_ribosome.png")
+			image_name = "purple_ribosome"
 		Globals.ParticleType.PRO_QUEEN:
-			$Sprite.texture = load("res://textures/pink_ribosome.png")
+			image_name = "pink_ribosome"
 		Globals.ParticleType.AMINO_PHE:
-			$Sprite.texture = load("res://textures/green_amino.png")
+			image_name = "green_amino"
 		Globals.ParticleType.AMINO_ALA:
-			$Sprite.texture = load("res://textures/yellow_amino.png")
+			image_name = "yellow_amino"
 		Globals.ParticleType.AMINO_LYS:
-			$Sprite.texture = load("res://textures/blue_amino.png")
+			image_name = "blue_amino"
 		Globals.ParticleType.AMINO_TYR:
-			$Sprite.texture = load("res://textures/purple_amino.png")
+			image_name = "purple_amino"
 		Globals.ParticleType.AMINO_PRO:
-			$Sprite.texture = load("res://textures/pink_amino.png")
+			image_name = "pink_amino"
 		Globals.ParticleType.SUGAR:
-			$Sprite.texture = load("res://textures/sugar.png")
+			image_name = "sugar"
 		Globals.ParticleType.RIBOSOME_TRANSPORTER:
-			$Sprite.texture = load("res://textures/green_ribosome.png")
+			image_name = "green_ribosome"
 		Globals.ParticleType.RIBOSOME_ALCOHOL:
-			$Sprite.texture = load("res://textures/yellow_ribosome.png")
+			image_name = "yellow_ribosome"
 		Globals.ParticleType.RIBOSOME_LYE:
-			$Sprite.texture = load("res://textures/blue_ribosome.png")
-		_:
-			$Sprite.texture = load("res://textures/white_prot.png")
+			image_name = "blue_ribosome"
+	if Globals.particle_type_is_in_transporter(type):
+		$InnerSprite.texture = load("res://textures/%s.png" % image_name)
+		$Sprite.texture = load("res://textures/transporter.png")
+	else:
+		$InnerSprite.texture = null
+		$Sprite.texture = load("res://textures/%s.png" % image_name)
 
 func _get_type() -> int:
 	return type

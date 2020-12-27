@@ -1,7 +1,7 @@
 class_name Recipe
 
 var inputs = {}
-var output: int
+var outputs = {}
 var automatic: bool
 
 static func matches(particle_counts: Dictionary) -> Array:
@@ -11,22 +11,16 @@ static func matches(particle_counts: Dictionary) -> Array:
 			rs.push_back(r)
 	return rs
 
-func _init(input: Dictionary, outpu: int, auto: bool = false):
+func _init(input: Dictionary, output: Dictionary, auto: bool = false):
 	self.inputs = input
-	self.output = outpu
+	self.outputs = output
 	self.automatic = auto
 
 func recipe_matches(particle_counts: Dictionary) -> bool:
 	for t in Globals.ParticleType.values():
 		if inputs.has(t) and particle_counts[t] < inputs[t]:
 			return false
+		# Only one factory type per cell is allowed
+		if Globals.particle_type_is_factory(t) and !outputs.has(t):
+			return false
 	return true
-	
-func subtract_resources(particle_counts: Dictionary):
-	for t in Globals.ParticleType.values():
-		if inputs.has(t):
-			if particle_counts[t] < inputs[t]:
-				print("Cannot craft…")
-			elif !Globals.particle_type_is_factory(t):
-				# Factories are not used
-				particle_counts[t] -= inputs[t]
