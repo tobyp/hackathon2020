@@ -367,7 +367,7 @@ func _enable_sugar_warning(enable: bool):
 
 func _process_recipes(delta):
 	auto_recipe_cooldown = max(0, auto_recipe_cooldown - delta)
-	var buttonContainer = $RecipeButtons.get_child(0)
+	var buttonContainer = $RecipeButtons/Container
 	var recipes = Recipe.matches(particle_counts)
 	for c in buttonContainer.get_children():
 		var found = false
@@ -391,12 +391,24 @@ func _process_recipes(delta):
 				_craft(r)
 		else:
 			# Add button
-			var button = Button.new()
-			button.text = "Craft " + r.get_name()
+			var button = TextureButton.new()
+			var texture = load(Globals.particle_type_get_res(r.outputs.keys()[0], true))
+			button.texture_normal = texture
+			button.expand = true
+			button.rect_min_size = 0.2 * texture.get_size()
+			button.self_modulate.a = 0.5
 			button.connect("pressed", self, "_manual_craft", [r])
+			button.connect("mouse_entered", self, "_icon_enter", [button])
+			button.connect("mouse_exited", self, "_icon_exit", [button])
 			button.mouse_filter = Control.MOUSE_FILTER_STOP
 			button.name = r.get_name()
 			buttonContainer.add_child(button)
+
+func _icon_enter(b: TextureButton):
+	b.self_modulate.a = 1
+
+func _icon_exit(b: TextureButton):
+	b.self_modulate.a = 0.5
 
 func _manual_craft(r: Recipe):
 	_craft(r)
