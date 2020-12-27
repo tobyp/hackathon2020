@@ -4,9 +4,6 @@ class_name Cell
 ### SIGNALS
 signal particle_count_changed(type, old_count, new_count)
 
-# How much sugar a particle needs per second
-const SUGAR_USAGE_PER_PARTICLE = 0.1
-
 ### MEMBERS
 # Own index position. Just for debugging
 var pos = Vector2.ZERO
@@ -15,8 +12,8 @@ var neighbors = []
 # Amino acid counts include a transporter, transporter count only means free transporter
 var particle_counts = {}  # Dict[ParticleType, int]
 var output_rules = {}  # Dict[ParticleType, Dict[Cell, bool]], output_rules[PARTICLE_*][<Neighbor Cell>] = true/false
-var poisons = {Globals.PoisonType.ANTI_BIOMASS: 1.0}  # Dict[PoisonType, float]
-var poison_recoveries = {}  # Dict[PoisonType, [float rate, float ceiling]]
+var poisons: Dictionary = {Globals.PoisonType.ANTI_BIOMASS: 1.0}  # Dict[PoisonType, float]
+var poison_recoveries: Dictionary = {}  # Dict[PoisonType, [float rate, float ceiling]]
 # 0 = Ready
 var auto_recipe_cooldown = 0
 export var type = Globals.CellType.NORMAL setget _set_type, _get_type
@@ -63,7 +60,8 @@ func add_particles(type: int, count: int = 1):
 	var old_count = particle_counts.get(type, 0)
 	var new_count = old_count + count
 	particle_counts[type] = new_count
-	self._put_particle_nodes(self._create_particle_nodes(type, count))
+	if self.type == Globals.CellType.NORMAL:
+		self._put_particle_nodes(self._create_particle_nodes(type, count))
 	emit_signal("particle_count_changed", type, old_count, new_count)
 
 func remove_particles(type: int, count: int) -> int:
@@ -72,15 +70,24 @@ func remove_particles(type: int, count: int) -> int:
 	var new_count = old_count - count;
 	particle_counts[type] = new_count
 	emit_signal("particle_count_changed", type, old_count, new_count)
-	self._free_particle_nodes(self._take_particle_nodes(type, count))
+	if self.type == Globals.CellType.NORMAL or not Globals.particle_type_is_factory(type):
+		self._free_particle_nodes(self._take_particle_nodes(type, count))
 	return old_count - new_count
 
 func _get_type() -> int:
 	return type
 
 func _set_type(type_: int):
+	if type == type_:
+		return
 	type = type_
 	$Gfx.visible = type == Globals.CellType.NORMAL
+	if type != Globals.CellType.NORMAL:
+		_free_particle_nodes(_take_nonfactory_nodes())
+	else:
+		for t in self.particle_counts:
+			if not Globals.particle_type_is_factory(t):
+				self.add_particles(t, self.particle_counts[t])
 
 # Called every game step.
 func simulate(delta):
@@ -149,6 +156,15 @@ func _take_particle_nodes(type: int, count: int = 1) -> Array:
 			count -= 1
 	return result
 
+func _take_nonfactory_nodes() -> Array:
+	# print("%s: taking %d %s" % [self, count, Globals.particle_type_get_name(type)])
+	var result = [];
+	for c in $Particles.get_children():
+		if c is CellParticle and not Globals.particle_type_is_factory(c.type):
+			$Particles.remove_child(c)
+			result.append(c)
+	return result
+
 # PARTICLE TRANSFER FUNCTIONS
 # Called by process_pressure when that has calculated which particles need to be transferred where.
 # returns [number_accepted, number_destroyed] (where n_accepted doesn't include n_destroyed, even they are technically "accepted")
@@ -160,7 +176,7 @@ func _recv_particles(type: int, count: int = 1) -> Array:
 	# print("%s got %d %s" % [self, count, type_name])
 	if self.poisons.size() > 0:
 		for poison_type in self.poisons:
-			var potency = Globals.particle_type_get_potency(type, poison_type, self.poisons)
+			var potency = Rules.particle_type_get_poison_potency(type, poison_type, self.poisons)
 			if potency <= 0.0:
 				continue
 			var poison_name = Globals.poison_type_get_name(poison_type)
@@ -192,8 +208,9 @@ func _send_particles(type: int, dest: Cell, count: int):
 	dest.particle_counts[type] = dst_new_count
 	self.emit_signal("particle_count_changed", type, src_old_count, src_new_count)
 	dest.emit_signal("particle_count_changed", type, dst_old_count, dst_new_count)
-	_free_particle_nodes(self._take_particle_nodes(type, recv_result[1]))
-	dest._put_particle_nodes(self._take_particle_nodes(type, recv_result[0]))
+	if self.type == Globals.CellType.NORMAL:
+		_free_particle_nodes(self._take_particle_nodes(type, recv_result[1]))
+		dest._put_particle_nodes(self._take_particle_nodes(type, recv_result[0]))
 
 ### OVERRIDES
 func _ready():
@@ -233,7 +250,7 @@ func _process_pressure(delta):
 			for n in demand_neighbors.keys():
 				var demand_neighbor = demand_neighbors[n] / demand_total
 				if demand_neighbor > 0:
-					var transfer = Globals.diffuse_func(budget, demand_neighbor, delta)
+					var transfer = Rules.diffuse_func(budget, demand_neighbor, delta)
 					# print("%s neighbor %s demands %f %s, transfer %f" % [self, n, demand_neighbor, particle_name, transfer])
 					var valve_transfer = output_valves.get(n, 0) + transfer
 					if valve_transfer >= 1.0:
@@ -242,49 +259,36 @@ func _process_pressure(delta):
 					output_valves[n] = valve_transfer
 
 func _process_sugar_usage(delta):
-	var particleCount = 0
-	for c in particle_counts.values():
-		particleCount += c
-	var thisTick = particleCount * SUGAR_USAGE_PER_PARTICLE * delta
-	var sugarUsage = int(thisTick)
-	# For non-whole sugars, use probability
-	if thisTick - float(sugarUsage) > Rules.rng.randf():
-		sugarUsage += 1
-	if sugarUsage == 0:
+	var sugar_required = 0
+	for t in self.particle_counts:
+		sugar_required += self.particle_counts[t] * Rules.sugar_requirement(t) * delta
+	var sugar_used = int(sugar_required)
+	# For fractional sugars, use probability
+	if sugar_required - float(sugar_used) > Rules.rng.randf():
+		sugar_used += 1
+	if sugar_used == 0:
 		return
-
-	var ORDER = [
-		Globals.ParticleType.SUGAR,
-		Globals.ParticleType.PROTEIN_WHITE,
-		Globals.ParticleType.AMINO_PHE,
-		Globals.ParticleType.AMINO_ALA,
-		Globals.ParticleType.AMINO_LYS,
-		Globals.ParticleType.AMINO_TYR,
-		Globals.ParticleType.AMINO_PRO,
-		Globals.ParticleType.ENZYME_ALCOHOL,
-		Globals.ParticleType.ENZYME_LYE,
-		Globals.ParticleType.PROTEIN_TRANSPORTER,
-		Globals.ParticleType.RIBOSOME_TRANSPORTER,
-		Globals.ParticleType.RIBOSOME_ALCOHOL,
-		Globals.ParticleType.RIBOSOME_LYE,
-		Globals.ParticleType.PRO_QUEEN,
-	];
 
 	# Kill things according to order
 	var notEnoughSugar = false
-	for t in ORDER:
-		if sugarUsage == 0:
+	for t in Rules.SUGAR_DEATH_ORDER:
+		if sugar_used == 0:
 			break
 		notEnoughSugar = t != Globals.ParticleType.SUGAR
-		var elemCount = particle_counts[t]
-		if elemCount == 0:
+		var old_t_count = particle_counts[t]
+		if old_t_count == 0:
 			continue
-		var removing = min(elemCount, sugarUsage)
-		sugarUsage -= removing
+		var removing = min(old_t_count, sugar_used)
+		sugar_used -= removing
 		if Globals.particle_type_is_in_transporter(t):
 			# Change type instead
-			particle_counts[t] -= removing
-			particle_counts[Globals.ParticleType.PROTEIN_TRANSPORTER] += removing
+			var new_t_count = old_t_count - removing
+			particle_counts[t] = new_t_count
+			emit_signal("particle_count_changed", type, old_t_count, new_t_count)
+			var old_transporter_count = particle_counts[Globals.ParticleType.PROTEIN_TRANSPORTER]
+			var new_transporter_count = old_transporter_count + removing
+			emit_signal("particle_count_changed", Globals.ParticleType.PROTEIN_TRANSPORTER, old_transporter_count, new_transporter_count)
+			particle_counts[Globals.ParticleType.PROTEIN_TRANSPORTER] = new_transporter_count
 			for c in $Particles.get_children():
 				if removing == 0:
 					break
@@ -348,7 +352,7 @@ func _craft(r: Recipe):
 func _display_debug():
 	$DebugLabel.visible = Rules.debug_visual
 	if Rules.debug_visual:
-		var dbg = "[b][i]%s[/i][/b]\n" % [self];
+		var dbg = "[b][i]%s[/i][/b] (%s)\n" % [self, Globals.cell_type_get_name(type)];
 		dbg += "[i]Neighbors:[/i] %s\n" % [self.neighbors];
 		for poison in Globals.PoisonType:
 			dbg += "[b][u]%s:[/u][/b] %f\n" % [poison, self.poisons.get(Globals.PoisonType[poison], 0)]

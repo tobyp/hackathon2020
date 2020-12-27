@@ -2,21 +2,21 @@ class_name Globals
 
 ### TYPES
 enum ParticleType {
-	PROTEIN_WHITE,
-	PROTEIN_TRANSPORTER, # Green
-	ENZYME_ALCOHOL, # Yellow
-	ENZYME_LYE, # Cyan
-	QUEEN, # Violet
-	PRO_QUEEN, # Pink
-	AMINO_PHE, # Green
-	AMINO_ALA, # Yellow
-	AMINO_LYS, # Cyan
-	AMINO_TYR, # Violet
-	AMINO_PRO, # Pink
-	SUGAR, # White
-	RIBOSOME_TRANSPORTER,
-	RIBOSOME_ALCOHOL,
-	RIBOSOME_LYE,
+	PROTEIN_WHITE,  # ... White
+	PROTEIN_TRANSPORTER,  # Green
+	ENZYME_ALCOHOL,  # Yellow
+	ENZYME_LYE,  # Cyan
+	QUEEN,  # Violet
+	PRO_QUEEN,  # Pink
+	AMINO_PHE,  # Green (Transporter)
+	AMINO_ALA,  # Yellow (Alcohol)
+	AMINO_LYS,  # Cyan (Lye)
+	AMINO_TYR,  # Violet (Queen)
+	AMINO_PRO,  # Pink (Pro Queen)
+	SUGAR,  # White
+	RIBOSOME_TRANSPORTER,  # Green 
+	RIBOSOME_ALCOHOL,  # Yellow
+	RIBOSOME_LYE,  # Cyan
 
 	# Uses the energy of your pc to create sugar, lives in sugar cells, but is very shy so you never see it
 	ANTI_MITOCHONDRION,
@@ -114,19 +114,6 @@ static func particle_type_is_in_transporter(particle: int) -> bool:
 			return true
 	return false
 
-static func particle_type_get_potency(particle: int, poison: int, poisons: Dictionary) -> float:
-	match particle:
-		ParticleType.ENZYME_ALCOHOL:
-			if poison == PoisonType.ALCOHOL:
-				return 1.0 / 50.0
-		ParticleType.ENZYME_LYE:
-			if poison == PoisonType.LYE:
-				return 1.0/100.0
-		ParticleType.PROTEIN_WHITE:
-			if poison == PoisonType.ANTI_BIOMASS and poisons.size() == 1:  # this only works if there are no other poisons
-				return 1.0/25.0
-	return 0.0
-
 static func poison_type_get_name(poison: int) -> String:
 	match poison:
 		PoisonType.ALCOHOL:
@@ -136,12 +123,11 @@ static func poison_type_get_name(poison: int) -> String:
 		PoisonType.ANTI_BIOMASS:
 			return "Anti-Biomass"
 	return "Unknown Poison"
-	
 
-# Calculate how many particles to send, in `delta` seconds, given a `budget` of cells that could be sent, and a `demand` weight from 0 to 1
-# There's a lot of tuning to be had on the constants here.
-static func diffuse_func(budget: int, demand: float, delta: float) -> float:
-	# for debugging, here's a very slow and even diffuse function that makes it easily visible
-	return budget * demand * 0.1 * delta
-	# this exponential will make diffusion go faster if the differential pressure is higher
-	# return budget * 0.55 * exp(-4 * demand) * delta
+static func cell_type_get_name(type: int) -> String:
+	match type:
+		CellType.NORMAL:
+			return "Normal"
+		CellType.RESOURCE:
+			return "Resource"
+	return "Unknown Cell Type"
