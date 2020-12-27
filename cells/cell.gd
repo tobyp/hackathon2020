@@ -215,7 +215,6 @@ func _process_recipes():
 			buttonContainer.add_child(button)
 
 func _craft(r: Recipe):
-	print("Crafting %s" % Globals.particle_type_get_name(r.output))
 	for t in r.inputs:
 		if particle_counts[t] < r.inputs[t]:
 			print("Cannot craft…")
