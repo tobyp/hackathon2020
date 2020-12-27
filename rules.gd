@@ -31,7 +31,7 @@ func _init_recipes():
 		Recipe.new({ Globals.ParticleType.RIBOSOME_ALCOHOL: 1, Globals.ParticleType.PROTEIN_WHITE: 1, }, { Globals.ParticleType.ENZYME_ALCOHOL: 1, }, true),
 		Recipe.new({ Globals.ParticleType.RIBOSOME_LYE: 1, Globals.ParticleType.PROTEIN_WHITE: 1, }, { Globals.ParticleType.ENZYME_LYE: 1, }, true),
 		# Creating Resources
-		Recipe.new({ Globals.ParticleType.ANTI_MITOCHONDRION: 1, Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }, { Globals.ParticleType.SUGAR: 1, }, true),
+		Recipe.new({ Globals.ParticleType.ANTI_MITOCHONDRION: 1, Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }, { Globals.ParticleType.SUGAR: 1, }, true, 0.05),
 	];
 
 static func new_tech_tree() -> Array:
@@ -65,7 +65,7 @@ static func apply_tech(tech_type: int, cell: Cell):
 			cell.add_particles(Globals.ParticleType.PROTEIN_WHITE, 20)
 
 static func sugar_requirement(type: int) -> float:
-	return 0.01
+	return 0.05
 
 # The order in which particles get destroyed if there is not enough sugar.
 const SUGAR_DEATH_ORDER: Array = [
