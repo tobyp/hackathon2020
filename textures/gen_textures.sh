@@ -1,5 +1,5 @@
-#!/bin/bash
-TYPES=(enzyme amino ribosome);
+#!/usr/bin/env bash
+TYPES=(enzyme amino ribosome ribosome_outline);
 for type in ${TYPES[@]}; do
 	convert "yellow_${type}.png" -define modulate:colorspace=HSB -modulate 100,100,180 "blue_${type}.png";
 	convert "yellow_${type}.png" -define modulate:colorspace=HSB -modulate 90,170,249 "pink_${type}.png";

@@ -132,6 +132,51 @@ static func particle_type_is_in_transporter(particle: int) -> bool:
 			return true
 	return false
 
+static func particle_type_get_res(particle: int, outline: bool = false) -> String:
+	var image_name = "white_prot"
+	match particle:
+		ParticleType.PROTEIN_TRANSPORTER:
+			image_name = "transporter"
+		ParticleType.ENZYME_ALCOHOL:
+			image_name = "yellow_enzyme"
+		ParticleType.ENZYME_LYE:
+			image_name = "blue_enzyme"
+		ParticleType.QUEEN:
+			image_name = "purple_ribosome"
+		ParticleType.PRO_QUEEN:
+			image_name = "pink_ribosome"
+		ParticleType.AMINO_PHE:
+			image_name = "green_amino"
+		ParticleType.AMINO_ALA:
+			image_name = "yellow_amino"
+		ParticleType.AMINO_LYS:
+			image_name = "blue_amino"
+		ParticleType.AMINO_TYR:
+			image_name = "purple_amino"
+		ParticleType.AMINO_PRO:
+			image_name = "pink_amino"
+		ParticleType.SUGAR:
+			image_name = "sugar"
+		ParticleType.RIBOSOME_TRANSPORTER:
+			image_name = "green_ribosome"
+		ParticleType.RIBOSOME_ALCOHOL:
+			image_name = "yellow_ribosome"
+		ParticleType.RIBOSOME_LYE:
+			image_name = "blue_ribosome"
+		ParticleType.ANTI_MITOCHONDRION:
+			image_name = "sugar"
+		ParticleType.POISON_ALCOHOL:
+			image_name = "poison_flammable"
+		ParticleType.POISON_LYE:
+			image_name = "poison_corrosive"
+		ParticleType.POISON_PLUTONIUM:
+			image_name = "poison_radioactive"
+
+	if "ribosome" in image_name and outline:
+		image_name += "_outline"
+
+	return "res://textures/%s.png" % image_name
+
 static func poison_type_get_name(poison: int) -> String:
 	match poison:
 		PoisonType.ALCOHOL:
