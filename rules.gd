@@ -2,6 +2,7 @@ extends Node
 
 var rng: RandomNumberGenerator
 var debug_visual: bool = false
+var _selected_cells = []
 
 func _ready():
 	_init_recipes()
@@ -136,3 +137,9 @@ func _input(event):
 		if event.is_pressed():
 			if event.get_scancode() == KEY_F1:
 				debug_visual = not debug_visual
+
+func select_cell(cell):
+	for oldcell in _selected_cells:
+		oldcell.selected = false
+	_selected_cells = [cell]
+	cell.selected = true

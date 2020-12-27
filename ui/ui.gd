@@ -85,12 +85,12 @@ func _set_arrow_texture_based_on_tunnelState(tunnel_idx):
 	var leftarrow_texture = tunnels[tunnel_idx].leftarrow.get_child(0) as TextureButton
 	var rightarrow_texture = tunnels[tunnel_idx].rightarrow.get_child(0) as TextureButton
 
-	if (tunnels[tunnel_idx].state == TunnelState.OPEN_RIGHT or tunnels[tunnel_idx].state == TunnelState.OPEN_BOTH):
+	if (tunnels[tunnel_idx].state == TunnelState.OPEN_LEFT or tunnels[tunnel_idx].state == TunnelState.OPEN_BOTH):
 		leftarrow_texture.texture_normal = head_png # default
 	else:
 		leftarrow_texture.texture_normal = shaft_png
 
-	if (tunnels[tunnel_idx].state == TunnelState.OPEN_LEFT or tunnels[tunnel_idx].state == TunnelState.OPEN_BOTH):
+	if (tunnels[tunnel_idx].state == TunnelState.OPEN_RIGHT or tunnels[tunnel_idx].state == TunnelState.OPEN_BOTH):
 		rightarrow_texture.texture_normal = head_png # default
 	else:
 		rightarrow_texture.texture_normal = shaft_png

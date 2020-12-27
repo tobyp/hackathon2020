@@ -7,6 +7,7 @@ signal output_rule_changed(cell, neighbor, type, old_rule, new_rule)  # rule is 
 # Gets called when a cell gets visible, so that the hexgrid manager can
 # initialize it with the tech scripting engine
 signal discover(cell)
+signal selected(cell, status)
 
 ### MEMBERS
 # Own index position. Just for debugging
@@ -24,6 +25,7 @@ var poison_recoveries: Dictionary = {}  # Dict[PoisonType, [float rate, float ce
 # 0 = Ready
 var auto_recipe_cooldown = 0
 export var type = Globals.CellType.UNDISCOVERED setget _set_type, _get_type
+var selected: bool = false setget _set_selected, _get_selected
 
 ### PRIVATE MEMBERS
 # since transferring an integer number of particles each tick makes it impossible to see any changes,
@@ -423,7 +425,17 @@ func _on_cell_click(viewport, event, shape_idx):
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT and event.is_pressed():
 			print("Clicked: %s ev: %s" % [self, event])
-			emit_signal("discover", self)
+			Rules.select_cell(self)
+			emit_signal("discover", self) # TODO this is only for debugginh
+			
+func _set_selected(_selected: bool):
+	if _selected != self.selected:
+		emit_signal("selected", self, _selected)
+		selected = _selected
+	$CellSelector.visible = _selected
+
+func _get_selected() -> bool:
+	return selected
 
 func _add_sound(path: String):
 	var sound = AudioStreamPlayer2D.new()

@@ -1,0 +1,21 @@
+[gd_scene format=2]
+
+[node name="CellSelector" type="Node2D"]
+
+[node name="L1" type="Line2D" parent="."]
+self_modulate = Color( 0, 1, 1, 1 )
+points = PoolVector2Array( 0, -512, -443, -256, -443, 256, 0, 512, 443, 256, 443, -256, 0, -512 )
+default_color = Color( 1, 1, 1, 1 )
+
+[node name="L2" type="Line2D" parent="L1"]
+modulate = Color( 1, 1, 1, 0.501961 )
+show_behind_parent = true
+points = PoolVector2Array( 0, -512, -443, -256, -443, 256, 0, 512, 443, 256, 443, -256, 0, -512 )
+width = 15.0
+default_color = Color( 0, 1, 0.501961, 1 )
+
+[node name="L3" type="Line2D" parent="L1/L2"]
+show_behind_parent = true
+points = PoolVector2Array( 0, -512, -443, -256, -443, 256, 0, 512, 443, 256, 443, -256, 0, -512 )
+width = 20.0
+default_color = Color( 0, 1, 0, 1 )

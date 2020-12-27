@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://cells/cell.gd" type="Script" id=1]
 [ext_resource path="res://blend_shader.shader" type="Shader" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://textures/hex.png" type="Texture" id=4]
 [ext_resource path="res://textures/sugar.png" type="Texture" id=5]
 [ext_resource path="res://textures/hex_gray.png" type="Texture" id=6]
+[ext_resource path="res://cells/cell_selector.tscn" type="PackedScene" id=7]
 
 [sub_resource type="SegmentShape2D" id=1]
 a = Vector2( 0, -512 )
@@ -37,14 +38,13 @@ shader_param/percentage = 0.0
 shader_param/wobbleSpeed = 1.0
 shader_param/blend_tex = ExtResource( 3 )
 
-[sub_resource type="ShaderMaterial" id=9]
+[sub_resource type="ShaderMaterial" id=8]
 shader = ExtResource( 2 )
 shader_param/percentage = 0.0
 shader_param/wobbleSpeed = 1.5
 shader_param/blend_tex = ExtResource( 6 )
 
-[sub_resource type="Animation" id=8]
-resource_name = "Warning"
+[sub_resource type="Animation" id=9]
 length = 2.0
 loop = true
 tracks/0/type = "value"
@@ -105,16 +105,20 @@ texture = ExtResource( 4 )
 
 [node name="GfxResource" type="Sprite" parent="."]
 visible = false
-material = SubResource( 9 )
+material = SubResource( 8 )
 scale = Vector2( 0.87, 0.87 )
 texture = ExtResource( 6 )
 
+[node name="CellSelector" parent="." instance=ExtResource( 7 )]
+visible = false
+z_index = 1
+
 [node name="WarningAnimationPlayer" type="AnimationPlayer" parent="."]
-anims/Warning = SubResource( 8 )
+anims/Warning = SubResource( 9 )
 
 [node name="WarningAnimationSprite" type="Sprite" parent="."]
 visible = false
-self_modulate = Color( 1, 1, 1, 0.705882 )
+self_modulate = Color( 1, 1, 1, 0.588235 )
 texture = ExtResource( 5 )
 
 [node name="Particles" type="Node2D" parent="."]
