@@ -52,7 +52,7 @@ func get_poison(poison: int) -> float:
 # Add new particles
 func add_particles(type, count: int = 1):
 	var type_name = Globals.particle_type_get_name(type)
-	print("%s got %d %s" % [self, count, type_name])
+	# print("%s got %d %s" % [self, count, type_name])
 	if self.poisons.size() > 0:
 		for poison_type in self.poisons:
 			var potency = Globals.particle_type_get_potency(type, poison_type)
@@ -63,10 +63,10 @@ func add_particles(type, count: int = 1):
 			var delta_poison = min(poison_value, count * potency)
 			self.set_poison(poison_type, poison_value - delta_poison)
 			var delta_particles = max(count, ceil(delta_poison / potency))  # rounding sometimes makes the max necessary
-			print("%s %d %s breaking down %f %s" % [self, delta_particles, type_name, delta_poison, poison_name])
+			# print("%s %d %s breaking down %f %s" % [self, delta_particles, type_name, delta_poison, poison_name])
 			count -= delta_particles
 	if self.poisons.size() > 0:
-		print("%s %d %s died due to %s" % [self, count, type_name, self.poisons])
+		# print("%s %d %s died due to %s" % [self, count, type_name, self.poisons])
 		return  # they dead :(
 	var old_count = particle_counts.get(type, 0)
 	var new_count = old_count + count
@@ -160,7 +160,7 @@ func _process_pressure(delta):
 				continue
 			# The "demand" of a neighbor equals how many cells we would need to give them to end up equal.
 			var demand_neighbor = ceil((supply_own - supply_neighbor) / 2)
-			print("%s neighbor %s has %d demand %d" % [self, n, supply_neighbor, demand_neighbor])
+			# print("%s neighbor %s has %d demand %d" % [self, n, supply_neighbor, demand_neighbor])
 			demand_neighbors[n] = demand_neighbor
 			demand_total += demand_neighbor
 		var budget = min(demand_total, supply_own)  # don't send more than the neighbors want, but also not more than we have
@@ -169,7 +169,7 @@ func _process_pressure(delta):
 				var demand_neighbor = demand_neighbors[n] / demand_total
 				if demand_neighbor > 0:
 					var transfer = Globals.diffuse_func(budget, demand_neighbor, delta)
-					print("%s neighbor %s demands %f %s, transfer %f" % [self, n, demand_neighbor, particle_name, transfer])
+					# print("%s neighbor %s demands %f %s, transfer %f" % [self, n, demand_neighbor, particle_name, transfer])
 					var valve_transfer = output_valves.get(n, 0) + transfer
 					if valve_transfer >= 1.0:
 						self._push_particles(t, n, floor(valve_transfer) as int)
