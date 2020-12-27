@@ -274,6 +274,7 @@ func _craft(r: Recipe):
 		add_particles(t, r.outputs[t])
 
 func _display_debug():
+	$DebugLabel.visible = Rules.debug_visual
 	var dbg = "[b][i]%s[/i][/b]\n" % [self];
 	dbg += "[i]Neighbors:[/i] %s\n" % [self.neighbors];
 	for poison in Globals.PoisonType:

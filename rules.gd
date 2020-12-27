@@ -1,6 +1,7 @@
 extends Node
 
-var rng
+var rng: RandomNumberGenerator
+var debug_visual: bool = true
 
 func _ready():
 	_init_recipes()
@@ -38,3 +39,10 @@ func _init_tech():
 	self.TECH_DICT = {}
 	for tech in TECH_LIST:
 		TECH_DICT[tech.tech] = tech
+
+
+func _input(event):
+	if event is InputEventKey:
+		if event.is_pressed():
+			if event.get_scancode() == KEY_F1:
+				debug_visual = not debug_visual
