@@ -70,11 +70,15 @@ func debug_populate():
 	cell6.set_output_rule(Globals.ParticleType.SUGAR, cell1, true)
 	# Sugar transport
 	cell1.set_output_rule(Globals.ParticleType.SUGAR, cell2, true)
+	cell2.set_output_rule(Globals.ParticleType.SUGAR, cell1, true)
 	cell1.set_output_rule(Globals.ParticleType.SUGAR, cell3, true)
+	cell3.set_output_rule(Globals.ParticleType.SUGAR, cell1, true)
 	cell1.set_output_rule(Globals.ParticleType.SUGAR, cell4, true)
+	cell4.set_output_rule(Globals.ParticleType.SUGAR, cell1, true)
 	cell2.set_output_rule(Globals.ParticleType.PROTEIN_TRANSPORTER, cell1, true)
 	cell3.set_output_rule(Globals.ParticleType.PROTEIN_TRANSPORTER, cell1, true)
 	cell4.set_output_rule(Globals.ParticleType.PROTEIN_TRANSPORTER, cell1, true)
 
 	# Breaking down the Alcohol
 	cell4.set_output_rule(Globals.ParticleType.ENZYME_ALCOHOL, cell5, true)
+	cell4.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell5, true)
