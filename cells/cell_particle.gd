@@ -46,15 +46,15 @@ func _set_type(type_: int):
 		Globals.ParticleType.ANTI_MITOCHONDRION:
 			scale = Vector2(5, 5)
 		Globals.ParticleType.POISON_ALCOHOL:
-			scale = Vector2(2, 2)
+			scale = Vector2(2.5, 2.5)
 		Globals.ParticleType.POISON_LYE:
-			scale = Vector2(2, 2)
+			scale = Vector2(2.5, 2.5)
 		Globals.ParticleType.POISON_PLUTONIUM:
-			scale = Vector2(2, 2)
+			scale = Vector2(2.5, 2.5)
 
 	if Globals.particle_type_is_in_transporter(type):
 		$InnerSprite.texture = load(image_res)
-		$Sprite.texture = load("res://textures/transporter.png")
+		$Sprite.texture = load("res://textures/green_enzyme.png")
 	else:
 		$InnerSprite.texture = null
 		$Sprite.texture = load(image_res)

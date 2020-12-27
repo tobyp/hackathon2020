@@ -136,7 +136,7 @@ static func particle_type_get_res(particle: int, outline: bool = false) -> Strin
 	var image_name = "white_prot"
 	match particle:
 		ParticleType.PROTEIN_TRANSPORTER:
-			image_name = "transporter"
+			image_name = "green_enzyme"
 		ParticleType.ENZYME_ALCOHOL:
 			image_name = "yellow_enzyme"
 		ParticleType.ENZYME_LYE:
