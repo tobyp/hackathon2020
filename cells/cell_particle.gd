@@ -9,6 +9,39 @@ export var type = Globals.ParticleType.PROTEIN_WHITE setget _set_type, _get_type
 onready var collision_shape = get_node("CollisionShape2D").shape as CircleShape2D
 onready var collision_radius = collision_shape.radius setget _set_collision_radius, _get_collision_radius
 
+func set_type(type: int):
+	match type:
+		Globals.ParticleType.PROTEIN_WHITE:
+			$Sprite.texture = load("res://textures/white_prot.png")
+		Globals.ParticleType.PROTEIN_TRANSPORTER:
+			$Sprite.texture = load("res://textures/green_enzyme.png")
+		Globals.ParticleType.ENZYME_ALCOHOL:
+			$Sprite.texture = load("res://textures/yellow_enzyme.png")
+		Globals.ParticleType.ENZYME_LYE:
+			$Sprite.texture = load("res://textures/blue_enzyme.png")
+		Globals.ParticleType.QUEEN:
+			$Sprite.texture = load("res://textures/purple_ribosome.png")
+		Globals.ParticleType.PRO_QUEEN:
+			$Sprite.texture = load("res://textures/pink_ribosome.png")
+		Globals.ParticleType.AMINO_PHE:
+			$Sprite.texture = load("res://textures/green_amino.png")
+		Globals.ParticleType.AMINO_ALA:
+			$Sprite.texture = load("res://textures/yellow_amino.png")
+		Globals.ParticleType.AMINO_LYS:
+			$Sprite.texture = load("res://textures/blue_amino.png")
+		Globals.ParticleType.AMINO_TYR:
+			$Sprite.texture = load("res://textures/purple_amino.png")
+		Globals.ParticleType.AMINO_PRO:
+			$Sprite.texture = load("res://textures/pink_amino.png")
+		Globals.ParticleType.SUGAR:
+			$Sprite.texture = load("res://textures/sugar.png")
+		Globals.ParticleType.RIBOSOME_TRANSPORTER:
+			$Sprite.texture = load("res://textures/green_ribosome.png")
+		Globals.ParticleType.RIBOSOME_ALCOHOL:
+			$Sprite.texture = load("res://textures/yellow_ribosome.png")
+		Globals.ParticleType.RIBOSOME_LYE:
+			$Sprite.texture = load("res://textures/blue_ribosome.png")
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	rng.randomize()

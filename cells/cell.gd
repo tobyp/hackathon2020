@@ -71,6 +71,7 @@ func add_particles(type, count: int = 1):
 	var old_count = particle_counts.get(type, 0)
 	var new_count = old_count + count
 	self._create_particles(type, count)
+		particle.set_type(type)
 	particle_counts[type] = new_count
 	emit_signal("particle_count_changed", type, old_count, new_count)
 
@@ -210,8 +211,14 @@ func _process_recipes():
 
 func _craft(r: Recipe):
 	print("Crafting %s" % Globals.particle_type_get_name(r.output))
-	r.subtract_resources(particle_counts)
-	add_particles(r.output)
+	for t in r.inputs:
+		if particle_counts[t] < r.inputs[t]:
+			print("Cannot craft…")
+			return
+		elif !Globals.particle_type_is_factory(t):
+			# Factories are not used
+			remove_particles(t, r.inputs[t])
+	add_particles(r.output, 1)
 
 func _display_debug():
 	var dbg = "[b][i]%s[/i][/b]\n" % [self];
