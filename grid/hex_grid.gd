@@ -20,8 +20,8 @@ func _ready():
 	add_child(timer)
 
 func _simulate_tick():
-	for node in self.grid.values():
-		node.cell.simulate(timer.wait_time)  # TODO: can we get the actual elapsed time?
+	for cell in self.grid.values():
+		cell.simulate(timer.wait_time) # TODO: can we get the actual elapsed time?
 
 func draw_tunnels(position, rotation):
 	var tunnelCollection = TunnelsTscn.instance()
@@ -35,13 +35,13 @@ func get_undirected_node_connections():
 	var known_connections = {}
 	# lists of unique tuples (okay, lists) of Vector2s
 	var undirected_connections = []
-	for node in self.grid.values():
-		var node_coords = node.pos
+	for cell in self.grid.values():
+		var node_coords = cell.pos
 		known_connections[node_coords] = []
 		var local_neighbors = get_neighbors_coord(node_coords.x, node_coords.y)
 		for neigh_coords in local_neighbors:
 			if neigh_coords in grid: # if the neighbor actually exists
-				print(str(node) + " is connected to " + str(neigh_coords) + ".")
+				print(str(cell) + " is connected to " + str(neigh_coords) + ".")
 				known_connections[node_coords].append(neigh_coords)
 				var already_known = false
 				for vector_tuple in undirected_connections:
@@ -56,27 +56,24 @@ func get_undirected_node_connections():
 # Creates a new cell or returns if it already exists
 func create_cell(x: int, y: int):
 	var pos = Vector2(x, y)
-	var node = grid.get(pos, null)
-	if node == null:
-		var cell = CellTscn.instance()
-		node = GridNode.new(cell, Vector2(x,y))
+	var cell = grid.get(pos, null)
+	if cell == null:
+		cell = CellTscn.instance()
+		cell.pos = pos
 		var pos_x = size_x * (float(x) + 0.5 if y % 2 != 0 else float(x))
 		var pos_y = size_y * y - (size_y / 2)
 		add_child(cell)
 		cell.translate(Vector2(pos_x, pos_y))
-		grid[pos] = node
+		grid[pos] = cell
 	var to_update = get_neighbors_coord(x,y)
 	to_update.append(pos)
 	_update_neighbors(to_update)
-	return node.cell
+	return cell
 
 # Returns the cell or null if empty
 func get_cell(x: int, y: int):
 	var pos = Vector2(x, y)
-	var node = grid.get(pos, null)
-	if node == null:
-		return null
-	return node.cell
+	return grid.get(pos, null)
 
 func _update_neighbors(cells_idx: Array):
 	for cell_idx in cells_idx:
@@ -88,9 +85,9 @@ func _update_neighbors(cells_idx: Array):
 func remove_cell(x: int, y: int):
 	var pos = Vector2(x, y)
 	if grid.has(pos):
-		var node = grid.get(pos)
+		var cell = grid.get(pos)
 		grid.remove(pos)
-		remove_child(node.cell)
+		remove_child(cell)
 		
 		var to_update = get_neighbors_coord(x,y)
 		_update_neighbors(to_update)
@@ -100,9 +97,9 @@ func get_neighbors(x: int, y: int) -> Array:
 	var cells = []
 	for n in neighbors:
 		var pos = Vector2(x, y) + n
-		var node = grid.get(pos, null)
-		if node != null:
-			cells.append(node.cell)
+		var cell = grid.get(pos, null)
+		if cell != null:
+			cells.append(cell)
 	return cells
 
 func get_neighbors_coord(x: int, y: int):
@@ -111,18 +108,10 @@ func get_neighbors_coord(x: int, y: int):
 		cells.append(Vector2(x, y) + n)
 	return cells
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
 
-class GridNode:
-	# The GD node element
-	var cell  # : Cell
-	var pos: Vector2
-
-	func _init(_cell: Node, _pos: Vector2):
-		self.cell = _cell
-		self.pos = _pos
-
-	func _to_string():
-		return "Cell %s" % pos
+const gen_dirs = [Vector2(0, -1), Vector2(-1, -1), Vector2(-1, 0), Vector2(-1, 1), Vector2(0, 1), Vector2(1, 0)]
+func generate_grid():
+	var rng = RandomNumberGenerator.new()
+	rng.randomize()
+	var start = rng.randi_range(0, 5)
+	

@@ -8,6 +8,8 @@ signal particle_count_changed(type, old_count, new_count)
 const AUTO_RECIPE_COOLDOWN = 10
 
 ### MEMBERS
+# Own index position. Just for debugging
+var pos = Vector2.ZERO
 # A list of all existing neighbors (Will be modified from the hexgrid manager)
 var neighbors = []
 # Amino acid counts include a transporter, transporter count only means free transporter
@@ -131,12 +133,14 @@ func _create_particles(type: int, count: int = 1):
 		$Particles.add_child(particle)
 
 ### OVERRIDES
-# Called when the node enters the scene tree for the first time.
 func _ready():
 	$Gfx.set_material($Gfx.get_material().duplicate())
 	for t in Globals.ParticleType.values():
 		self.particle_counts[t] = 0
 		self.output_rules[t] = {}
+
+func _to_string():
+	return "Cell_%s @ %s" % [self.get_index(), pos]
 
 func _process_poison_recovery(delta):
 	for t in self.poison_recoveries:
