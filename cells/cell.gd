@@ -183,15 +183,14 @@ func _put_particle_nodes(particles: Array):
 		$Particles.add_child(p)
 
 func _take_particle_nodes(type: int, count: int = 1) -> Array:
-	# print("%s: taking %d %s" % [self, count, Globals.particle_type_get_name(type)])
 	var result = [];
 	for c in $Particles.get_children():
-		if count == 0:
+		if result.size() >= count:
 			break
 		if c is CellParticle and c.type == type:
 			$Particles.remove_child(c)
 			result.append(c)
-			count -= 1
+	# print("%s: taking %d %s" % [self, count, Globals.particle_type_get_name(type)])
 	return result
 
 func _take_nonfactory_nodes() -> Array:
@@ -252,13 +251,13 @@ func _send_particles(type: int, dest: Cell, count: int):
 	dest.particle_counts[type] = dst_new_count
 	self.emit_signal("particle_count_changed", self, type, src_old_count, src_new_count)
 	dest.emit_signal("particle_count_changed", self, type, dst_old_count, dst_new_count)
+	var particles_transfer = []
 	if self.type == Globals.CellType.NORMAL:
 		_free_particle_nodes(self._take_particle_nodes(type, recv_result[1]))
-		if dest.type == Globals.CellType.NORMAL:
-			dest._put_particle_nodes(self._take_particle_nodes(type, recv_result[0]))
-	else:
-		if dest.type == Globals.CellType.NORMAL:
-			dest._put_particle_nodes(_create_particle_nodes(type, recv_result[0]))
+		particles_transfer = self._take_particle_nodes(type, recv_result[0])
+	if dest.type == Globals.CellType.NORMAL:
+		dest._put_particle_nodes(particles_transfer)
+		dest._put_particle_nodes(_create_particle_nodes(type, recv_result[0] - particles_transfer.size()))
 
 ### OVERRIDES
 func _ready():
