@@ -80,10 +80,10 @@ const SUGAR_DEATH_ORDER: Array = [
 	Globals.ParticleType.ENZYME_ALCOHOL,
 	Globals.ParticleType.ENZYME_LYE,
 	Globals.ParticleType.PROTEIN_TRANSPORTER,
-	Globals.ParticleType.RIBOSOME_TRANSPORTER,
-	Globals.ParticleType.RIBOSOME_ALCOHOL,
-	Globals.ParticleType.RIBOSOME_LYE,
-	Globals.ParticleType.PRO_QUEEN,
+	#Globals.ParticleType.RIBOSOME_TRANSPORTER,
+	#Globals.ParticleType.RIBOSOME_ALCOHOL,
+	#Globals.ParticleType.RIBOSOME_LYE,
+	#Globals.ParticleType.PRO_QUEEN,
 ];
 
 static func particle_type_get_poison_potency(particle: int, poison: int, poisons: Dictionary) -> float:
