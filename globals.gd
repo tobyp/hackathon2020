@@ -52,6 +52,8 @@ enum TechType {
 
 ### CONSTANTS
 const SIMULATION_TICK_PERIOD = 0.1
+# Material to show progress
+const PROGRESS_MATERIAL = "res://shader/progress_material.tres"
 # By tran5ient under CC-0, https://freesound.org/people/tran5ient/sounds/190112/
 const PARTICLE_DIE_SOUND = "res://sounds/Flail.ogg"
 # By szegvari under CC-0, https://freesound.org/people/szegvari/sounds/530699/

@@ -14,8 +14,6 @@ void fragment() {
 	float displaceY = sin(time2 * 0.9);
 	vec2 offset = vec2(displaceX, displaceY) * SCREEN_PIXEL_SIZE * wobbleScale;
 
-	vec4 color = texture(TEXTURE, UV + offset) * (1.0 - percentage) +
+	COLOR = texture(TEXTURE, UV + offset) * (1.0 - percentage) +
 		texture(blend_tex, UV + offset) * percentage;
-
-	COLOR = color;
 }

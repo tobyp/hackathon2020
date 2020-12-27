@@ -10,6 +10,9 @@ export var type = Globals.ParticleType.PROTEIN_WHITE setget _set_type, _get_type
 onready var collision_shape = get_node("CollisionShape2D").shape as CircleShape2D
 onready var collision_radius = collision_shape.radius setget _set_collision_radius, _get_collision_radius
 
+func set_texture_material(mat: Material):
+	$Sprite.material = mat
+
 func _physics_process(delta):
 	if velocity.x != 0 or velocity.y != 0:
 		var motion = velocity * delta

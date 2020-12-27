@@ -24,6 +24,8 @@ var poisons: Dictionary = {Globals.PoisonType.ANTI_BIOMASS: 1.0}  # Dict[PoisonT
 var poison_recoveries: Dictionary = {}  # Dict[PoisonType, [float rate, float ceiling]]
 # 0 = Ready
 var auto_recipe_cooldown = 0
+var auto_recipe_cooldown_max = 0
+var auto_recipe_material: ShaderMaterial = load(Globals.PROGRESS_MATERIAL).duplicate()
 export var type = Globals.CellType.UNDISCOVERED setget _set_type, _get_type
 var selected: bool = false setget _set_selected, _get_selected
 
@@ -156,16 +158,17 @@ static func _random_velocity() -> Vector2:
 	return Vector2(dist * cos(phi), dist * sin(phi));
 
 ### UTILTIY/PRIVATE
-static func _particle_init(particle: CellParticle, anywhere: bool = true):
+func _particle_init(particle: CellParticle, anywhere: bool = true):
 	if Globals.particle_type_is_factory(particle.type):
 		particle.translate(Vector2.ZERO)
 		particle.velocity = Vector2.ZERO
+		particle.set_texture_material(auto_recipe_material)
 	else:
 		particle.translate(_random_coord_in_cell(particle.collision_radius, anywhere))
 		particle.velocity = _random_velocity()
 
 ## PARTICLE NODE FUNCTIONS - these do not modify `particle_counts`!
-static func _create_particle_nodes(type: int, count: int = 1, anywhere: bool = true) -> Array:
+func _create_particle_nodes(type: int, count: int = 1, anywhere: bool = true) -> Array:
 	var particles = []
 	for i in count:
 		var particle = preload("res://cells/particle.tscn").instance()
@@ -270,6 +273,11 @@ func _ready():
 		self.particle_counts[t] = 0
 		self.output_rules[t] = {}
 
+func _process(delta):
+	if auto_recipe_cooldown != 0:
+		auto_recipe_cooldown = max(0, auto_recipe_cooldown - delta)
+		_update_recipe_cooldown()
+
 func _to_string():
 	return "Cell_%s @ %s" % [self.get_index(), pos]
 
@@ -308,8 +316,8 @@ func _process_pressure(delta):
 
 func _process_sugar_usage(delta):
 	var sugar_required = 0
-	for t in self.particle_counts:
-		sugar_required += self.particle_counts[t] * Rules.sugar_requirement(t) * delta
+	for t in particle_counts:
+		sugar_required += particle_counts[t] * Rules.sugar_requirement(t) * delta
 	if sugar_required == 0:
 		_enable_sugar_warning(false)
 		return
@@ -318,6 +326,8 @@ func _process_sugar_usage(delta):
 	if sugar_required - float(sugar_used) > Rules.rng.randf():
 		sugar_used += 1
 	if sugar_used == 0:
+		if particle_counts[Globals.ParticleType.SUGAR] > 0:
+			_enable_sugar_warning(false)
 		return
 
 	# Kill things according to order
@@ -364,7 +374,6 @@ func _enable_sugar_warning(enable: bool):
 			$WarningAnimationPlayer.stop()
 
 func _process_recipes(delta):
-	auto_recipe_cooldown = max(0, auto_recipe_cooldown - delta)
 	var buttonContainer = $RecipeButtons/Container
 	var recipes = Recipe.matches(particle_counts)
 	for c in buttonContainer.get_children():
@@ -385,6 +394,8 @@ func _process_recipes(delta):
 		if r.automatic:
 			if auto_recipe_cooldown == 0:
 				auto_recipe_cooldown = r.cooldown
+				auto_recipe_cooldown_max = r.cooldown
+				_update_recipe_cooldown()
 				# Run recipe
 				_craft(r)
 		else:
@@ -420,6 +431,12 @@ func _craft(r: Recipe):
 			remove_particles(t, r.inputs[t])
 	for t in r.outputs:
 		add_particles(t, r.outputs[t], false)
+
+func _update_recipe_cooldown():
+	if auto_recipe_cooldown == 0:
+		auto_recipe_material.set_shader_param("percentage", 1.0)
+	else:
+		auto_recipe_material.set_shader_param("percentage", 1 - auto_recipe_cooldown / auto_recipe_cooldown_max)
 
 func _on_cell_click(viewport, event, shape_idx):
 	if event is InputEventMouseButton:
