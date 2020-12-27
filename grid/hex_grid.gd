@@ -14,7 +14,7 @@ onready var TunnelsTscn = load("res://ui/ui.tscn")
 func _ready():
 	timer = Timer.new()
 	timer.autostart = true
-	timer.wait_time = 0.1
+	timer.wait_time = Globals.SIMULATION_TICK_PERIOD
 	timer.one_shot = false
 	timer.connect("timeout", self, "_simulate_tick")
 	add_child(timer)

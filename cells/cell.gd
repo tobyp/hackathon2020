@@ -53,44 +53,26 @@ func set_poison(poison: int, value: float):
 func get_poison(poison: int) -> float:
 	return self.poisons.get(poison, 0.0)
 
-### UTILTIY/PRIVATE
-# Add new particles
-func add_particles(type, count: int = 1):
-	var type_name = Globals.particle_type_get_name(type)
-	# print("%s got %d %s" % [self, count, type_name])
-	if self.poisons.size() > 0:
-		for poison_type in self.poisons:
-			var potency = Globals.particle_type_get_potency(type, poison_type)
-			if potency <= 0.0:
-				continue
-			var poison_name = Globals.poison_type_get_name(poison_type)
-			var poison_value = self.poisons[poison_type]
-			var delta_poison = min(poison_value, count * potency)
-			self.set_poison(poison_type, poison_value - delta_poison)
-			var delta_particles = max(count, ceil(delta_poison / potency))  # rounding sometimes makes the max necessary
-			# print("%s %d %s breaking down %f %s" % [self, delta_particles, type_name, delta_poison, poison_name])
-			count -= delta_particles
-	if self.poisons.size() > 0:
-		# print("%s %d %s died due to %s" % [self, count, type_name, self.poisons])
-		return  # they dead :(
+# Add *new* particles - particle nodes will be created as necessary
+func add_particles(type: int, count: int = 1):
+	var recv_result = self._recv_particles(type, count)
+	if recv_result[1] > 0:
+		var type_name = Globals.particle_type_get_name(type)
+		print("%s: tried to add %d %s particles, but they were destroyed (by poison etc.)" % [self, count, type_name])
+	count = recv_result[0]
 	var old_count = particle_counts.get(type, 0)
 	var new_count = old_count + count
-	self._create_particles(type, count)
 	particle_counts[type] = new_count
+	self._put_particle_nodes(self._create_particle_nodes(type, count))
 	emit_signal("particle_count_changed", type, old_count, new_count)
 
 func remove_particles(type: int, count: int) -> int:
 	var old_count = particle_counts.get(type, 0)
 	count = min(old_count, count) as int  # don't remove more than we have
 	var new_count = old_count - count;
-	for c in $Particles.get_children():
-		if c is CellParticle and c.type == type:
-			$Particles.remove_child(c)
-			count -= 1
-		if count == 0:
-			break
 	particle_counts[type] = new_count
 	emit_signal("particle_count_changed", type, old_count, new_count)
+	self._free_particle_nodes(self._take_particle_nodes(type, count))
 	return old_count - new_count
 
 # Called every game step.
@@ -114,12 +96,7 @@ static func _random_velocity() -> Vector2:
 	var dist = Rules.rng.randf_range(350, 500)
 	return Vector2(dist * cos(phi), dist * sin(phi));
 
-# Transfer `count` particles of type `type` from this cell to `dest`.
-# This should take care of updating the particle_count dicts on both cells, and any actual particle 
-func _push_particles(type: int, dest: Cell, count: int):
-	count = remove_particles(type, count)
-	dest.add_particles(type, count)
-
+### UTILTIY/PRIVATE
 static func _particle_init(particle: CellParticle):
 	if Globals.particle_type_is_factory(particle.type):
 		particle.translate(Vector2.ZERO)
@@ -128,12 +105,83 @@ static func _particle_init(particle: CellParticle):
 		particle.translate(_random_coord_in_cell(particle.collision_radius))
 		particle.velocity = _random_velocity()
 
-func _create_particles(type: int, count: int = 1):
+## PARTICLE NODE FUNCTIONS - these do not modify `particle_counts`!
+static func _create_particle_nodes(type: int, count: int = 1) -> Array:
+	var particles = []
 	for i in count:
 		var particle = preload("res://cells/particle.tscn").instance()
 		particle.type = type
 		_particle_init(particle)
-		$Particles.add_child(particle)
+		particles.append(particle)
+	return particles
+	
+static func _free_particle_nodes(particles: Array):
+	for p in particles:
+		p.free()
+		
+func _put_particle_nodes(particles: Array):
+	# print("%s: adding %d particles" % [self, particles.size()])
+	for p in particles:
+		# assert(p.type == type)
+		$Particles.add_child(p)
+	
+func _take_particle_nodes(type: int, count: int = 1) -> Array:
+	# print("%s: taking %d %s" % [self, count, Globals.particle_type_get_name(type)])
+	var result = [];
+	for c in $Particles.get_children():
+		if count == 0:
+			break
+		if c is CellParticle and c.type == type:
+			$Particles.remove_child(c)
+			result.append(c)
+			count -= 1
+	return result
+
+# PARTICLE TRANSFER FUNCTIONS
+# Called by process_pressure when that has calculated which particles need to be transferred where.
+# returns [number_accepted, number_destroyed] (where n_accepted doesn't include n_destroyed, even they are technically "accepted")
+# number_accepted + number_destroyed <= count
+# **NOTE this does NOT update any particle counts or particle nodes**
+func _recv_particles(type: int, count: int = 1) -> Array:
+	var n_destroyed = 0
+	var type_name = Globals.particle_type_get_name(type)
+	# print("%s got %d %s" % [self, count, type_name])
+	if self.poisons.size() > 0:
+		for poison_type in self.poisons:
+			var potency = Globals.particle_type_get_potency(type, poison_type, self.poisons)
+			if potency <= 0.0:
+				continue
+			var poison_name = Globals.poison_type_get_name(poison_type)
+			var poison_value = self.poisons[poison_type]
+			var delta_poison = min(poison_value, count * potency)
+			self.set_poison(poison_type, poison_value - delta_poison)
+			var delta_particles = max(count, ceil(delta_poison / potency))  # rounding sometimes makes the max necessary
+			# print("%s %d %s breaking down %f %s" % [self, delta_particles, type_name, delta_poison, poison_name])
+			n_destroyed = delta_particles
+	var n_accepted = count - n_destroyed
+	if self.poisons.size() > 0:
+		# print("%s %d %s died due to %s" % [self, count, type_name, self.poisons])
+		n_accepted = 0
+		n_destroyed = count
+	# print("%s recv %d %s: %d accept, %d destroyed" % [self, count, type_name, n_accepted, n_destroyed])
+	return [n_accepted, n_destroyed]
+
+# Transfer `count` particles of type `type` from this cell to `dest`.
+# This DOES update the particle_count dicts on both cells, and moves/creates/deletes particle nodes as needed.
+func _send_particles(type: int, dest: Cell, count: int):
+	# print("Send %d %s from %s to %s" % [count, Globals.particle_type_get_name(type), self, dest])
+	var src_old_count = self.particle_counts.get(type, 0)
+	var dst_old_count = dest.particle_counts.get(type, 0)
+	count = min(src_old_count, count)
+	var recv_result = dest._recv_particles(type, min(src_old_count, count))
+	var src_new_count = src_old_count - recv_result[0] - recv_result[1]
+	var dst_new_count = dst_old_count + recv_result[0]
+	self.particle_counts[type] = src_new_count
+	dest.particle_counts[type] = dst_new_count
+	self.emit_signal("particle_count_changed", type, src_old_count, src_new_count)
+	dest.emit_signal("particle_count_changed", type, dst_old_count, dst_new_count)
+	_free_particle_nodes(self._take_particle_nodes(type, recv_result[1]))
+	dest._put_particle_nodes(self._take_particle_nodes(type, recv_result[0]))
 
 ### OVERRIDES
 func _ready():
@@ -177,7 +225,7 @@ func _process_pressure(delta):
 					# print("%s neighbor %s demands %f %s, transfer %f" % [self, n, demand_neighbor, particle_name, transfer])
 					var valve_transfer = output_valves.get(n, 0) + transfer
 					if valve_transfer >= 1.0:
-						self._push_particles(t, n, floor(valve_transfer) as int)
+						self._send_particles(t, n, floor(valve_transfer) as int)
 						valve_transfer -= floor(valve_transfer)
 					output_valves[n] = valve_transfer
 

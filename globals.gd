@@ -37,6 +37,9 @@ enum TechType {
 	F
 }
 
+### CONSTANTS
+const SIMULATION_TICK_PERIOD = 0.1
+
 ### FUNCTIONS
 static func particle_type_get_name(particle: int) -> String:
 	match particle:
@@ -106,7 +109,7 @@ static func particle_type_is_in_transporter(particle: int) -> bool:
 			return true
 	return false
 
-static func particle_type_get_potency(particle: int, poison: int) -> float:
+static func particle_type_get_potency(particle: int, poison: int, poisons: Dictionary) -> float:
 	match particle:
 		ParticleType.ENZYME_ALCOHOL:
 			if poison == PoisonType.ALCOHOL:
@@ -115,7 +118,7 @@ static func particle_type_get_potency(particle: int, poison: int) -> float:
 			if poison == PoisonType.LYE:
 				return 1.0/100.0
 		ParticleType.PROTEIN_WHITE:
-			if poison == PoisonType.ANTI_BIOMASS:
+			if poison == PoisonType.ANTI_BIOMASS and poisons.size() == 1:  # this only works if there are no other poisons
 				return 1.0/25.0
 	return 0.0
 
