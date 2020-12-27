@@ -186,20 +186,26 @@ func _recv_particles(type: int, count: int = 1) -> Array:
 	var n_destroyed = 0
 	var type_name = Globals.particle_type_get_name(type)
 	# print("%s got %d %s" % [self, count, type_name])
+	var susceptible = false
 	if self.poisons.size() > 0:
 		for poison_type in self.poisons:
+			if not Rules.particle_type_poison_susceptible(type, poison_type):
+				continue
+			susceptible = true
 			var potency = Rules.particle_type_get_poison_potency(type, poison_type, self.poisons)
 			if potency <= 0.0:
 				continue
 			var poison_name = Globals.poison_type_get_name(poison_type)
 			var poison_value = self.poisons[poison_type]
 			var delta_poison = min(poison_value, count * potency)
+			if delta_poison >= poison_value:
+				susceptible = false
 			self.set_poison(poison_type, poison_value - delta_poison)
 			var delta_particles = max(count, ceil(delta_poison / potency))  # rounding sometimes makes the max necessary
 			# print("%s %d %s breaking down %f %s" % [self, delta_particles, type_name, delta_poison, poison_name])
 			n_destroyed = delta_particles
 	var n_accepted = count - n_destroyed
-	if self.poisons.size() > 0:
+	if susceptible:
 		# print("%s %d %s died due to %s" % [self, count, type_name, self.poisons])
 		n_accepted = 0
 		n_destroyed = count

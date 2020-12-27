@@ -94,6 +94,12 @@ static func particle_type_get_poison_potency(particle: int, poison: int, poisons
 				return 1.0/25.0
 	return 0.0
 
+static func particle_type_poison_susceptible(particle: int, poison: int) -> bool:
+	match particle:
+		Globals.ParticleType.POISON_ALCOHOL, Globals.ParticleType.POISON_LYE, Globals.ParticleType.POISON_LYE, Globals.ParticleType.ANTI_MITOCHONDRION:
+			return false
+	return true
+
 # Calculate how many particles to send, in `delta` seconds, given a `budget` of cells that could be sent, and a `demand` weight from 0 to 1
 # There's a lot of tuning to be had on the constants here.
 static func diffuse_func(budget: int, demand: float, delta: float) -> float:
