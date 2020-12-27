@@ -2,7 +2,8 @@ extends Node2D
 class_name Cell
 
 ### SIGNALS
-signal particle_count_changed(type, old_count, new_count)
+signal particle_count_changed(cell, type, old_count, new_count)
+signal output_rule_changed(cell, neighbor, type, old_rule, new_rule)  # rule is a boolean, whether type is allowed to travel cell -> neighbor or not
 # Gets called when a cell gets visible, so that the hexgrid manager can
 # initialize it with the tech scripting engine
 signal discover(cell)
@@ -16,7 +17,8 @@ var ring_level = 0
 var neighbors = []
 # Amino acid counts include a transporter, transporter count only means free transporter
 var particle_counts = {}  # Dict[ParticleType, int]
-var output_rules = {}  # Dict[ParticleType, Dict[Cell, bool]], output_rules[PARTICLE_*][<Neighbor Cell>] = true/false
+var output_rules = {}  # Dict[ParticleType, Dict[Cell, bool]], output_rules[PARTICLE_*][<Neighbor Cell>] = true/false, default false
+var _input_allowed = {}  # Dict[ParticleType, bool], default true
 var poisons: Dictionary = {Globals.PoisonType.ANTI_BIOMASS: 1.0}  # Dict[PoisonType, float]
 var poison_recoveries: Dictionary = {}  # Dict[PoisonType, [float rate, float ceiling]]
 # 0 = Ready
@@ -27,7 +29,7 @@ export var type = Globals.CellType.UNDISCOVERED setget _set_type, _get_type
 # since transferring an integer number of particles each tick makes it impossible to see any changes,
 # and random()-gating any transfers is sad, this will keep track of "partial" transfers, letting them
 # accumulate, and then transferring while numbers whenever the counter >= 1.
-var output_valves = {}  # Dict[Cell, float]
+var _output_valves = {}  # Dict[Cell, float]
 
 ### API
 # Are particles of type `type` allowed to be pushed to `neighbor`?
@@ -37,13 +39,30 @@ func output_rule(type: int, neighbor: Cell) -> bool:
 		return false  # default is closed
 	return self.output_rules[type].get(neighbor, false)
 
-func set_output_rule(type: int, neighbor: Cell, rule: bool):
+func input_allowed(type: int) -> bool:
+	return self._input_allowed.get(type, true)
+	
+func set_input_allowed(type: int, allowed: bool):
+	self._input_allowed[type] = allowed
+
+func output_allowed(type: int, neighbor: Cell) -> bool:
+	return self.neighbors.has(neighbor) and neighbor.input_allowed(type)
+
+# returns the new stat eof the rule
+func set_output_rule(type: int, neighbor: Cell, rule: bool) -> bool:
 	if not self.neighbors.has(neighbor):
 		print("%s: Invalid output rule! %s is not a neighbor" % [self, neighbor])
-		return
+		return false
+	if not neighbor.input_allowed(type):
+		print("%s: Invalid output rule! %s does not allow %s as input" % [self, neighbor, Globals.particle_type_get_name(type)])
+		return false
 	if not self.output_rules.has(type):
 		self.output_rules[type] = {}
+	var old_rule = self.output_rules[type].get(neighbor, false)
+	if old_rule != rule:
+		emit_signal("output_rule_changed", self, neighbor, type, old_rule, rule)
 	self.output_rules[type][neighbor] = rule
+	return rule
 
 func set_poison(poison: int, value: float):
 	if value <= 0.0:
@@ -77,14 +96,14 @@ func add_particles(type: int, count: int = 1):
 	particle_counts[type] = new_count
 	if self.type == Globals.CellType.NORMAL:
 		self._put_particle_nodes(self._create_particle_nodes(type, count))
-	emit_signal("particle_count_changed", type, old_count, new_count)
+	emit_signal("particle_count_changed", self, type, old_count, new_count)
 
 func remove_particles(type: int, count: int) -> int:
 	var old_count = particle_counts.get(type, 0)
 	count = min(old_count, count) as int  # don't remove more than we have
 	var new_count = old_count - count;
 	particle_counts[type] = new_count
-	emit_signal("particle_count_changed", type, old_count, new_count)
+	emit_signal("particle_count_changed", self, type, old_count, new_count)
 	if self.type == Globals.CellType.NORMAL or not Globals.particle_type_is_factory(type):
 		self._free_particle_nodes(self._take_particle_nodes(type, count))
 	return old_count - new_count
@@ -227,8 +246,8 @@ func _send_particles(type: int, dest: Cell, count: int):
 	var dst_new_count = dst_old_count + recv_result[0]
 	self.particle_counts[type] = src_new_count
 	dest.particle_counts[type] = dst_new_count
-	self.emit_signal("particle_count_changed", type, src_old_count, src_new_count)
-	dest.emit_signal("particle_count_changed", type, dst_old_count, dst_new_count)
+	self.emit_signal("particle_count_changed", self, type, src_old_count, src_new_count)
+	dest.emit_signal("particle_count_changed", self, type, dst_old_count, dst_new_count)
 	if self.type == Globals.CellType.NORMAL:
 		_free_particle_nodes(self._take_particle_nodes(type, recv_result[1]))
 		if dest.type == Globals.CellType.NORMAL:
@@ -279,11 +298,11 @@ func _process_pressure(delta):
 				if demand_neighbor > 0:
 					var transfer = Rules.diffuse_func(budget, demand_neighbor, delta)
 					# print("%s neighbor %s demands %f %s, transfer %f" % [self, n, demand_neighbor, particle_name, transfer])
-					var valve_transfer = output_valves.get(n, 0) + transfer
+					var valve_transfer = self._output_valves.get(n, 0) + transfer
 					if valve_transfer >= 1.0:
 						self._send_particles(t, n, floor(valve_transfer) as int)
 						valve_transfer -= floor(valve_transfer)
-					output_valves[n] = valve_transfer
+					self._output_valves[n] = valve_transfer
 
 func _process_sugar_usage(delta):
 	var sugar_required = 0
@@ -314,10 +333,10 @@ func _process_sugar_usage(delta):
 			# Change type instead
 			var new_t_count = old_t_count - removing
 			particle_counts[t] = new_t_count
-			emit_signal("particle_count_changed", t, old_t_count, new_t_count)
+			emit_signal("particle_count_changed", self, t, old_t_count, new_t_count)
 			var old_transporter_count = particle_counts[Globals.ParticleType.PROTEIN_TRANSPORTER]
 			var new_transporter_count = old_transporter_count + removing
-			emit_signal("particle_count_changed", Globals.ParticleType.PROTEIN_TRANSPORTER, old_transporter_count, new_transporter_count)
+			emit_signal("particle_count_changed", self, Globals.ParticleType.PROTEIN_TRANSPORTER, old_transporter_count, new_transporter_count)
 			particle_counts[Globals.ParticleType.PROTEIN_TRANSPORTER] = new_transporter_count
 			for c in $Particles.get_children():
 				if removing == 0:

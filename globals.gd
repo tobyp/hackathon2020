@@ -205,6 +205,8 @@ static func cell_type_get_name(type: int) -> String:
 			return "Normal"
 		CellType.RESOURCE:
 			return "Resource"
+		CellType.UNDISCOVERED:
+			return "Undiscovered"
 	return "Unknown Cell Type"
 
 static func get_enum_name(enu, value) -> String:
