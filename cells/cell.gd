@@ -281,31 +281,28 @@ func _process_pressure(delta):
 	for t in Globals.ParticleType.values():
 		var particle_name = Globals.particle_type_get_name(t)
 		var supply_own = self.particle_counts.get(t, 0)
-		var demand_total = 0
-		var demand_neighbors = {}
+		var pressure_total = 0
+		var pressure_neighbors = {}
 		for n in self.neighbors:
 			if not self.output_rule(t, n):
 				continue
 			var supply_neighbor = n.particle_counts.get(t, 0)
-			if supply_neighbor > supply_own:  # do they even want any?
-				continue
-			# The "demand" of a neighbor equals how many cells we would need to give them to end up equal.
-			var demand_neighbor = ceil((supply_own - supply_neighbor) / 2)
-			# print("%s neighbor %s has %d demand %d" % [self, n, supply_neighbor, demand_neighbor])
-			demand_neighbors[n] = demand_neighbor
-			demand_total += demand_neighbor
-		var budget = min(demand_total, supply_own)  # don't send more than the neighbors want, but also not more than we have
-		if demand_total > 0:
-			for n in demand_neighbors.keys():
-				var demand_neighbor = demand_neighbors[n] / demand_total
-				if demand_neighbor > 0:
-					var transfer = Rules.diffuse_func(budget, demand_neighbor, delta)
-					# print("%s neighbor %s demands %f %s, transfer %f" % [self, n, demand_neighbor, particle_name, transfer])
-					var valve_transfer = self._output_valves.get(n, 0) + transfer
-					if valve_transfer >= 1.0:
-						self._send_particles(t, n, floor(valve_transfer) as int)
-						valve_transfer -= floor(valve_transfer)
-					self._output_valves[n] = valve_transfer
+			var pressure_neighbor = Rules.pressure_func(supply_own, supply_neighbor)
+			# print("%s neighbor %s has pressure %d" % [self, n, pressure_neighbor])
+			if pressure_neighbor <= 0:
+				continue  # well, if they don't want anything...
+			pressure_neighbors[n] = pressure_neighbor
+			pressure_total += pressure_neighbor
+		var budget = Rules.budget_func(supply_own, pressure_total)
+		for n in pressure_neighbors.keys():
+			var pressure_neighbor = pressure_neighbors[n] / pressure_total
+			var transfer = Rules.diffuse_func(budget, pressure_neighbor, delta)
+			# print("%s neighbor %s normalized pressure %f %s, transfer %f" % [self, n, pressure_neighbor, particle_name, transfer])
+			var valve_transfer = self._output_valves.get(n, 0) + transfer
+			if valve_transfer >= 1.0:
+				self._send_particles(t, n, floor(valve_transfer) as int)
+				valve_transfer -= floor(valve_transfer)
+			self._output_valves[n] = valve_transfer
 
 func _process_sugar_usage(delta):
 	var sugar_required = 0

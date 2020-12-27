@@ -104,11 +104,30 @@ static func particle_type_poison_susceptible(particle: int, poison: int) -> bool
 			return false
 	return true
 
-# Calculate how many particles to send, in `delta` seconds, given a `budget` of cells that could be sent, and a `demand` weight from 0 to 1
+# calculate pressure between own cell (having `own` particles) and another cell (having `other` particles).
+# There's a lot of tuning to be had here.
+# If the result is <= 0, no particles will be transferred
+# Pressures will be normalized together with the pressures against other cells to calculate diffusion weights (weight in diffuse_func).
+static func pressure_func(own: float, other: float) -> float:
+	# Output rules will always take, but become very slow quickly when the other cell has more than us.
+	# Tip: calculate for 0, 10 and 100 and see how that goes.
+	var differential = own - other
+	return differential * differential / 10
+
+# how many particles to send from a cell with `supply` particles inside, given the `total_pressure` of all neighbors is 
+static func budget_func(supply: int, total_pressure: float) -> float:
+	# if the pressure is weak (about 1), we send about a third.
+	# use a sigmoid here: at pressure 1.5, we send a half; higher we approach all, lower we approach none.
+	return supply * 1 / (1 + exp(-total_pressure - 1.5))  # x-shifted logistics function
+
+# Calculate diffuse rate (number of particles to send per second), given a `budget` of cells that could be sent, and a `normalized_pressure` weight from 0 to 1
+# normalized_pressure sums to 1 for all (positive) pressures going out of the cell.
 # There's a lot of tuning to be had on the constants here.
-static func diffuse_func(budget: int, demand: float, delta: float) -> float:
+static func diffuse_func(budget: int, normalized_pressure: float, total_pressure: float) -> float:
 	# for debugging, here's a very slow and even diffuse function that makes it easily visible
-	return budget * demand * 0.1 * delta
+	# normalized_pressure is simply used to split the budget between neightbors proportionally to pressure.
+	# the 0.1 is the total diffusion rate
+	return budget * normalized_pressure * total_pressure
 	# this exponential will make diffusion go faster if the differential pressure is higher
 	# return budget * 0.55 * exp(-4 * demand) * delta
 
