@@ -3,18 +3,29 @@ class_name CellParticle
 
 var velo_abs = 1000;
 var velocity = Vector2(-1000, 0)
+var origin = null
+var _time = 0.0
+
 export var type = Globals.ParticleType.PROTEIN_WHITE setget _set_type, _get_type
 
 onready var collision_shape = get_node("CollisionShape2D").shape as CircleShape2D
 onready var collision_radius = collision_shape.radius setget _set_collision_radius, _get_collision_radius
 
 func _physics_process(delta):
-	var motion = velocity * delta
-	var collision = move_and_collide(motion)
-	if collision != null:
-		var reflect = collision.remainder.bounce(collision.normal)
-		velocity = (velocity.bounce(collision.normal) + Vector2(Rules.rng.randf(), Rules.rng.randf()) * velocity.length() / 2).normalized() * velo_abs
-		collision = move_and_collide(reflect)
+	if velocity.x != 0 or velocity.y != 0:
+		var motion = velocity * delta
+		var collision = move_and_collide(motion)
+		if collision != null:
+			var reflect = collision.remainder.bounce(collision.normal)
+			velocity = (velocity.bounce(collision.normal) + Vector2(Rules.rng.randf(), Rules.rng.randf()) * velocity.length() / 2).normalized() * velo_abs
+			collision = move_and_collide(reflect)
+	else:
+		# Move a little random
+		if origin == null:
+			origin = position
+		_time += delta / 3
+		var offset = Vector2(sin(_time) * sin(_time * 3), cos(_time) * sin(_time * 1.2)) * 30
+		position = origin + offset
 
 func _set_collision_radius(v):
 	collision_shape.radius = v
