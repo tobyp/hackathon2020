@@ -91,21 +91,26 @@ func _ready():
 			rightarrow_texture.texture_normal = shaft_png
 
 func _iterate_state(h):
+	# todo figure out if we're drawing arrows multiple times??
 	# todo use toby's fancy getter instead of illegally accessing the dict directly
 	print("inverting the output rule from ",start_cell," to ",end_cell," for type ",h)
 	var global_particle_type = possible_particle_types[h][0]
-	# print("particle type is ", global_particle_type)
-	print(start_cell.output_rules[global_particle_type])
 
 	var rules_for_type = start_cell.output_rules[global_particle_type]
 	# if there are no rules for the particle type, or no rule for the end_cell, we add one
 	if rules_for_type == {} or not rules_for_type.has(end_cell):
-		start_cell.set_output_rule(global_particle_type, end_cell, false)
+		start_cell.set_output_rule(global_particle_type, end_cell, true)
 	else: # flip it! (for now..) TODO: iterate state, don't just flip the bools
 		start_cell.set_output_rule(global_particle_type, end_cell, !rules_for_type[end_cell])
 	print("  value is now ",start_cell.output_rules[global_particle_type][end_cell])
+	var current_texture = tunnels[h].leftarrow.get_child(0).texture_normal
+	# todo use state-changing logic rather than directly inverting the graphic!!!
+	# the tunnelState and the graphics aren't connected in any way like this!!
+	if (current_texture == head_png):
+		tunnels[h].leftarrow.get_child(0).texture_normal = shaft_png
+	else:
+		tunnels[h].leftarrow.get_child(0).texture_normal = head_png
 	print("todo: update the opposite output rule (from end to start)")
-
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
