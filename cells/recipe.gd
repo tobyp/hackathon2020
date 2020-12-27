@@ -29,6 +29,11 @@ func recipe_matches(particle_counts: Dictionary) -> bool:
 		if inputs.has(t) and particle_counts[t] < inputs[t]:
 			return false
 		# Only one factory type per cell is allowed
-		if _output_has_factory and Globals.particle_type_is_factory(t) and !outputs.has(t):
+		if _output_has_factory and Globals.particle_type_is_factory(t) and !outputs.has(t) and particle_counts[t] > 0:
 			return false
 	return true
+
+func get_name() -> String:
+	for t in outputs:
+		return Globals.particle_type_get_name(t)
+	return "multiple things"

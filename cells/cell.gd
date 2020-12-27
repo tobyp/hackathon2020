@@ -321,7 +321,7 @@ func _process_recipes(delta):
 		var i = 0
 		var found_i = 0
 		for r in recipes:
-			if str(r.output) == c.name:
+			if r.get_name() == c.name:
 				found = true
 				found_i = i
 				break
@@ -339,10 +339,10 @@ func _process_recipes(delta):
 		else:
 			# Add button
 			var button = Button.new()
-			button.text = "Craft " + Globals.particle_type_get_name(r.output)
+			button.text = "Craft " + r.get_name()
 			button.connect("pressed", self, "_craft", [r])
 			button.mouse_filter = Control.MOUSE_FILTER_STOP
-			button.name = str(r.output)
+			button.name = r.get_name()
 			buttonContainer.add_child(button)
 
 func _craft(r: Recipe):
