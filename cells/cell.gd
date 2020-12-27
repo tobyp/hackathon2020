@@ -98,11 +98,8 @@ func _set_type(type_: int):
 func simulate(delta):
 	if type == Globals.CellType.NORMAL:
 		_process_poison_recovery(delta)
-		_process_pressure(delta)
 		_process_sugar_usage(delta)
-	else:
-		# TODO?
-		pass
+	_process_pressure(delta)
 	_process_recipes(delta)
 	_display_debug()
 
@@ -117,7 +114,7 @@ static func _random_coord_in_cell(clearance: float) -> Vector2:
 
 static func _random_velocity() -> Vector2:
 	var phi = Rules.rng.randf_range(0, 2*PI)
-	var dist = Rules.rng.randf_range(350, 500)
+	var dist = Rules.rng.randf_range(100, 250)
 	return Vector2(dist * cos(phi), dist * sin(phi));
 
 ### UTILTIY/PRIVATE
@@ -215,7 +212,11 @@ func _send_particles(type: int, dest: Cell, count: int):
 	dest.emit_signal("particle_count_changed", type, dst_old_count, dst_new_count)
 	if self.type == Globals.CellType.NORMAL:
 		_free_particle_nodes(self._take_particle_nodes(type, recv_result[1]))
-		dest._put_particle_nodes(self._take_particle_nodes(type, recv_result[0]))
+		if dest.type == Globals.CellType.NORMAL:
+			dest._put_particle_nodes(self._take_particle_nodes(type, recv_result[0]))
+	else:
+		if dest.type == Globals.CellType.NORMAL:
+			dest._put_particle_nodes(_create_particle_nodes(type, recv_result[0]))
 
 ### OVERRIDES
 func _ready():
@@ -267,6 +268,9 @@ func _process_sugar_usage(delta):
 	var sugar_required = 0
 	for t in self.particle_counts:
 		sugar_required += self.particle_counts[t] * Rules.sugar_requirement(t) * delta
+	if sugar_required == 0:
+		_enable_sugar_warning(false)
+		return
 	var sugar_used = int(sugar_required)
 	# For fractional sugars, use probability
 	if sugar_required - float(sugar_used) > Rules.rng.randf():
@@ -289,7 +293,7 @@ func _process_sugar_usage(delta):
 			# Change type instead
 			var new_t_count = old_t_count - removing
 			particle_counts[t] = new_t_count
-			emit_signal("particle_count_changed", type, old_t_count, new_t_count)
+			emit_signal("particle_count_changed", t, old_t_count, new_t_count)
 			var old_transporter_count = particle_counts[Globals.ParticleType.PROTEIN_TRANSPORTER]
 			var new_transporter_count = old_transporter_count + removing
 			emit_signal("particle_count_changed", Globals.ParticleType.PROTEIN_TRANSPORTER, old_transporter_count, new_transporter_count)
@@ -300,14 +304,17 @@ func _process_sugar_usage(delta):
 				if c is CellParticle and c.type == t:
 					c.type = Globals.ParticleType.PROTEIN_TRANSPORTER
 					removing -= 1
-			assert(removing == 0, "Did not find particles to change")
+			if removing != 0:
+				print("Changed t from ", old_t_count, " to ", new_t_count, " and transporter from ", old_transporter_count, " to ", new_transporter_count)
+				assert(removing == 0, "Did not find particles to change")
 		else:
 			remove_particles(t, removing)
+	_enable_sugar_warning(notEnoughSugar)
 
-	if $WarningAnimationSprite.visible != notEnoughSugar:
-		print("Change ", $WarningAnimationSprite, " Current cell ", self, " ", notEnoughSugar)
-		$WarningAnimationSprite.visible = notEnoughSugar
-		if notEnoughSugar:
+func _enable_sugar_warning(enable: bool):
+	if $WarningAnimationSprite.visible != enable:
+		$WarningAnimationSprite.visible = enable
+		if enable:
 			$WarningAnimationPlayer.play("Warning")
 		else:
 			$WarningAnimationPlayer.stop()

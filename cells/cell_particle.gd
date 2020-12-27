@@ -35,6 +35,9 @@ func _get_collision_radius():
 func _set_type(type_: int):
 	type = type_
 	var image_name = "white_prot"
+	scale = Vector2(1, 1)
+	$InnerSprite.scale = Vector2(1, 1)
+
 	match type:
 		Globals.ParticleType.PROTEIN_TRANSPORTER:
 			image_name = "transporter"
@@ -58,6 +61,7 @@ func _set_type(type_: int):
 			image_name = "pink_amino"
 		Globals.ParticleType.SUGAR:
 			image_name = "sugar"
+			$InnerSprite.scale = Vector2(0.2, 0.2)
 		Globals.ParticleType.RIBOSOME_TRANSPORTER:
 			image_name = "green_ribosome"
 		Globals.ParticleType.RIBOSOME_ALCOHOL:
