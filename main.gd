@@ -5,7 +5,7 @@ var Cell = preload("res://cells/cell.gd")
 func _ready():
 	OS.set_window_title("Hackathon 2020")
 
-	# $HexGrid.generate_grid(5)
+	$HexGrid.generate_grid(5)
 	# $HexGrid.discover_cell($HexGrid.create_cell(1,0))
 	# $HexGrid.discover_cell($HexGrid.create_cell(2,0))
 	# $HexGrid.discover_cell($HexGrid.create_cell(1,1))
@@ -25,31 +25,35 @@ func _ready():
 
 func debug_populate():
 	var cell1 = $HexGrid.create_cell(0, 0)  # 1-indexed becase that matches get_index() on the cells, in this case
-
+	cell1.type = Globals.CellType.NORMAL
 	# remove poison first, else any particles you add will just die :(
 	cell1.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
 	cell1.add_particles(Globals.ParticleType.PROTEIN_WHITE, 40)
 	cell1.add_particles(Globals.ParticleType.AMINO_PHE, 1)
 
 	var cell2 = $HexGrid.create_cell(1,0)
+	cell2.type = Globals.CellType.NORMAL
 	cell2.poison_recoveries = {Globals.PoisonType.ANTI_BIOMASS: [0.001, 1.0]}
 
 	var cell3 = $HexGrid.create_cell(0,1)
+	cell3.type = Globals.CellType.NORMAL
 	cell3.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
 	cell3.add_particles(Globals.ParticleType.PROTEIN_WHITE, 40)
 	cell3.add_particles(Globals.ParticleType.QUEEN, 1)
 
 	var cell4 = $HexGrid.create_cell(0,-1)
+	cell4.type = Globals.CellType.NORMAL
 	cell4.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
 	cell4.add_particles(Globals.ParticleType.PROTEIN_WHITE, 60)
 	cell4.add_particles(Globals.ParticleType.RIBOSOME_ALCOHOL, 1)
 
 	var cell5 = $HexGrid.create_cell(-1,-1)
+	cell5.type = Globals.CellType.RESOURCE
 	cell5.set_poison(Globals.PoisonType.ALCOHOL, 1.0)
 	cell5.add_particles(Globals.ParticleType.POISON_ALCOHOL, 1)
-	cell5.type = Globals.CellType.RESOURCE
 
 	var cell6 = $HexGrid.create_cell(-1,0)
+	cell6.type = Globals.CellType.NORMAL
 	cell6.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
 	cell6.add_particles(Globals.ParticleType.ANTI_MITOCHONDRION, 1)
 	cell6.type = Globals.CellType.RESOURCE
