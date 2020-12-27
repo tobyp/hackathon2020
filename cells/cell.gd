@@ -33,6 +33,8 @@ var output_valves = {}  # Dict[Cell, float]
 # Are particles of type `type` allowed to be pushed to `neighbor`?
 # Note, there is no `input_rule(type, neighbor)`, use `neighbor.output_rule(type, self)` instead
 func output_rule(type: int, neighbor: Cell) -> bool:
+	if not self.output_rules.has(type):
+		return false  # default is closed
 	return self.output_rules[type].get(neighbor, false)
 
 func set_output_rule(type: int, neighbor: Cell, rule: bool):
