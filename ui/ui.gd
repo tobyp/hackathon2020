@@ -34,7 +34,6 @@ class Tunnel:
 func _ready():
 	head_png = preload("res://ui/arrowhead.png")
 	shaft_png = preload("res://ui/arrowshaft.png")
-	# 	cell2.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell4, true)
 	
 	var possible_particle_types = [
 		[Globals.ParticleType.PROTEIN_WHITE, Color.gray],
@@ -53,12 +52,14 @@ func _ready():
 		var color = entry[1]
 		var state = _calculate_tunnel_state(particle_type, start_cell, end_cell)
 		tunnels.append(Tunnel.new(particle_type, color, state))
-	
+	# for x in range(tunnels.size()):
 	for x in range(tunnels.size()):
 		var leftarrow = preload("res://ui/arrow.tscn").instance()
 		tunnels[x].leftarrow = leftarrow
 		leftarrow.modulate = Color(tunnels[x].color)
-		leftarrow.position.y += 44*x
+		leftarrow.position.y += 44*x - 200
+		leftarrow.scale.x = 2
+		leftarrow.scale.y = 2
 		add_child(leftarrow)
 		var leftarrow_texture = leftarrow.get_child(0) as TextureButton
 		
@@ -75,8 +76,10 @@ func _ready():
 		rightarrow.rotation += 3.14159
 		
 		rightarrow.position.x += 32
+		rightarrow.scale.x = 2
+		rightarrow.scale.y = 2
 		
-		rightarrow.position.y += 44*x
+		rightarrow.position.y += 44*x - 200
 		add_child(rightarrow)
 		var rightarrow_texture = rightarrow.get_child(0) as TextureButton
 		
