@@ -27,6 +27,9 @@ class Tunnel:
 		self.particle_type = _name
 		self.color = _color
 		self.state = _state
+		
+	func iterate_tunnelState():
+		state = (state + 1)%4
 
 	func _to_string():
 		return "Tunnel for %s, colored %s " % [Globals.particle_type_get_name(particle_type), color]
@@ -49,74 +52,64 @@ func _ready():
 		[Globals.ParticleType.AMINO_PRO, Color.pink],
 		[Globals.ParticleType.SUGAR, Color.white]
 	]
+	# calculate state, save references to UI nodes
 	for entry in possible_particle_types:
 		var particle_type = entry[0]
 		var color = entry[1]
 		var state = _calculate_tunnel_state(particle_type, start_cell, end_cell)
 		tunnels.append(Tunnel.new(particle_type, color, state))
-	# for x in range(tunnels.size()):
+
 	for x in range(tunnels.size()):
-		var leftarrow = preload("res://ui/arrow.tscn").instance()
-		tunnels[x].leftarrow = leftarrow
-		leftarrow.modulate = Color(tunnels[x].color)
-		leftarrow.position.y += 44*x - 200
-		leftarrow.scale.x = 2
-		leftarrow.scale.y = 2
-		add_child(leftarrow)
-		var leftarrow_texture = leftarrow.get_child(0) as TextureButton
-		
-		if (tunnels[x].state == TunnelState.OPEN_RIGHT or tunnels[x].state == TunnelState.OPEN_BOTH):
-			leftarrow_texture.texture_normal = head_png # default
-		else:
-			leftarrow_texture.texture_normal = shaft_png
-		
+		# identical for each arrow
+		var arrows = [preload("res://ui/arrow.tscn").instance(), preload("res://ui/arrow.tscn").instance()]
+			
+		tunnels[x].leftarrow = arrows[0]
+		tunnels[x].rightarrow = arrows[1]
 		tunnels[x].leftarrow.get_child(0).connect("button_down", self, "_iterate_state", [x])
+		tunnels[x].rightarrow.get_child(0).connect("button_down", self, "_iterate_state", [x])
 		
-		var rightarrow = preload("res://ui/arrow.tscn").instance()
-		tunnels[x].rightarrow = rightarrow
-		rightarrow.modulate = Color(tunnels[x].color)
-		rightarrow.rotation += 3.14159
+		for arrow in arrows:
+			arrow.modulate = Color(tunnels[x].color)
+			arrow.position.y += 44*x - 200
+			arrow.scale.x = 2
+			arrow.scale.y = 2
+			add_child(arrow)
+			
+		# different for each arrow
+		arrows[1].position.x += 32
+		arrows[1].rotation += 3.14159
 		
-		rightarrow.position.x += 32
-		rightarrow.scale.x = 3
-		rightarrow.scale.y = 2
+		_set_arrow_texture_based_on_tunnelState(x)
 		
-		rightarrow.position.y += 44*x - 200
-		add_child(rightarrow)
-		var rightarrow_texture = rightarrow.get_child(0) as TextureButton
-		
-		if (tunnels[x].state == TunnelState.OPEN_LEFT or tunnels[x].state == TunnelState.OPEN_BOTH):
-			rightarrow_texture.texture_normal = head_png # default
-		else:
-			rightarrow_texture.texture_normal = shaft_png
+func _set_arrow_texture_based_on_tunnelState(tunnel_idx):
+	var leftarrow_texture = tunnels[tunnel_idx].leftarrow.get_child(0) as TextureButton
+	var rightarrow_texture = tunnels[tunnel_idx].rightarrow.get_child(0) as TextureButton
+
+	if (tunnels[tunnel_idx].state == TunnelState.OPEN_RIGHT or tunnels[tunnel_idx].state == TunnelState.OPEN_BOTH):
+		leftarrow_texture.texture_normal = head_png # default
+	else:
+		leftarrow_texture.texture_normal = shaft_png
+
+	if (tunnels[tunnel_idx].state == TunnelState.OPEN_LEFT or tunnels[tunnel_idx].state == TunnelState.OPEN_BOTH):
+		rightarrow_texture.texture_normal = head_png # default
+	else:
+		rightarrow_texture.texture_normal = shaft_png
 
 func _iterate_state(h):
-	# todo figure out if we're drawing arrows multiple times??
-	# todo use toby's fancy getter instead of illegally accessing the dict directly
-	print("inverting the output rule from ",start_cell," to ",end_cell," for type ",h)
+	# update internal ui tunnelState
+	tunnels[h].iterate_tunnelState()
+	# update graphics to match the state
+	_set_arrow_texture_based_on_tunnelState(h)
+	
+	# update the output rules to match the state
 	var global_particle_type = possible_particle_types[h][0]
-
-	var rules_for_type = start_cell.output_rules[global_particle_type]
-	# if there are no rules for the particle type, or no rule for the end_cell, we add one
-	if rules_for_type == {} or not rules_for_type.has(end_cell):
-		start_cell.set_output_rule(global_particle_type, end_cell, true)
-	else: # flip it! (for now..) TODO: iterate state, don't just flip the bools
-		start_cell.set_output_rule(global_particle_type, end_cell, !rules_for_type[end_cell])
-	print("  value is now ",start_cell.output_rules[global_particle_type][end_cell])
-	var current_texture = tunnels[h].leftarrow.get_child(0).texture_normal
-	# todo use state-changing logic rather than directly inverting the graphic!!!
-	# the tunnelState and the graphics aren't connected in any way like this!!
-	if (current_texture == head_png):
-		tunnels[h].leftarrow.get_child(0).texture_normal = shaft_png
-	else:
-		tunnels[h].leftarrow.get_child(0).texture_normal = head_png
-	print("todo: update the opposite output rule (from end to start)")
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	# print("start cell: ",start_cell.output_rules.size())
-	pass
-
+	var tunnel_state = tunnels[h].state
+	
+	var left_to_right_is_open = (tunnel_state == TunnelState.OPEN_BOTH or tunnel_state == TunnelState.OPEN_RIGHT)
+	start_cell.set_output_rule(global_particle_type, end_cell, left_to_right_is_open)
+	
+	var right_to_left_is_open = (tunnel_state == TunnelState.OPEN_BOTH or tunnel_state == TunnelState.OPEN_LEFT)
+	end_cell.set_output_rule(global_particle_type, start_cell, right_to_left_is_open)
 
 func _calculate_tunnel_state(particle_type, start_cell, end_cell):
 	var state
