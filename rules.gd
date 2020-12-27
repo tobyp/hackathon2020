@@ -20,7 +20,7 @@ func _init_recipes():
 
 		# Auto recipes
 		Recipe.new({ Globals.ParticleType.RIBOSOME_TRANSPORTER: 1, Globals.ParticleType.PROTEIN_WHITE: 1, }, Globals.ParticleType.PROTEIN_TRANSPORTER, true),
-		Recipe.new({ Globals.ParticleType.RIBOSOME_TRANSPORTER: 1, Globals.ParticleType.PROTEIN_WHITE: 1, }, Globals.ParticleType.ENZYME_ALCOHOL, true),
+		Recipe.new({ Globals.ParticleType.RIBOSOME_ALCOHOL: 1, Globals.ParticleType.PROTEIN_WHITE: 1, }, Globals.ParticleType.ENZYME_ALCOHOL, true),
 		Recipe.new({ Globals.ParticleType.RIBOSOME_LYE: 1, Globals.ParticleType.PROTEIN_WHITE: 1, }, Globals.ParticleType.ENZYME_LYE, true),
 		Recipe.new({ Globals.ParticleType.ANTI_MITOCHONDRION: 1, Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }, Globals.ParticleType.SUGAR, true),
 	];

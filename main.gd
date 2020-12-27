@@ -5,28 +5,40 @@ var Cell = preload("res://cells/cell.gd")
 func _ready():
 	OS.set_window_title("Hackathon 2020")
 
-	var cell0 = $HexGrid.create_cell(0, 0) as Cell
+	var cell1 = $HexGrid.create_cell(0, 0)  # 1-indexed becase that matches get_index() on the cells, in this case
 	# remove poison first, else any particles you add will just die :(
-	cell0.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
-	cell0.add_particles(Globals.ParticleType.PROTEIN_WHITE, 19)
-	cell0.add_particles(Globals.ParticleType.QUEEN, 1)
-	cell0.add_particles(Globals.ParticleType.AMINO_PHE, 1)
+	cell1.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
+	cell1.add_particles(Globals.ParticleType.PROTEIN_WHITE, 40)
+	cell1.add_particles(Globals.ParticleType.AMINO_PHE, 1)
 
-	var cell1 = $HexGrid.create_cell(1,0)
-	cell1.poison_recoveries = {Globals.PoisonType.ANTI_BIOMASS: [0.001, 1.0]}
+	var cell2 = $HexGrid.create_cell(1,0)
+	cell2.poison_recoveries = {Globals.PoisonType.ANTI_BIOMASS: [0.001, 1.0]}
 
-	var cell2 = $HexGrid.create_cell(0,1)
-	cell2.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
-	cell2.add_particles(Globals.ParticleType.PROTEIN_WHITE, 20)
-
-	var cell3 = $HexGrid.create_cell(0,-1)
+	var cell3 = $HexGrid.create_cell(0,1)
 	cell3.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
-	cell3.add_particles(Globals.ParticleType.PROTEIN_WHITE, 60)
+	cell3.add_particles(Globals.ParticleType.PROTEIN_WHITE, 20)
 
-	cell0.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell1, true)
-	cell0.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell2, true)
-	cell3.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell0, true)
+	var cell4 = $HexGrid.create_cell(0,-1)
+	cell4.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
+	cell4.add_particles(Globals.ParticleType.PROTEIN_WHITE, 60)
+	cell4.add_particles(Globals.ParticleType.RIBOSOME_ALCOHOL, 1)
 
+	var cell5 = $HexGrid.create_cell(-1,-1)
+	cell5.set_poison(Globals.PoisonType.ALCOHOL, 1.0)
+	
+	var cell6 = $HexGrid.create_cell(-1,0)
+	cell6.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
+	cell6.add_particles(Globals.ParticleType.ANTI_MITOCHONDRION, 1)
+
+	cell1.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell2, true)
+	cell1.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell3, true)
+	cell2.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell4, true)
+	cell3.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell2, true)
+	cell4.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell1, true)
+	cell4.set_output_rule(Globals.ParticleType.ENZYME_ALCOHOL, cell5, true)
+	cell1.set_output_rule(Globals.ParticleType.PROTEIN_TRANSPORTER, cell6, true)
+	cell6.set_output_rule(Globals.ParticleType.SUGAR, cell1, true)
+	
 	var edges = $HexGrid.get_undirected_node_connections()
 	for connection in edges:
 		var start_pos = $HexGrid.create_cell(connection[0].x, connection[0].y).position
