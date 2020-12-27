@@ -45,9 +45,17 @@ func set_output_rule(type: int, neighbor: Cell, rule: bool):
 
 func set_poison(poison: int, value: float):
 	if value <= 0.0:
+		if poisons.has(poison):
+			var poison_particle_type = Globals.poison_type_get_particle_type(poison)
+			if poison_particle_type != -1:
+				self.remove_particles(poison_particle_type, 1)
 		self.poisons.erase(poison)
 		self.poison_recoveries.erase(poison)
 	else:
+		if not self.poisons.has(poison):
+			var poison_particle_type = Globals.poison_type_get_particle_type(poison)
+			if poison_particle_type != -1:
+				self.add_particles(poison_particle_type, 1)
 		self.poisons[poison] = value
 	if poison == Globals.PoisonType.ANTI_BIOMASS:
 		$Gfx.material.set_shader_param("percentage", 1.0 - clamp(value, 0, 1.0))
@@ -86,7 +94,9 @@ func _set_type(type_: int):
 	if type == type_:
 		return
 	type = type_
+
 	$Gfx.visible = type == Globals.CellType.NORMAL
+	$GfxResource.visible = type == Globals.CellType.RESOURCE
 	if type != Globals.CellType.NORMAL:
 		_free_particle_nodes(_take_nonfactory_nodes())
 	else:

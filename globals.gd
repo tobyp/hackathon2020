@@ -24,6 +24,10 @@ enum ParticleType {
 
 	# Uses the energy of your pc to create sugar, lives in sugar cells, but is very shy so you never see it
 	ANTI_MITOCHONDRION,
+	# These have the thankless job of carrying the hazard icons (you can't actually see the particles themselves, the signs are so big)
+	POISON_ALCOHOL,
+	POISON_LYE,
+	POISON_PLUTONIUM,
 }
 
 enum CellType {
@@ -35,6 +39,7 @@ enum PoisonType {
 	ANTI_BIOMASS,
 	ALCOHOL,
 	LYE,
+	PLUTONIUM,
 }
 
 enum TechType {
@@ -102,6 +107,12 @@ static func particle_type_is_factory(particle: int) -> bool:
 			return true
 		ParticleType.ANTI_MITOCHONDRION:
 			return true
+		ParticleType.POISON_ALCOHOL:
+			return true
+		ParticleType.POISON_LYE:
+			return true
+		ParticleType.POISON_PLUTONIUM:
+			return true
 	return false
 
 static func particle_type_is_in_transporter(particle: int) -> bool:
@@ -126,9 +137,21 @@ static func poison_type_get_name(poison: int) -> String:
 			return "Alcohol"
 		PoisonType.LYE:
 			return "Lye"
+		PoisonType.PLUTONIUM:
+			return "Plutonium"
 		PoisonType.ANTI_BIOMASS:
 			return "Anti-Biomass"
 	return "Unknown Poison"
+
+static func poison_type_get_particle_type(poison: int) -> int:
+	match poison:
+		PoisonType.ALCOHOL:
+			return ParticleType.POISON_ALCOHOL
+		PoisonType.LYE:
+			return ParticleType.POISON_LYE
+		PoisonType.PLUTONIUM:
+			return ParticleType.POISON_PLUTONIUM
+	return -1
 
 static func cell_type_get_name(type: int) -> String:
 	match type:

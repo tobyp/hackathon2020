@@ -71,6 +71,16 @@ func _set_type(type_: int):
 		Globals.ParticleType.ANTI_MITOCHONDRION:
 			image_name = "sugar"
 			scale = Vector2(5, 5)
+		Globals.ParticleType.POISON_ALCOHOL:
+			image_name = "poison_flammable"
+			scale = Vector2(2, 2)
+		Globals.ParticleType.POISON_LYE:
+			image_name = "poison_corrosive"
+			scale = Vector2(2, 2)
+		Globals.ParticleType.POISON_PLUTONIUM:
+			image_name = "poison_radioactive"
+			scale = Vector2(2, 2)
+
 
 	if Globals.particle_type_is_in_transporter(type):
 		$InnerSprite.texture = load("res://textures/%s.png" % image_name)
