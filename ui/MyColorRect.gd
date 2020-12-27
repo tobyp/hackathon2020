@@ -9,11 +9,12 @@ var state_index = 0
 func _ready():
 	pass # Replace with function body.
 
-func _input(event):
+func _gui_input(event):
 	if event is InputEventMouseButton:
-		if event.is_pressed():
+		if event.button_index == BUTTON_LEFT and event.pressed:
 			state_index = (state_index + 1) % 4
 			color = Color(1,state_index/4.0,1)
+
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
