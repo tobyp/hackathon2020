@@ -33,16 +33,8 @@ func _ready():
 	tunnels.append((Tunnel.new(Globals.particle_type_get_name(Globals.ParticleType.AMINO_LYS), Color.cyan, TunnelState.OPEN_RIGHT)))
 	tunnels.append((Tunnel.new(Globals.particle_type_get_name(Globals.ParticleType.AMINO_TYR), Color.violet, TunnelState.OPEN_BOTH)))
 	tunnels.append((Tunnel.new(Globals.particle_type_get_name(Globals.ParticleType.AMINO_PRO), Color.pink, TunnelState.CLOSED)))
-
-func _iterate_state(x):
-	print("button clicked")
-	print(x)
-	pass
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
+	
 	for x in range(tunnels.size()):
-		
 		var leftarrow = preload("res://ui/arrow.tscn").instance()
 		leftarrow.modulate = Color(tunnels[x].color)
 		leftarrow.position.y += 44*x
@@ -70,3 +62,12 @@ func _process(delta):
 			rightarrow_texture.texture_normal = head_png # default
 		else:
 			rightarrow_texture.texture_normal = shaft_png
+
+func _iterate_state(x):
+	print("button clicked")
+	print(x)
+	pass
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	pass
