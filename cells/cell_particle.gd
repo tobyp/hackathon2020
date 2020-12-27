@@ -16,7 +16,9 @@ func _physics_process(delta):
 		var collision = move_and_collide(motion)
 		if collision != null:
 			var reflect = collision.remainder.bounce(collision.normal)
-			velocity = (velocity.bounce(collision.normal) + Vector2(Rules.rng.randf(), Rules.rng.randf()) * velocity.length() / 2).normalized() * velocity.length()
+			# This is a Box-Muller transform, to get a normal distributed sample, scaled by 2 so 
+			var phi = deg2rad(sqrt(-1 * log(Rules.rng.randf())) * cos(2 * PI * Rules.rng.randf()))
+			velocity = velocity.bounce(collision.normal).rotated(phi)
 			collision = move_and_collide(reflect)
 	else:
 		# Move a little random
