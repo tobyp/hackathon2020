@@ -49,5 +49,5 @@ func _ready():
 		var end_pos = $HexGrid.create_cell(connection[1].x, connection[1].y).position
 		var middle = 0.5 * (start_pos + end_pos)
 		var the_angle = (start_pos.direction_to(end_pos)).angle()
-		print("the middle of "+str(start_pos)+" and "+str(end_pos)+" is "+str(middle)+ ", angl "+str(the_angle))
+		# print("the middle of "+str(start_pos)+" and "+str(end_pos)+" is "+str(middle)+ ", angl "+str(the_angle))
 		$HexGrid.draw_tunnels(middle, the_angle)

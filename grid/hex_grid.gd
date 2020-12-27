@@ -50,7 +50,7 @@ func get_undirected_node_connections():
 				if not already_known:
 					undirected_connections.append([node_coords, neigh_coords])
 	# print("starts and stops:", known_connections)
-	print("unique edges: ",undirected_connections)
+	print("We have " + str(grid.size()) + " cells, " + str(undirected_connections.size()) + " connections, and 99 problems.")
 	return undirected_connections
 
 # Creates a new cell or returns if it already exists
