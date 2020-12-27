@@ -66,6 +66,7 @@ func _set_type(type_: int):
 			image_name = "blue_ribosome"
 		Globals.ParticleType.ANTI_MITOCHONDRION:
 			image_name = "sugar"
+			scale = Vector2(5, 5)
 
 	if Globals.particle_type_is_in_transporter(type):
 		$InnerSprite.texture = load("res://textures/%s.png" % image_name)

@@ -1,7 +1,7 @@
 extends Node
 
 var rng: RandomNumberGenerator
-var debug_visual: bool = true
+var debug_visual: bool = false
 
 func _ready():
 	_init_recipes()

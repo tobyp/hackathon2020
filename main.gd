@@ -32,6 +32,7 @@ func _ready():
 	var cell6 = $HexGrid.create_cell(-1,0)
 	cell6.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
 	cell6.add_particles(Globals.ParticleType.ANTI_MITOCHONDRION, 1)
+	cell6.type = Globals.CellType.RESOURCE
 
 	cell1.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell2, true)
 	cell1.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell3, true)

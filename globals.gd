@@ -22,6 +22,11 @@ enum ParticleType {
 	ANTI_MITOCHONDRION,
 }
 
+enum CellType {
+	NORMAL,
+	RESOURCE,
+}
+
 enum PoisonType {
 	ANTI_BIOMASS,
 	ALCOHOL,

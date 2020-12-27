@@ -17,11 +17,11 @@ var neighbors = []
 # Amino acid counts include a transporter, transporter count only means free transporter
 var particle_counts = {}  # Dict[ParticleType, int]
 var output_rules = {}  # Dict[ParticleType, Dict[Cell, bool]], output_rules[PARTICLE_*][<Neighbor Cell>] = true/false
-var discovered: bool = true
 var poisons = {Globals.PoisonType.ANTI_BIOMASS: 1.0}  # Dict[PoisonType, float]
 var poison_recoveries = {}  # Dict[PoisonType, [float rate, float ceiling]]
 # 0 = Ready
 var auto_recipe_cooldown = 0
+export var type = Globals.CellType.NORMAL setget _set_type, _get_type
 
 ### PRIVATE MEMBERS
 # since transferring an integer number of particles each tick makes it impossible to see any changes,
@@ -77,11 +77,22 @@ func remove_particles(type: int, count: int) -> int:
 	self._free_particle_nodes(self._take_particle_nodes(type, count))
 	return old_count - new_count
 
+func _get_type() -> int:
+	return type
+
+func _set_type(type_: int):
+	type = type_
+	$Gfx.visible = type == Globals.CellType.NORMAL
+
 # Called every game step.
 func simulate(delta):
-	_process_poison_recovery(delta)
-	_process_pressure(delta)
-	_process_sugar_usage(delta)
+	if type == Globals.CellType.NORMAL:
+		_process_poison_recovery(delta)
+		_process_pressure(delta)
+		_process_sugar_usage(delta)
+	else:
+		# TODO?
+		pass
 	_process_recipes(delta)
 	_display_debug()
 
@@ -325,10 +336,11 @@ func _craft(r: Recipe):
 
 func _display_debug():
 	$DebugLabel.visible = Rules.debug_visual
-	var dbg = "[b][i]%s[/i][/b]\n" % [self];
-	dbg += "[i]Neighbors:[/i] %s\n" % [self.neighbors];
-	for poison in Globals.PoisonType:
-		dbg += "[b][u]%s:[/u][/b] %f\n" % [poison, self.poisons.get(Globals.PoisonType[poison], 0)]
-	for particle in Globals.ParticleType:
-		dbg += "[b][u]%s:[/u][/b] %d\n" % [particle, self.particle_counts.get(Globals.ParticleType[particle], 0)]
-	$DebugLabel.bbcode_text = dbg
+	if Rules.debug_visual:
+		var dbg = "[b][i]%s[/i][/b]\n" % [self];
+		dbg += "[i]Neighbors:[/i] %s\n" % [self.neighbors];
+		for poison in Globals.PoisonType:
+			dbg += "[b][u]%s:[/u][/b] %f\n" % [poison, self.poisons.get(Globals.PoisonType[poison], 0)]
+		for particle in Globals.ParticleType:
+			dbg += "[b][u]%s:[/u][/b] %d\n" % [particle, self.particle_counts.get(Globals.ParticleType[particle], 0)]
+		$DebugLabel.bbcode_text = dbg
