@@ -466,13 +466,35 @@ func _remove_sound(sound: AudioStreamPlayer2D):
 	sound.stop()
 	sound.queue_free()
 
+static func _debug_direction(own: Vector2, other: Vector2) -> String:
+	var rel = other - own;
+	if rel.x < 0:
+		if rel.y < 0:
+			return "UL"
+		elif rel.y > 0:
+			return "BL"
+		else:
+			return "L"
+	else:
+		if rel.y < 0:
+			return "UR"
+		elif rel.y > 0:
+			return "BR"
+		else:
+			return "R"
+
 func _display_debug():
 	$DebugLabel.visible = Rules.debug_visual
 	if Rules.debug_visual:
 		var dbg = "[b][i]%s[/i][/b] (%s)\n" % [self, Globals.cell_type_get_name(type)];
-		dbg += "[i]Neighbors:[/i] %s\n" % [self.neighbors];
+		# dbg += "[i]Neighbors:[/i] %s\n" % [self.neighbors];
 		for poison in Globals.PoisonType:
 			dbg += "[b][u]%s:[/u][/b] %f\n" % [poison, self.poisons.get(Globals.PoisonType[poison], 0)]
 		for particle in Globals.ParticleType:
-			dbg += "[b][u]%s:[/u][/b] %d\n" % [particle, self.particle_counts.get(Globals.ParticleType[particle], 0)]
+			dbg += "[b][u]%s:[/u][/b] %d" % [particle, self.particle_counts.get(Globals.ParticleType[particle], 0)]
+			var p_rules = self.output_rules.get(Globals.ParticleType[particle], {})
+			for n in p_rules:
+				if p_rules[n]:
+					dbg += " " + _debug_direction(self.pos, n.pos)
+			dbg += "\n"
 		$DebugLabel.bbcode_text = dbg
