@@ -273,12 +273,12 @@ static func poison_type_get_particle_type(poison: int) -> int:
 
 static func cell_type_get_name(type: int) -> String:
 	match type:
+		CellType.UNDISCOVERED:
+			return "Undiscovered"
 		CellType.NORMAL:
 			return "Normal"
 		CellType.RESOURCE:
 			return "Resource"
-		CellType.UNDISCOVERED:
-			return "Undiscovered"
 	return "Unknown Cell Type"
 
 static func get_enum_name(enu, value) -> String:

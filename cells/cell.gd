@@ -44,6 +44,8 @@ func output_rule(type: int, neighbor: Cell) -> bool:
 	return self.output_rules[type].get(neighbor, false)
 
 func input_allowed(type: int) -> bool:
+	if self.type == Globals.CellType.UNDISCOVERED:
+		return false
 	return self._input_allowed.get(type, true)
 	
 func set_input_allowed(allowed: Array):
@@ -51,6 +53,8 @@ func set_input_allowed(allowed: Array):
 		self._input_allowed[t] = allowed.has(t)
 
 func output_allowed(type: int, neighbor: Cell) -> bool:
+	if self.type == Globals.CellType.UNDISCOVERED:
+		return false
 	return self.neighbors.has(neighbor) and neighbor.input_allowed(type)
 
 # returns the new stat eof the rule
@@ -60,6 +64,8 @@ func set_output_rule(type: int, neighbor: Cell, rule: bool) -> bool:
 		return false
 	if not neighbor.input_allowed(type):
 		print("%s: Invalid output rule! %s does not allow %s as input" % [self, neighbor, Globals.particle_type_get_name(type)])
+		return false
+	if self.type == Globals.CellType.UNDISCOVERED:
 		return false
 	if not self.output_rules.has(type):
 		self.output_rules[type] = {}
@@ -116,19 +122,19 @@ func remove_particles(type: int, count: int) -> int:
 func _get_type() -> int:
 	return type
 
-func _set_type(type_: int):
+func _set_type(type_: int) -> int:
 	if type == type_:
-		return
+		return type
 	type = type_
 
 	$Gfx.visible = type == Globals.CellType.NORMAL
 	$GfxResource.visible = type == Globals.CellType.RESOURCE
 	if type != Globals.CellType.NORMAL:
-		_free_particle_nodes(_take_nonfactory_nodes())
+		_free_particle_nodes(_take_all_particle_nodes())
 	else:
 		for t in self.particle_counts:
-			if not Globals.particle_type_is_factory(t):
-				self.add_particles(t, self.particle_counts[t])
+			self.add_particles(t, self.particle_counts[t])
+	return type
 
 # Called every game step.
 func simulate(delta):
