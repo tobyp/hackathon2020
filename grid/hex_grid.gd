@@ -134,9 +134,23 @@ func generate_grid(size: int):
 		for hex in ring:
 			var cell = create_cell(hex.x, hex.y)
 			cell.ring_level = s
-			cell.connect("discover", self, "discover_cell")
+			cell.connect("selected", self, "_cell_selected")
+			cell.connect("type_changed", self, "_cell_type_changed")
 	
 	discover_cell(root)
+
+func _cell_selected(cell, selection_state):
+	if Rules.cell_is_discoverable(cell):
+		discover_cell(cell)
+
+func _cell_type_changed(cell, old_type, new_type):
+	var win = true
+	for cell in grid.values():
+		if Rules.cell_blocks_win(cell):
+			win = false
+			break
+	if win:
+		print("You win!")
 
 func discover_cell(cell):
 	var rng = RandomNumberGenerator.new()

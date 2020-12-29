@@ -216,11 +216,14 @@ static func diffuse_func(budget: int, normalized_pressure: float, total_pressure
 	# this exponential will make diffusion go faster if the differential pressure is higher
 	# return budget * 0.55 * exp(-4 * demand) * delta
 
-func _input(event):
-	if event is InputEventKey:
-		if event.is_pressed():
-			if event.get_scancode() == KEY_F1:
-				debug_visual = not debug_visual
+static func cell_is_discoverable(cell: Cell) -> bool:
+	for n in cell.neighbors:
+		if n.type == Globals.CellType.CAPTURED:
+			return true
+	return false
+
+static func cell_blocks_win(cell: Cell) -> bool:
+	return cell.type != Globals.CellType.CAPTURED and cell.type != Globals.CellType.RESOURCE
 
 static func cell_type_renders_particles(cell_type: int, particle_type: int) -> bool:
 	if cell_type == Globals.CellType.CAPTURED:
@@ -253,3 +256,11 @@ func select_cell(cell):
 		oldcell.selected = false
 	_selected_cells = [cell]
 	cell.selected = true
+	if cell_is_discoverable(cell):
+		cell.emit_signal("discover", cell)
+
+func _input(event):
+	if event is InputEventKey:
+		if event.is_pressed():
+			if event.get_scancode() == KEY_F1:
+				debug_visual = not debug_visual

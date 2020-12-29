@@ -202,7 +202,7 @@ func _set_type(type_: int) -> int:
 		if not Rules.cell_type_renders_particles(old_type, t) and Rules.cell_type_renders_particles(type, t):
 			_put_particle_nodes(_create_particle_nodes(t, self.particle_counts[t]))
 
-	emit_signal("type_changed", old_type, type)
+	emit_signal("type_changed", self, old_type, type)
 	return type
 
 # Called every game step.

@@ -5,7 +5,7 @@ var Cell = preload("res://cells/cell.gd")
 func _ready():
 	OS.set_window_title("Hackathon 2020")
 
-	$HexGrid.generate_grid(3)
+	$HexGrid.generate_grid(2)
 	# $HexGrid.discover_cell($HexGrid.create_cell(1,0))
 	# $HexGrid.discover_cell($HexGrid.create_cell(2,0))
 	# $HexGrid.discover_cell($HexGrid.create_cell(1,1))
@@ -26,7 +26,7 @@ func _ready():
 func debug_populate():
 	var cell1 = $HexGrid.create_cell(0, 0)  # 1-indexed becase that matches the names in _to_string
 	cell1.init_captured()
-	cell1.add_particles(Globals.ParticleType.PROTEIN_WHITE, 40)
+	cell1.add_particles(Globals.ParticleType.PROTEIN_WHITE, 400)
 	cell1.add_particles(Globals.ParticleType.AMINO_PHE, 1)
 
 	var cell2 = $HexGrid.create_cell(1,0)
