@@ -171,9 +171,11 @@ func _particle_init(particle: CellParticle, anywhere: bool = true):
 ## PARTICLE NODE FUNCTIONS - these do not modify `particle_counts`!
 func _create_particle_nodes(type: int, count: int = 1, anywhere: bool = true) -> Array:
 	var particles = []
+	var z_index = Rules.particle_type_z_index(type)
 	for i in count:
 		var particle = preload("res://cells/particle.tscn").instance()
 		particle.type = type
+		particle.z_index = z_index
 		_particle_init(particle, anywhere)
 		particles.append(particle)
 	return particles

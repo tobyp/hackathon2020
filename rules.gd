@@ -124,6 +124,22 @@ static func particle_type_poison_susceptible(particle: int, poison: int) -> bool
 			return false
 	return true
 
+static func particle_type_z_index(particle: int) -> float:
+	match particle:
+		Globals.ParticleType.PROTEIN_WHITE:
+			return 0.0
+		Globals.ParticleType.PROTEIN_TRANSPORTER, Globals.ParticleType.ENZYME_ALCOHOL, Globals.ParticleType.ENZYME_LYE:
+			return 1.0
+		Globals.ParticleType.SUGAR:
+			return 2.0
+		Globals.ParticleType.AMINO_PHE, Globals.ParticleType.AMINO_ALA, Globals.ParticleType.AMINO_LYS, Globals.ParticleType.AMINO_TYR, Globals.ParticleType.AMINO_PRO:
+			return 3.0
+		Globals.ParticleType.QUEEN, Globals.ParticleType.PRO_QUEEN, Globals.ParticleType.RIBOSOME_TRANSPORTER, Globals.ParticleType.RIBOSOME_ALCOHOL, Globals.ParticleType.RIBOSOME_LYE:
+			return 4.0
+		Globals.ParticleType.ANTI_MITOCHONDRION, Globals.ParticleType.POISON_ALCOHOL, Globals.ParticleType.POISON_LYE, Globals.ParticleType.POISON_PLUTONIUM:
+			return 5.0
+	return 0.0
+
 # calculate pressure between own cell (having `own` particles) and another cell (having `other` particles).
 # There's a lot of tuning to be had here.
 # If the result is <= 0, no particles will be transferred
