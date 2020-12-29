@@ -39,13 +39,15 @@ func debug_populate():
 	cell3.type = Globals.CellType.NORMAL
 	cell3.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
 	cell3.add_particles(Globals.ParticleType.PROTEIN_WHITE, 40)
-	cell3.add_particles(Globals.ParticleType.QUEEN, 1)
+	cell3.add_particles(Globals.ParticleType.AMINO_TYR, 1)
+	#cell3.add_particles(Globals.ParticleType.QUEEN, 1)
 
 	var cell4 = $HexGrid.create_cell(0,-1)
 	cell4.type = Globals.CellType.NORMAL
 	cell4.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
 	cell4.add_particles(Globals.ParticleType.PROTEIN_WHITE, 60)
-	cell4.add_particles(Globals.ParticleType.RIBOSOME_ALCOHOL, 1)
+	cell4.add_particles(Globals.ParticleType.AMINO_ALA, 1)
+	#cell4.add_particles(Globals.ParticleType.RIBOSOME_ALCOHOL, 1)
 
 	var cell5 = $HexGrid.create_cell(-1,-1)
 	cell5.type = Globals.CellType.RESOURCE
@@ -54,31 +56,32 @@ func debug_populate():
 
 	var cell6 = $HexGrid.create_cell(-1,0)
 	cell6.type = Globals.CellType.NORMAL
+	cell6.set_input_allowed([Globals.ParticleType.PROTEIN_TRANSPORTER])
 	cell6.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
 	cell6.add_particles(Globals.ParticleType.ANTI_MITOCHONDRION, 1)
 	cell6.type = Globals.CellType.RESOURCE
 
 	# "A Diffusion of Whites"
-	cell1.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell2, true)
-	cell1.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell3, true)
-	cell2.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell4, true)
-	cell3.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell2, true)
-	cell4.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell1, true)
+	#cell1.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell2, true)
+	#cell1.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell3, true)
+	#cell2.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell4, true)
+	#cell3.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell2, true)
+	#cell4.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell1, true)
 
 	# Sugar production
-	cell1.set_output_rule(Globals.ParticleType.PROTEIN_TRANSPORTER, cell6, true)
-	cell6.set_output_rule(Globals.ParticleType.SUGAR, cell1, true)
+	#cell1.set_output_rule(Globals.ParticleType.PROTEIN_TRANSPORTER, cell6, true)
+	#cell6.set_output_rule(Globals.ParticleType.SUGAR, cell1, true)
 	# Sugar transport
-	cell1.set_output_rule(Globals.ParticleType.SUGAR, cell2, true)
-	cell2.set_output_rule(Globals.ParticleType.SUGAR, cell1, true)
-	cell1.set_output_rule(Globals.ParticleType.SUGAR, cell3, true)
-	cell3.set_output_rule(Globals.ParticleType.SUGAR, cell1, true)
-	cell1.set_output_rule(Globals.ParticleType.SUGAR, cell4, true)
-	cell4.set_output_rule(Globals.ParticleType.SUGAR, cell1, true)
-	cell2.set_output_rule(Globals.ParticleType.PROTEIN_TRANSPORTER, cell1, true)
-	cell3.set_output_rule(Globals.ParticleType.PROTEIN_TRANSPORTER, cell1, true)
-	cell4.set_output_rule(Globals.ParticleType.PROTEIN_TRANSPORTER, cell1, true)
+	#cell1.set_output_rule(Globals.ParticleType.SUGAR, cell2, true)
+	#cell2.set_output_rule(Globals.ParticleType.SUGAR, cell1, true)
+	#cell1.set_output_rule(Globals.ParticleType.SUGAR, cell3, true)
+	#cell3.set_output_rule(Globals.ParticleType.SUGAR, cell1, true)
+	#cell1.set_output_rule(Globals.ParticleType.SUGAR, cell4, true)
+	#cell4.set_output_rule(Globals.ParticleType.SUGAR, cell1, true)
+	#cell2.set_output_rule(Globals.ParticleType.PROTEIN_TRANSPORTER, cell1, true)
+	#cell3.set_output_rule(Globals.ParticleType.PROTEIN_TRANSPORTER, cell1, true)
+	#cell4.set_output_rule(Globals.ParticleType.PROTEIN_TRANSPORTER, cell1, true)
 
 	# Breaking down the Alcohol
-	cell4.set_output_rule(Globals.ParticleType.ENZYME_ALCOHOL, cell5, true)
-	cell4.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell5, true)
+	#cell4.set_output_rule(Globals.ParticleType.ENZYME_ALCOHOL, cell5, true)
+	#cell4.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell5, true)
