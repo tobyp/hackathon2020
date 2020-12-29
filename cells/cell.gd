@@ -433,6 +433,8 @@ func _craft(r: Recipe):
 		add_particles(t, r.outputs[t], false)
 
 func _update_recipe_cooldown():
+	if type != Globals.CellType.NORMAL:
+		return
 	if auto_recipe_cooldown == 0:
 		auto_recipe_material.set_shader_param("percentage", 1.0)
 	else:
