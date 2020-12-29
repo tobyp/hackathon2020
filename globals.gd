@@ -185,6 +185,26 @@ static func particle_type_get_res(particle: int, outline: bool = false) -> Strin
 
 	return "res://textures/%s.png" % image_name
 
+static func particle_type_get_color(particle: int) -> Color:
+	match particle:
+		ParticleType.PROTEIN_WHITE:
+			return Color.gray
+		ParticleType.SUGAR, ParticleType.ANTI_MITOCHONDRION:
+			return Color.white
+		ParticleType.AMINO_PHE, ParticleType.PROTEIN_TRANSPORTER, ParticleType.RIBOSOME_TRANSPORTER:
+			return Color("#72f281")  # Green
+		ParticleType.AMINO_ALA, ParticleType.ENZYME_ALCOHOL, ParticleType.RIBOSOME_ALCOHOL, ParticleType.POISON_ALCOHOL:
+			return Color("#fae06e")  # Yellow
+		ParticleType.AMINO_LYS, ParticleType.ENZYME_LYE, ParticleType.RIBOSOME_LYE, ParticleType.POISON_LYE:
+			return Color("#72daf2")  # Cyan
+		ParticleType.AMINO_TYR, ParticleType.QUEEN:
+			return Color("#6e00fa")  # Violet
+		ParticleType.AMINO_PRO, ParticleType.PRO_QUEEN:
+			return Color("#fa0090")  # Pink
+		ParticleType.POISON_PLUTONIUM:
+			return Color.black
+	return Color.black
+
 static func poison_type_get_name(poison: int) -> String:
 	match poison:
 		PoisonType.ALCOHOL:

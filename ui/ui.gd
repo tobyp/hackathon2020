@@ -41,21 +41,20 @@ func _ready():
 	shaft_png = preload("res://ui/arrowshaft.png")
 	
 	possible_particle_types = [
-		[Globals.ParticleType.PROTEIN_WHITE, Color.gray],
-		[Globals.ParticleType.PROTEIN_TRANSPORTER, Color.green],
-		[Globals.ParticleType.ENZYME_ALCOHOL, Color.yellow],
-		[Globals.ParticleType.ENZYME_LYE, Color.cyan],
-		[Globals.ParticleType.AMINO_PHE, Color.green],
-		[Globals.ParticleType.AMINO_ALA, Color.yellow],
-		[Globals.ParticleType.AMINO_LYS, Color.cyan],
-		[Globals.ParticleType.AMINO_TYR, Color.violet],
-		[Globals.ParticleType.AMINO_PRO, Color.pink],
-		[Globals.ParticleType.SUGAR, Color.white]
+		Globals.ParticleType.PROTEIN_WHITE,
+		Globals.ParticleType.PROTEIN_TRANSPORTER,
+		Globals.ParticleType.ENZYME_ALCOHOL,
+		Globals.ParticleType.ENZYME_LYE,
+		Globals.ParticleType.AMINO_PHE,
+		Globals.ParticleType.AMINO_ALA,
+		Globals.ParticleType.AMINO_LYS,
+		Globals.ParticleType.AMINO_TYR,
+		Globals.ParticleType.AMINO_PRO,
+		Globals.ParticleType.SUGAR,
 	]
 	# calculate state, save references to UI nodes
-	for entry in possible_particle_types:
-		var particle_type = entry[0]
-		var color = entry[1]
+	for particle_type in possible_particle_types:
+		var color = Globals.particle_type_get_color(particle_type)
 		var state = _calculate_tunnel_state(particle_type, start_cell, end_cell)
 		tunnels.append(Tunnel.new(particle_type, color, state))
 
@@ -102,7 +101,7 @@ func _iterate_state(h):
 	_set_arrow_texture_based_on_tunnelState(h)
 	
 	# update the output rules to match the state
-	var global_particle_type = possible_particle_types[h][0]
+	var global_particle_type = possible_particle_types[h]
 	var tunnel_state = tunnels[h].state
 	
 	var left_to_right_is_open = (tunnel_state == TunnelState.OPEN_BOTH or tunnel_state == TunnelState.OPEN_RIGHT)
