@@ -36,6 +36,29 @@ var selected: bool = false setget _set_selected, _get_selected
 var _output_valves = {}  # Dict[Cell, float]
 
 ### API
+func init_resource(resource_particle: int, biomass: bool = true):
+	self.type = Globals.CellType.RESOURCE
+	if not biomass:
+		self.set_poison(Globals.PoisonType.ANTI_BIOMASS, 1.0)
+	self.set_input_allowed([Globals.ParticleType.PROTEIN_TRANSPORTER])
+	self.add_particles(resource_particle, 1, false, true)
+
+func init_poison(poison_type: int, strength: float = 1.0, biomass: bool = false):
+	self.type = Globals.CellType.RESOURCE
+	if not biomass:
+		self.set_poison(Globals.PoisonType.ANTI_BIOMASS, 1.0)
+	self.set_poison(poison_type, strength)
+
+func init_empty(biomass: bool = false):
+	self.type = Globals.CellType.NORMAL
+	if not biomass:
+		self.set_poison(Globals.PoisonType.ANTI_BIOMASS, 1.0)
+
+func init_undiscovered(biomass: bool = false):
+	self.type = Globals.CellType.UNDISCOVERED
+	if not biomass:
+		self.set_poison(Globals.PoisonType.ANTI_BIOMASS, 1.0)
+
 # Are particles of type `type` allowed to be pushed to `neighbor`?
 # Note, there is no `input_rule(type, neighbor)`, use `neighbor.output_rule(type, self)` instead
 func output_rule(type: int, neighbor: Cell) -> bool:

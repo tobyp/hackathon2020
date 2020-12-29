@@ -25,42 +25,32 @@ func _ready():
 
 func debug_populate():
 	var cell1 = $HexGrid.create_cell(0, 0)  # 1-indexed becase that matches get_index() on the cells, in this case
-	cell1.type = Globals.CellType.NORMAL
-	# remove poison first, else any particles you add will just die :(
-	cell1.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
+	cell1.init_empty(true)
 	cell1.add_particles(Globals.ParticleType.PROTEIN_WHITE, 40)
 	cell1.add_particles(Globals.ParticleType.AMINO_PHE, 1)
 
 	var cell2 = $HexGrid.create_cell(1,0)
-	cell2.type = Globals.CellType.NORMAL
+	cell2.init_empty(false)
 	cell2.poison_recoveries = {Globals.PoisonType.ANTI_BIOMASS: [0.001, 1.0]}
 
 	var cell3 = $HexGrid.create_cell(0,1)
-	cell3.type = Globals.CellType.NORMAL
-	cell3.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
+	cell3.init_empty(true)
 	cell3.add_particles(Globals.ParticleType.PROTEIN_WHITE, 40)
 	cell3.add_particles(Globals.ParticleType.AMINO_TYR, 1)
 	#cell3.add_particles(Globals.ParticleType.QUEEN, 1)
 
 	var cell4 = $HexGrid.create_cell(0,-1)
-	cell4.type = Globals.CellType.NORMAL
-	cell4.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
+	cell4.init_empty(true)
 	cell4.add_particles(Globals.ParticleType.PROTEIN_WHITE, 60)
 	cell4.add_particles(Globals.ParticleType.AMINO_ALA, 1)
 	cell4.add_particles(Globals.ParticleType.ENZYME_ALCOHOL, 52)
 	#cell4.add_particles(Globals.ParticleType.RIBOSOME_ALCOHOL, 1)
 
 	var cell5 = $HexGrid.create_cell(-1,-1)
-	cell5.type = Globals.CellType.RESOURCE
-	cell5.set_poison(Globals.PoisonType.ALCOHOL, 1.0)
+	cell5.init_poison(Globals.PoisonType.ALCOHOL)
 
 	var cell6 = $HexGrid.create_cell(-1,0)
-	cell6.type = Globals.CellType.RESOURCE
-	cell6.set_input_allowed([Globals.ParticleType.PROTEIN_TRANSPORTER])
-	cell6.add_particles(Globals.ParticleType.ANTI_MITOCHONDRION, 1, false, true)
-	cell6.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
-	cell6.add_particles(Globals.ParticleType.ANTI_MITOCHONDRION, 1)
-	cell6.type = Globals.CellType.RESOURCE
+	cell6.init_resource(Globals.ParticleType.ANTI_MITOCHONDRION)
 
 	# "A Diffusion of Whites"
 	#cell1.set_output_rule(Globals.ParticleType.PROTEIN_WHITE, cell2, true)

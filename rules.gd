@@ -54,21 +54,20 @@ static func new_tech_tree() -> Array:
 static func apply_tech(tech_type: int, cell: Cell):
 	match tech_type:
 		Globals.TechType.INIT:
-			cell.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
+			cell.init_empty(true)
 			cell.add_particles(Globals.ParticleType.PROTEIN_WHITE, 40)
 			cell.add_particles(Globals.ParticleType.AMINO_PHE, 1)
 		Globals.TechType.SUGAR_CELL:
-			cell.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
-			cell.set_input_allowed([Globals.ParticleType.PROTEIN_TRANSPORTER])
-			cell.add_particles(Globals.ParticleType.ANTI_MITOCHONDRION, 1)
-			cell.type = Globals.CellType.RESOURCE
+			cell.init_resource(Globals.ParticleType.ANTI_MITOCHONDRION)
 		Globals.TechType.POISON_ALCOHOL:
-			cell.set_poison(Globals.PoisonType.ALCOHOL, 1.0)
+			cell.init_poison(Globals.PoisonType.ALCOHOL)
 		Globals.TechType.POISON_LYE:
-			cell.set_poison(Globals.PoisonType.LYE, 1.0)
+			cell.init_poison(Globals.PoisonType.LYE)
 		Globals.TechType.DEBUG_PARTICLES:
-			cell.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
+			cell.init_empty(true)
 			cell.add_particles(Globals.ParticleType.PROTEIN_WHITE, 20)
+		_:
+			cell.init_empty()
 
 static func sugar_requirement(type: int) -> float:
 	return 0.05
