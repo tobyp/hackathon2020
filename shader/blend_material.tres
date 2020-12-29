@@ -1,0 +1,17 @@
+[gd_resource type="ShaderMaterial" load_steps=4 format=2]
+
+[ext_resource path="res://shader/blend_shader.shader" type="Shader" id=1]
+[ext_resource path="res://textures/hex_pink.png" type="Texture" id=2]
+[ext_resource path="res://textures/hex.png" type="Texture" id=3]
+
+[resource]
+shader = ExtResource( 1 )
+shader_param/percentage = 0.0
+shader_param/wobble_amplitude_x = 5.0
+shader_param/wobble_amplitude_y = 5.0
+shader_param/wobble_period_x = 1.5
+shader_param/wobble_period_y = 0.9
+shader_param/wobble_period_xy = 4.5
+shader_param/wobble_period_yx = 3.5
+shader_param/base_tex = ExtResource( 3 )
+shader_param/blend_tex = ExtResource( 2 )

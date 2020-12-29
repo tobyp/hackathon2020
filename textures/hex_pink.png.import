@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/hex2.png-221d8152cf55b3d234894c55880cca73.stex"
+path="res://.import/hex_pink.png-397eb4143968a147542d9290ed209596.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://textures/hex2.png"
-dest_files=[ "res://.import/hex2.png-221d8152cf55b3d234894c55880cca73.stex" ]
+source_file="res://textures/hex_pink.png"
+dest_files=[ "res://.import/hex_pink.png-397eb4143968a147542d9290ed209596.stex" ]
 
 [params]
 

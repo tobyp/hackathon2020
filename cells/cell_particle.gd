@@ -55,7 +55,7 @@ func _set_type(type_: int):
 		Globals.ParticleType.POISON_PLUTONIUM:
 			scale = Vector2(2.5, 2.5)
 
-	if Globals.particle_type_is_in_transporter(type):
+	if Rules.particle_type_is_in_transporter(type):
 		$InnerSprite.texture = load(image_res)
 		$Sprite.texture = load("res://textures/green_enzyme.png")
 	else:

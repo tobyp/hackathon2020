@@ -1,11 +1,9 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://cells/cell.gd" type="Script" id=1]
-[ext_resource path="res://blend_shader.shader" type="Shader" id=2]
-[ext_resource path="res://textures/hex2.png" type="Texture" id=3]
+[ext_resource path="res://shader/blend_material.tres" type="Material" id=3]
 [ext_resource path="res://textures/hex.png" type="Texture" id=4]
 [ext_resource path="res://textures/sugar.png" type="Texture" id=5]
-[ext_resource path="res://textures/hex_gray.png" type="Texture" id=6]
 [ext_resource path="res://cells/cell_selector.tscn" type="PackedScene" id=7]
 
 [sub_resource type="SegmentShape2D" id=1]
@@ -31,20 +29,6 @@ b = Vector2( 443, -256 )
 [sub_resource type="SegmentShape2D" id=6]
 a = Vector2( 443, -256 )
 b = Vector2( 0, -512 )
-
-[sub_resource type="ShaderMaterial" id=7]
-shader = ExtResource( 2 )
-shader_param/percentage = 0.0
-shader_param/wobbleSpeed = 1.5
-shader_param/wobbleScale = 7.0
-shader_param/blend_tex = ExtResource( 3 )
-
-[sub_resource type="ShaderMaterial" id=8]
-shader = ExtResource( 2 )
-shader_param/percentage = 0.0
-shader_param/wobbleSpeed = 1.5
-shader_param/wobbleScale = 7.0
-shader_param/blend_tex = ExtResource( 6 )
 
 [sub_resource type="Animation" id=9]
 length = 2.0
@@ -101,19 +85,10 @@ shape = SubResource( 6 )
 one_way_collision_margin = 0.0
 
 [node name="Gfx" type="Sprite" parent="."]
-material = SubResource( 7 )
+visible = false
+material = ExtResource( 3 )
 scale = Vector2( 0.85, 0.85 )
 texture = ExtResource( 4 )
-
-[node name="GfxResource" type="Sprite" parent="."]
-visible = false
-material = SubResource( 8 )
-scale = Vector2( 0.85, 0.85 )
-texture = ExtResource( 6 )
-
-[node name="CellSelector" parent="." instance=ExtResource( 7 )]
-visible = false
-z_index = 1
 
 [node name="WarningAnimationPlayer" type="AnimationPlayer" parent="."]
 anims/Warning = SubResource( 9 )
@@ -124,6 +99,10 @@ self_modulate = Color( 1, 1, 1, 0.588235 )
 texture = ExtResource( 5 )
 
 [node name="Particles" type="Node2D" parent="."]
+
+[node name="CellSelector" parent="." instance=ExtResource( 7 )]
+visible = false
+z_index = 1
 
 [node name="ClickArea" type="StaticBody2D" parent="."]
 input_pickable = true

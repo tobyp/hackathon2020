@@ -54,7 +54,7 @@ static func new_tech_tree() -> Array:
 static func apply_tech(tech_type: int, cell: Cell):
 	match tech_type:
 		Globals.TechType.INIT:
-			cell.init_empty(true)
+			cell.init_captured()
 			cell.add_particles(Globals.ParticleType.PROTEIN_WHITE, 40)
 			cell.add_particles(Globals.ParticleType.AMINO_PHE, 1)
 		Globals.TechType.SUGAR_CELL:
@@ -64,7 +64,7 @@ static func apply_tech(tech_type: int, cell: Cell):
 		Globals.TechType.POISON_LYE:
 			cell.init_poison(Globals.PoisonType.LYE)
 		Globals.TechType.DEBUG_PARTICLES:
-			cell.init_empty(true)
+			cell.init_captured()
 			cell.add_particles(Globals.ParticleType.PROTEIN_WHITE, 20)
 		_:
 			cell.init_empty()
@@ -139,6 +139,56 @@ static func particle_type_z_index(particle: int) -> float:
 			return 5.0
 	return 0.0
 
+static func particle_type_is_factory(particle: int) -> bool:
+	match particle:
+		Globals.ParticleType.QUEEN:
+			return true
+		Globals.ParticleType.PRO_QUEEN:
+			return true
+		Globals.ParticleType.RIBOSOME_TRANSPORTER:
+			return true
+		Globals.ParticleType.RIBOSOME_ALCOHOL:
+			return true
+		Globals.ParticleType.RIBOSOME_LYE:
+			return true
+		Globals.ParticleType.ANTI_MITOCHONDRION:
+			return true
+		Globals.ParticleType.POISON_ALCOHOL:
+			return true
+		Globals.ParticleType.POISON_LYE:
+			return true
+		Globals.ParticleType.POISON_PLUTONIUM:
+			return true
+	return false
+
+static func particle_type_is_in_transporter(particle: int) -> bool:
+	match particle:
+		Globals.ParticleType.AMINO_PHE:
+			return true
+		Globals.ParticleType.AMINO_ALA:
+			return true
+		Globals.ParticleType.AMINO_LYS:
+			return true
+		Globals.ParticleType.AMINO_TYR:
+			return true
+		Globals.ParticleType.AMINO_PRO:
+			return true
+		Globals.ParticleType.SUGAR:
+			return true
+	return false
+
+static func particle_type_is_resource(particle: int) -> bool:
+	match particle:
+		Globals.ParticleType.ANTI_MITOCHONDRION:
+			return true
+	return false
+
+static func particle_type_is_toxin(particle: int) -> bool:
+	match particle:
+		Globals.ParticleType.POISON_ALCOHOL, Globals.ParticleType.POISON_LYE, Globals.ParticleType.POISON_PLUTONIUM:
+			return true
+	return false
+
 # calculate pressure between own cell (having `own` particles) and another cell (having `other` particles).
 # There's a lot of tuning to be had here.
 # If the result is <= 0, no particles will be transferred
@@ -171,6 +221,32 @@ func _input(event):
 		if event.is_pressed():
 			if event.get_scancode() == KEY_F1:
 				debug_visual = not debug_visual
+
+static func cell_type_renders_particles(cell_type: int, particle_type: int) -> bool:
+	if cell_type == Globals.CellType.CAPTURED:
+		return true
+	elif cell_type == Globals.CellType.RESOURCE and Rules.particle_type_is_resource(particle_type):
+		return true
+	elif cell_type == Globals.CellType.TOXIC and Rules.particle_type_is_toxin(particle_type):
+		return true
+	return false
+
+static func cell_type_processes_recipes(type: int) -> bool:
+	return type == Globals.CellType.RESOURCE or type == Globals.CellType.CAPTURED
+	
+static func cell_type_has_toxin_recovery(type: int) -> bool:
+	return type == Globals.CellType.TOXIC or type == Globals.CellType.EMPTY
+
+static func cell_type_renders_recipe_progress(type: int) -> bool:
+	return type == Globals.CellType.CAPTURED
+
+static func cell_type_texture_resource(type: int) -> Array:
+	if type == Globals.CellType.EMPTY or type == Globals.CellType.CAPTURED:
+		return [preload("res://textures/hex.png"), preload("res://textures/hex_pink.png")]
+	elif type == Globals.CellType.UNDISCOVERED:
+		return [null, null]
+	else:
+		return [preload("res://textures/hex_gray.png"), preload("res://textures/hex_gray.png")]
 
 func select_cell(cell):
 	for oldcell in _selected_cells:

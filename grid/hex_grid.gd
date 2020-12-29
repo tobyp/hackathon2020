@@ -147,8 +147,8 @@ func discover_cell(cell):
 		return
 
 	print("Discovered %s on ring %d" % [cell, cell.ring_level])
-	# Set normal by default, the tech events can override this
-	cell.type = Globals.CellType.NORMAL
+	# Set empty by default, the tech events can override this
+	cell.type = Globals.CellType.EMPTY
 	
 	if cell.ring_level >= tech_tree.size():
 		print("No tech for ", cell)

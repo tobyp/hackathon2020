@@ -32,8 +32,10 @@ enum ParticleType {
 
 enum CellType {
 	UNDISCOVERED,
-	NORMAL,
 	RESOURCE,
+	TOXIC,
+	EMPTY,
+	CAPTURED,
 }
 
 enum PoisonType {
@@ -146,50 +148,6 @@ static func particle_type_get_mnemonic(particle: int) -> String:
 			return "(U)"
 	return "?"
 
-static func particle_type_is_factory(particle: int) -> bool:
-	match particle:
-		ParticleType.QUEEN:
-			return true
-		ParticleType.PRO_QUEEN:
-			return true
-		ParticleType.RIBOSOME_TRANSPORTER:
-			return true
-		ParticleType.RIBOSOME_ALCOHOL:
-			return true
-		ParticleType.RIBOSOME_LYE:
-			return true
-		ParticleType.ANTI_MITOCHONDRION:
-			return true
-		ParticleType.POISON_ALCOHOL:
-			return true
-		ParticleType.POISON_LYE:
-			return true
-		ParticleType.POISON_PLUTONIUM:
-			return true
-	return false
-
-static func particle_type_is_in_transporter(particle: int) -> bool:
-	match particle:
-		ParticleType.AMINO_PHE:
-			return true
-		ParticleType.AMINO_ALA:
-			return true
-		ParticleType.AMINO_LYS:
-			return true
-		ParticleType.AMINO_TYR:
-			return true
-		ParticleType.AMINO_PRO:
-			return true
-		ParticleType.SUGAR:
-			return true
-	return false
-
-static func particle_type_is_resource(particle: int) -> bool:
-	match particle:
-		ParticleType.ANTI_MITOCHONDRION, ParticleType.POISON_ALCOHOL, ParticleType.POISON_LYE, ParticleType.POISON_PLUTONIUM:
-			return true
-	return false
-
 static func particle_type_get_res(particle: int, outline: bool = false) -> String:
 	var image_name = "white_prot"
 	match particle:
@@ -281,10 +239,14 @@ static func cell_type_get_name(type: int) -> String:
 	match type:
 		CellType.UNDISCOVERED:
 			return "Undiscovered"
-		CellType.NORMAL:
-			return "Normal"
 		CellType.RESOURCE:
 			return "Resource"
+		CellType.TOXIC:
+			return "Toxic"
+		CellType.EMPTY:
+			return "Empty"
+		CellType.CAPTURED:
+			return "Captured"
 	return "Unknown Cell Type"
 
 static func get_enum_name(enu, value) -> String:

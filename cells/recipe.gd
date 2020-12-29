@@ -20,16 +20,16 @@ func _init(input: Dictionary, output: Dictionary, auto: bool = false, cool: floa
 	self.automatic = auto
 	self.cooldown = cool
 	for t in outputs:
-		if Globals.particle_type_is_factory(t):
+		if Rules.particle_type_is_factory(t):
 			_output_has_factory = true
 			break
 
 func recipe_matches(particle_counts: Dictionary) -> bool:
 	for t in Globals.ParticleType.values():
-		if inputs.has(t) and particle_counts[t] < inputs[t]:
+		if inputs.has(t) and particle_counts.get(t, 0) < inputs[t]:
 			return false
 		# Only one factory type per cell is allowed
-		if _output_has_factory and Globals.particle_type_is_factory(t) and !outputs.has(t) and particle_counts[t] > 0:
+		if _output_has_factory and Rules.particle_type_is_factory(t) and !outputs.has(t) and particle_counts.get(t, 0) > 0:
 			return false
 	return true
 

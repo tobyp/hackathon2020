@@ -6,7 +6,7 @@ signal particle_count_changed(cell, type, old_count, new_count)
 signal output_rule_changed(cell, neighbor, type, old_rule, new_rule)  # rule is a boolean, whether type is allowed to travel cell -> neighbor or not
 # Gets called when a cell gets visible, so that the hexgrid manager can
 # initialize it with the tech scripting engine
-signal discover(cell)
+signal type_changed(cell, old_type, new_type)
 signal selected(cell, status)
 
 ### MEMBERS
@@ -20,6 +20,7 @@ var neighbors = []
 var particle_counts = {}  # Dict[ParticleType, int]
 var output_rules = {}  # Dict[ParticleType, Dict[Cell, bool]], output_rules[PARTICLE_*][<Neighbor Cell>] = true/false, default false
 var _input_allowed = {}  # Dict[ParticleType, bool], default true
+var _output_allowed = {}  # Dict[ParticleType, bool], default true
 var poisons: Dictionary = {Globals.PoisonType.ANTI_BIOMASS: 1.0}  # Dict[PoisonType, float]
 var poison_recoveries: Dictionary = {}  # Dict[PoisonType, [float rate, float ceiling]]
 # 0 = Ready
@@ -36,28 +37,51 @@ var selected: bool = false setget _set_selected, _get_selected
 var _output_valves = {}  # Dict[Cell, float]
 
 ### API
-func init_resource(resource_particle: int, biomass: bool = true):
-	self.type = Globals.CellType.RESOURCE
-	if not biomass:
-		self.set_poison(Globals.PoisonType.ANTI_BIOMASS, 1.0)
-	self.set_input_allowed([Globals.ParticleType.PROTEIN_TRANSPORTER])
-	self.add_particles(resource_particle, 1, false, true)
+func init_resource(resource_particle: int, anti_biomass: bool = 0.0):
+	self.set_poison(Globals.PoisonType.ANTI_BIOMASS, anti_biomass)  # otherwise all transporters die on entry
+	self.set_input_allowed([Globals.ParticleType.PROTEIN_TRANSPORTER])  # otherwise particles get trapped
+	self.set_output_allowed([resource_particle])
+	self.add_particles(resource_particle, 1)
+	_set_type(Globals.CellType.RESOURCE)
 
-func init_poison(poison_type: int, strength: float = 1.0, biomass: bool = false):
-	self.type = Globals.CellType.RESOURCE
-	if not biomass:
-		self.set_poison(Globals.PoisonType.ANTI_BIOMASS, 1.0)
+func init_poison(poison_type: int, strength: float = 1.0, anti_biomass: float = 1.0):
+	_set_type(Globals.CellType.TOXIC)
+	self.set_poison(Globals.PoisonType.ANTI_BIOMASS, anti_biomass)
 	self.set_poison(poison_type, strength)
 
-func init_empty(biomass: bool = false):
-	self.type = Globals.CellType.NORMAL
-	if not biomass:
-		self.set_poison(Globals.PoisonType.ANTI_BIOMASS, 1.0)
+func init_empty(anti_biomass: float = 1.0):
+	_set_type(Globals.CellType.EMPTY)
+	self.set_poison(Globals.PoisonType.ANTI_BIOMASS, anti_biomass)
 
-func init_undiscovered(biomass: bool = false):
-	self.type = Globals.CellType.UNDISCOVERED
-	if not biomass:
-		self.set_poison(Globals.PoisonType.ANTI_BIOMASS, 1.0)
+func init_captured(anti_biomass: float = 0.0):
+	self.set_poison(Globals.PoisonType.ANTI_BIOMASS, anti_biomass)
+	_set_type(Globals.CellType.CAPTURED)
+
+func init_undiscovered(anti_biomass: float = 1.0):
+	self.set_poison(Globals.PoisonType.ANTI_BIOMASS, anti_biomass)
+	_set_type(Globals.CellType.UNDISCOVERED)
+
+# NOTE: this is intended to be checked when configuring walls, not for every actual transfer.
+func set_input_allowed(allowed: Array):
+	for t in Globals.ParticleType.values():
+		self._input_allowed[t] = allowed.has(t)
+
+func input_allowed(type: int) -> bool:
+	if self.type != Globals.CellType.CAPTURED and self.type != Globals.CellType.RESOURCE and self.type != Globals.CellType.TOXIC and self.type != Globals.CellType.EMPTY:
+		return false
+	# Sacrificing your particles to toxins is allowed...
+	assert(self.type != Globals.CellType.RESOURCE or self.input_allowed.size() > 0, "RESOURCE cells should have explicit input_allowed values")
+	return self._input_allowed.get(type, true)
+
+func set_output_allowed(allowed: Array):
+	for t in Globals.ParticleType.values():
+		self._output_allowed[t] = allowed.has(t)
+
+func output_allowed(type: int, neighbor: Cell) -> bool:
+	if self.type != Globals.CellType.CAPTURED and self.type != Globals.CellType.RESOURCE:
+		return false
+	assert(self.type != Globals.CellType.RESOURCE or self._output_allowed.size() > 0, "RESOURCE cells should have explicit output_allowed values")
+	return self._output_allowed.get(type, true)
 
 # Are particles of type `type` allowed to be pushed to `neighbor`?
 # Note, there is no `input_rule(type, neighbor)`, use `neighbor.output_rule(type, self)` instead
@@ -66,29 +90,16 @@ func output_rule(type: int, neighbor: Cell) -> bool:
 		return false  # default is closed
 	return self.output_rules[type].get(neighbor, false)
 
-func input_allowed(type: int) -> bool:
-	if self.type == Globals.CellType.UNDISCOVERED:
-		return false
-	return self._input_allowed.get(type, true)
-	
-func set_input_allowed(allowed: Array):
-	for t in Globals.ParticleType.values():
-		self._input_allowed[t] = allowed.has(t)
-
-func output_allowed(type: int, neighbor: Cell) -> bool:
-	if self.type == Globals.CellType.UNDISCOVERED:
-		return false
-	return self.neighbors.has(neighbor) and neighbor.input_allowed(type)
-
-# returns the new stat eof the rule
+# returns the new state of the rule
 func set_output_rule(type: int, neighbor: Cell, rule: bool) -> bool:
 	if not self.neighbors.has(neighbor):
 		print("%s: Invalid output rule! %s is not a neighbor" % [self, neighbor])
 		return false
+	if not self.output_allowed(type, neighbor):
+		print("%s: Invalid output rule! %s does not allow %s as output" % [self, self, Globals.particle_type_get_name(type)])
+		return false
 	if not neighbor.input_allowed(type):
 		print("%s: Invalid output rule! %s does not allow %s as input" % [self, neighbor, Globals.particle_type_get_name(type)])
-		return false
-	if self.type == Globals.CellType.UNDISCOVERED:
 		return false
 	if not self.output_rules.has(type):
 		self.output_rules[type] = {}
@@ -103,17 +114,18 @@ func set_poison(poison: int, value: float):
 		if poisons.has(poison):
 			var poison_particle_type = Globals.poison_type_get_particle_type(poison)
 			if poison_particle_type != -1:
-				self.remove_particles(poison_particle_type, 1)
-				self.remove_particles(poison_particle_type, self.particle_counts[poison_particle_type], true)
+				assert(self.particle_counts.get(poison_particle_type, 0) == 1, "There should only ever be one particle per poison type")
+				self.remove_particles(poison_particle_type, self.particle_counts.get(poison_particle_type, 0))
 		self.poisons.erase(poison)
-		self.poison_recoveries.erase(poison)
+		self.poison_recoveries.erase(poison)  # once it's broken down, it can't recover
 		self._detect_type()
 	else:
 		if not self.poisons.has(poison):
 			var poison_particle_type = Globals.poison_type_get_particle_type(poison)
 			if poison_particle_type != -1:
-				self.add_particles(poison_particle_type, 1, false, true)
+				self.add_particles(poison_particle_type, 1)
 		self.poisons[poison] = value
+		self._detect_type()
 	if poison == Globals.PoisonType.ANTI_BIOMASS:
 		$Gfx.material.set_shader_param("percentage", 1.0 - clamp(value, 0, 1.0))
 
@@ -121,7 +133,7 @@ func get_poison(poison: int) -> float:
 	return self.poisons.get(poison, 0.0)
 
 # Add *new* particles - particle nodes will be created as necessary
-func add_particles(type: int, count: int = 1, anywhere: bool = true, override_cell_type: bool = false):
+func add_particles(type: int, count: int = 1, anywhere: bool = true):
 	var recv_result = self._recv_particles(type, count)
 	if recv_result[1] > 0:
 		var type_name = Globals.particle_type_get_name(type)
@@ -130,32 +142,44 @@ func add_particles(type: int, count: int = 1, anywhere: bool = true, override_ce
 	var old_count = particle_counts.get(type, 0)
 	var new_count = old_count + count
 	particle_counts[type] = new_count
-	if self.type == Globals.CellType.NORMAL or override_cell_type:
+	if Rules.cell_type_renders_particles(self.type, type):
 		self._put_particle_nodes(self._create_particle_nodes(type, count, anywhere))
 	emit_signal("particle_count_changed", self, type, old_count, new_count)
 
-func remove_particles(type: int, count: int, override_cell_type: bool = false) -> int:
+func remove_particles(type: int, count: int) -> int:
 	var old_count = particle_counts.get(type, 0)
 	count = min(old_count, count) as int  # don't remove more than we have
 	var new_count = old_count - count;
 	particle_counts[type] = new_count
 	emit_signal("particle_count_changed", self, type, old_count, new_count)
-	if self.type == Globals.CellType.NORMAL or override_cell_type:
+	if Rules.cell_type_renders_particles(self.type, type):
 		self._free_particle_nodes(self._take_particle_nodes(type, count))
 	return old_count - new_count
 
 func _detect_type() -> int:
+	# check criteria in order; first criteria that match determine type
 	if type == Globals.CellType.UNDISCOVERED:
 		return Globals.CellType.UNDISCOVERED
+
+	var poisons_count = self.poisons.size()
+	var needs_biomass = self.poisons.has(Globals.PoisonType.ANTI_BIOMASS)
+	if needs_biomass:
+		poisons_count -= 1
+	if poisons_count > 0:
+		return _set_type(Globals.CellType.TOXIC)
+
 	var contains_resource = false
 	for t in self.particle_counts:
-		if self.particle_counts[t] > 0 and Globals.particle_type_is_resource(t):
+		if self.particle_counts.get(t, 0) > 0 and Rules.particle_type_is_resource(t):
 			contains_resource = true
 			break
 	if contains_resource:
 		return _set_type(Globals.CellType.RESOURCE)
-	else:
-		return _set_type(Globals.CellType.NORMAL)
+
+	if needs_biomass:
+		return _set_type(Globals.CellType.EMPTY)
+
+	return _set_type(Globals.CellType.CAPTURED)
 
 func _get_type() -> int:
 	return type
@@ -163,24 +187,32 @@ func _get_type() -> int:
 func _set_type(type_: int) -> int:
 	if type == type_:
 		return type
+	var old_type = type
 	type = type_
+	
+	var material = $Gfx.material as ShaderMaterial
+	var textures = Rules.cell_type_texture_resource(type)
+	$Gfx.visible = textures[0] != null
+	material.set_shader_param("base_tex", textures[0])
+	material.set_shader_param("blend_tex", textures[1])
 
-	$Gfx.visible = type == Globals.CellType.NORMAL
-	$GfxResource.visible = type == Globals.CellType.RESOURCE
-	if type != Globals.CellType.NORMAL:
-		_free_particle_nodes(_take_all_particle_nodes())
-	else:
-		for t in self.particle_counts:
-			self.add_particles(t, self.particle_counts[t])
+	for t in particle_counts:
+		if Rules.cell_type_renders_particles(old_type, t) and not Rules.cell_type_renders_particles(type, t):
+			_free_particle_nodes(_take_particle_nodes(t, particle_counts[t]))
+		if not Rules.cell_type_renders_particles(old_type, t) and Rules.cell_type_renders_particles(type, t):
+			_put_particle_nodes(_create_particle_nodes(t, self.particle_counts[t]))
+
+	emit_signal("type_changed", old_type, type)
 	return type
 
 # Called every game step.
 func simulate(delta):
-	if type != Globals.CellType.UNDISCOVERED:
+	if Rules.cell_type_has_toxin_recovery(type):
 		_process_poison_recovery(delta)
-		if type == Globals.CellType.NORMAL:
-			_process_sugar_usage(delta)
+	if type == Globals.CellType.CAPTURED:
+		pass # _process_sugar_usage(delta)  # TODO reenable this, it's just commented to ease debugging
 		_process_pressure(delta)
+	if Rules.cell_type_processes_recipes(type):
 		_process_recipes(delta)
 	_display_debug()
 
@@ -189,12 +221,10 @@ func simulate(delta):
 # with anywhere=true, anywhere in the cell, and with anywhere=false, near the center (moving outwards)
 # this doesn't reach the corners, but that's okay for now
 # clearance is how far inside the edge the point must be (to avoid generating particles intersecting the cell border)
-static func _random_coord_in_cell(clearance: float, anywhere: bool = true) -> Vector2:
+static func _random_coord_in_cell(clearance: float) -> Vector2:
 	var phi = Rules.rng.randf_range(0, 2*PI)
-	var dist = 0
-	if anywhere:
-		Rules.rng.randf_range(0, sqrt(HexGrid.size_x / 2 - clearance))
-		dist = dist * dist
+	var dist = Rules.rng.randf_range(0, sqrt(HexGrid.size_x / 2 - clearance))
+	dist = dist * dist
 	return Vector2(dist * cos(phi), dist * sin(phi));
 
 static func _random_velocity() -> Vector2:
@@ -204,12 +234,13 @@ static func _random_velocity() -> Vector2:
 
 ### UTILTIY/PRIVATE
 func _particle_init(particle: CellParticle, anywhere: bool = true):
-	if Globals.particle_type_is_factory(particle.type):
+	if Rules.particle_type_is_factory(particle.type):
 		particle.translate(Vector2.ZERO)
 		particle.velocity = Vector2.ZERO
 		particle.set_texture_material(auto_recipe_material)
 	else:
-		particle.translate(_random_coord_in_cell(particle.collision_radius, anywhere))
+		if anywhere:
+			particle.translate(_random_coord_in_cell(particle.collision_radius))
 		particle.velocity = _random_velocity()
 
 ## PARTICLE NODE FUNCTIONS - these do not modify `particle_counts`!
@@ -304,21 +335,19 @@ func _send_particles(type: int, dest: Cell, count: int):
 	self.emit_signal("particle_count_changed", self, type, src_old_count, src_new_count)
 	dest.emit_signal("particle_count_changed", self, type, dst_old_count, dst_new_count)
 	var particles_transfer = []
-	if self.type == Globals.CellType.NORMAL:
+	if Rules.cell_type_renders_particles(self.type, type):
 		_free_particle_nodes(self._take_particle_nodes(type, recv_result[1]))
 		particles_transfer = self._take_particle_nodes(type, recv_result[0])
-	if dest.type == Globals.CellType.NORMAL:
+	if Rules.cell_type_renders_particles(dest.type, type):
 		dest._put_particle_nodes(particles_transfer)
 		dest._put_particle_nodes(_create_particle_nodes(type, recv_result[0] - particles_transfer.size()))
+	else:
+		_free_particle_nodes(particles_transfer)
 
 ### OVERRIDES
 func _ready():
 	$ClickArea.connect("input_event", self, "_on_cell_click")
-	$Gfx.visible = false
 	$Gfx.set_material($Gfx.get_material().duplicate())
-	for t in Globals.ParticleType.values():
-		self.particle_counts[t] = 0
-		self.output_rules[t] = {}
 
 func _process(delta):
 	if auto_recipe_cooldown != 0:
@@ -364,7 +393,7 @@ func _process_pressure(delta):
 func _process_sugar_usage(delta):
 	var sugar_required = 0
 	for t in particle_counts:
-		sugar_required += particle_counts[t] * Rules.sugar_requirement(t) * delta
+		sugar_required += particle_counts.get(t, 0) * Rules.sugar_requirement(t) * delta
 	if sugar_required == 0:
 		_enable_sugar_warning(false)
 		return
@@ -373,7 +402,7 @@ func _process_sugar_usage(delta):
 	if sugar_required - float(sugar_used) > Rules.rng.randf():
 		sugar_used += 1
 	if sugar_used == 0:
-		if particle_counts[Globals.ParticleType.SUGAR] > 0:
+		if particle_counts.get(Globals.ParticleType.SUGAR, 0) > 0:
 			_enable_sugar_warning(false)
 		return
 
@@ -383,17 +412,17 @@ func _process_sugar_usage(delta):
 		if sugar_used == 0:
 			break
 		notEnoughSugar = t != Globals.ParticleType.SUGAR
-		var old_t_count = particle_counts[t]
+		var old_t_count = particle_counts.get(t, 0)
 		if old_t_count == 0:
 			continue
 		var removing = min(old_t_count, sugar_used)
 		sugar_used -= removing
-		if Globals.particle_type_is_in_transporter(t):
+		if Rules.particle_type_is_in_transporter(t):
 			# Change type instead
 			var new_t_count = old_t_count - removing
 			particle_counts[t] = new_t_count
 			emit_signal("particle_count_changed", self, t, old_t_count, new_t_count)
-			var old_transporter_count = particle_counts[Globals.ParticleType.PROTEIN_TRANSPORTER]
+			var old_transporter_count = particle_counts.get(Globals.ParticleType.PROTEIN_TRANSPORTER, 0)
 			var new_transporter_count = old_transporter_count + removing
 			emit_signal("particle_count_changed", self, Globals.ParticleType.PROTEIN_TRANSPORTER, old_transporter_count, new_transporter_count)
 			particle_counts[Globals.ParticleType.PROTEIN_TRANSPORTER] = new_transporter_count
@@ -472,15 +501,15 @@ func _manual_craft(r: Recipe):
 
 func _craft(r: Recipe):
 	for t in r.inputs:
-		assert(particle_counts[t] >= r.inputs[t], "Cannot craft…")
-		if !Globals.particle_type_is_factory(t):
+		assert(particle_counts.get(t, 0) >= r.inputs[t], "Cannot craft…")
+		if !Rules.particle_type_is_factory(t):
 			# Factories are not used
 			remove_particles(t, r.inputs[t])
 	for t in r.outputs:
 		add_particles(t, r.outputs[t], false)
 
 func _update_recipe_cooldown():
-	if type != Globals.CellType.NORMAL:
+	if not Globals.cell_type_renders_recipe_progress(type):
 		return
 	if auto_recipe_cooldown == 0:
 		auto_recipe_material.set_shader_param("percentage", 1.0)
