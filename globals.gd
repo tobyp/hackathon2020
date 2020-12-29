@@ -184,6 +184,12 @@ static func particle_type_is_in_transporter(particle: int) -> bool:
 			return true
 	return false
 
+static func particle_type_is_resource(particle: int) -> bool:
+	match particle:
+		ParticleType.ANTI_MITOCHONDRION, ParticleType.POISON_ALCOHOL, ParticleType.POISON_LYE, ParticleType.POISON_PLUTONIUM:
+			return true
+	return false
+
 static func particle_type_get_res(particle: int, outline: bool = false) -> String:
 	var image_name = "white_prot"
 	match particle:

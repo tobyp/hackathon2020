@@ -81,13 +81,15 @@ func set_poison(poison: int, value: float):
 			var poison_particle_type = Globals.poison_type_get_particle_type(poison)
 			if poison_particle_type != -1:
 				self.remove_particles(poison_particle_type, 1)
+				self.remove_particles(poison_particle_type, self.particle_counts[poison_particle_type], true)
 		self.poisons.erase(poison)
 		self.poison_recoveries.erase(poison)
+		self._detect_type()
 	else:
 		if not self.poisons.has(poison):
 			var poison_particle_type = Globals.poison_type_get_particle_type(poison)
 			if poison_particle_type != -1:
-				self.add_particles(poison_particle_type, 1)
+				self.add_particles(poison_particle_type, 1, false, true)
 		self.poisons[poison] = value
 	if poison == Globals.PoisonType.ANTI_BIOMASS:
 		$Gfx.material.set_shader_param("percentage", 1.0 - clamp(value, 0, 1.0))
@@ -96,7 +98,7 @@ func get_poison(poison: int) -> float:
 	return self.poisons.get(poison, 0.0)
 
 # Add *new* particles - particle nodes will be created as necessary
-func add_particles(type: int, count: int = 1, anywhere: bool = true):
+func add_particles(type: int, count: int = 1, anywhere: bool = true, override_cell_type: bool = false):
 	var recv_result = self._recv_particles(type, count)
 	if recv_result[1] > 0:
 		var type_name = Globals.particle_type_get_name(type)
@@ -105,19 +107,32 @@ func add_particles(type: int, count: int = 1, anywhere: bool = true):
 	var old_count = particle_counts.get(type, 0)
 	var new_count = old_count + count
 	particle_counts[type] = new_count
-	if self.type == Globals.CellType.NORMAL or Globals.particle_type_is_factory(type):
+	if self.type == Globals.CellType.NORMAL or override_cell_type:
 		self._put_particle_nodes(self._create_particle_nodes(type, count, anywhere))
 	emit_signal("particle_count_changed", self, type, old_count, new_count)
 
-func remove_particles(type: int, count: int) -> int:
+func remove_particles(type: int, count: int, override_cell_type: bool = false) -> int:
 	var old_count = particle_counts.get(type, 0)
 	count = min(old_count, count) as int  # don't remove more than we have
 	var new_count = old_count - count;
 	particle_counts[type] = new_count
 	emit_signal("particle_count_changed", self, type, old_count, new_count)
-	if self.type == Globals.CellType.NORMAL or not Globals.particle_type_is_factory(type):
+	if self.type == Globals.CellType.NORMAL or override_cell_type:
 		self._free_particle_nodes(self._take_particle_nodes(type, count))
 	return old_count - new_count
+
+func _detect_type() -> int:
+	if type == Globals.CellType.UNDISCOVERED:
+		return Globals.CellType.UNDISCOVERED
+	var contains_resource = false
+	for t in self.particle_counts:
+		if self.particle_counts[t] > 0 and Globals.particle_type_is_resource(t):
+			contains_resource = true
+			break
+	if contains_resource:
+		return _set_type(Globals.CellType.RESOURCE)
+	else:
+		return _set_type(Globals.CellType.NORMAL)
 
 func _get_type() -> int:
 	return type
@@ -139,8 +154,8 @@ func _set_type(type_: int) -> int:
 # Called every game step.
 func simulate(delta):
 	if type != Globals.CellType.UNDISCOVERED:
+		_process_poison_recovery(delta)
 		if type == Globals.CellType.NORMAL:
-			_process_poison_recovery(delta)
 			_process_sugar_usage(delta)
 		_process_pressure(delta)
 		_process_recipes(delta)
@@ -207,11 +222,11 @@ func _take_particle_nodes(type: int, count: int = 1) -> Array:
 	# print("%s: taking %d %s" % [self, count, Globals.particle_type_get_name(type)])
 	return result
 
-func _take_nonfactory_nodes() -> Array:
+func _take_all_particle_nodes() -> Array:
 	# print("%s: taking %d %s" % [self, count, Globals.particle_type_get_name(type)])
 	var result = [];
 	for c in $Particles.get_children():
-		if c is CellParticle and not Globals.particle_type_is_factory(c.type):
+		if c is CellParticle:
 			$Particles.remove_child(c)
 			result.append(c)
 	return result
@@ -454,8 +469,7 @@ func _on_cell_click(viewport, event, shape_idx):
 		if event.button_index == BUTTON_LEFT and event.is_pressed():
 			print("Clicked: %s ev: %s" % [self, event])
 			Rules.select_cell(self)
-			emit_signal("discover", self) # TODO this is only for debugginh
-			
+
 func _set_selected(_selected: bool):
 	if _selected != self.selected:
 		emit_signal("selected", self, _selected)

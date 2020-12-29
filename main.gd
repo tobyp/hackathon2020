@@ -47,16 +47,17 @@ func debug_populate():
 	cell4.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
 	cell4.add_particles(Globals.ParticleType.PROTEIN_WHITE, 60)
 	cell4.add_particles(Globals.ParticleType.AMINO_ALA, 1)
+	cell4.add_particles(Globals.ParticleType.ENZYME_ALCOHOL, 52)
 	#cell4.add_particles(Globals.ParticleType.RIBOSOME_ALCOHOL, 1)
 
 	var cell5 = $HexGrid.create_cell(-1,-1)
 	cell5.type = Globals.CellType.RESOURCE
 	cell5.set_poison(Globals.PoisonType.ALCOHOL, 1.0)
-	cell5.add_particles(Globals.ParticleType.POISON_ALCOHOL, 1)
 
 	var cell6 = $HexGrid.create_cell(-1,0)
-	cell6.type = Globals.CellType.NORMAL
+	cell6.type = Globals.CellType.RESOURCE
 	cell6.set_input_allowed([Globals.ParticleType.PROTEIN_TRANSPORTER])
+	cell6.add_particles(Globals.ParticleType.ANTI_MITOCHONDRION, 1, false, true)
 	cell6.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
 	cell6.add_particles(Globals.ParticleType.ANTI_MITOCHONDRION, 1)
 	cell6.type = Globals.CellType.RESOURCE
