@@ -73,6 +73,20 @@ static func apply_tech(tech_type: int, cell: Cell):
 static func sugar_requirement(type: int) -> float:
 	return 0.05
 
+# Which particles have tunnels
+const TUNNEL_TYPES: Array = [
+	Globals.ParticleType.PROTEIN_WHITE,
+	Globals.ParticleType.PROTEIN_TRANSPORTER,
+	Globals.ParticleType.ENZYME_ALCOHOL,
+	Globals.ParticleType.ENZYME_LYE,
+	Globals.ParticleType.AMINO_PHE,
+	Globals.ParticleType.AMINO_ALA,
+	Globals.ParticleType.AMINO_LYS,
+	Globals.ParticleType.AMINO_TYR,
+	Globals.ParticleType.AMINO_PRO,
+	Globals.ParticleType.SUGAR,
+]
+
 # The order in which particles get destroyed if there is not enough sugar.
 const SUGAR_DEATH_ORDER: Array = [
 	Globals.ParticleType.SUGAR,

@@ -7,7 +7,6 @@ var shaft_png
 var start_cell
 var end_cell
 
-var possible_particle_types
 
 enum TunnelState {
 	OPEN_LEFT,
@@ -39,21 +38,9 @@ class Tunnel:
 func _ready():
 	head_png = preload("res://ui/arrowhead.png")
 	shaft_png = preload("res://ui/arrowshaft.png")
-	
-	possible_particle_types = [
-		Globals.ParticleType.PROTEIN_WHITE,
-		Globals.ParticleType.PROTEIN_TRANSPORTER,
-		Globals.ParticleType.ENZYME_ALCOHOL,
-		Globals.ParticleType.ENZYME_LYE,
-		Globals.ParticleType.AMINO_PHE,
-		Globals.ParticleType.AMINO_ALA,
-		Globals.ParticleType.AMINO_LYS,
-		Globals.ParticleType.AMINO_TYR,
-		Globals.ParticleType.AMINO_PRO,
-		Globals.ParticleType.SUGAR,
-	]
 	# calculate state, save references to UI nodes
-	for particle_type in possible_particle_types:
+	var i = 0
+	for particle_type in Rules.TUNNEL_TYPES:
 		var color = Globals.particle_type_get_color(particle_type)
 		var state = _calculate_tunnel_state(particle_type, start_cell, end_cell)
 		tunnels.append(Tunnel.new(particle_type, color, state))
