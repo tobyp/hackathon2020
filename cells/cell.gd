@@ -46,8 +46,9 @@ func output_rule(type: int, neighbor: Cell) -> bool:
 func input_allowed(type: int) -> bool:
 	return self._input_allowed.get(type, true)
 	
-func set_input_allowed(type: int, allowed: bool):
-	self._input_allowed[type] = allowed
+func set_input_allowed(allowed: Array):
+	for t in Globals.ParticleType.values():
+		self._input_allowed[t] = allowed.has(t)
 
 func output_allowed(type: int, neighbor: Cell) -> bool:
 	return self.neighbors.has(neighbor) and neighbor.input_allowed(type)

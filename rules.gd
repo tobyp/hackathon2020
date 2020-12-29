@@ -59,6 +59,7 @@ static func apply_tech(tech_type: int, cell: Cell):
 			cell.add_particles(Globals.ParticleType.AMINO_PHE, 1)
 		Globals.TechType.SUGAR_CELL:
 			cell.set_poison(Globals.PoisonType.ANTI_BIOMASS, 0.0)
+			cell.set_input_allowed([Globals.ParticleType.PROTEIN_TRANSPORTER])
 			cell.add_particles(Globals.ParticleType.ANTI_MITOCHONDRION, 1)
 			cell.type = Globals.CellType.RESOURCE
 		Globals.TechType.DEBUG_PARTICLES:
