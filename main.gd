@@ -22,6 +22,8 @@ func _ready():
 		var the_angle = (start_pos.direction_to(end_pos)).angle()
 		# print("the middle of "+str(start_pos)+" and "+str(end_pos)+" is "+str(middle)+ ", angl "+str(the_angle))
 		$HexGrid.create_tunnels(middle, the_angle, start_cell, end_cell)
+		
+	$AnimationPlayer.play("CameraZoomIn")
 
 func debug_populate():
 	var cell1 = $HexGrid.create_cell(0, 0)  # 1-indexed becase that matches the names in _to_string
