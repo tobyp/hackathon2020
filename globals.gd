@@ -38,7 +38,7 @@ enum CellType {
 	CAPTURED,
 }
 
-enum PoisonType {
+enum ToxinType {
 	ANTI_BIOMASS,
 	ALCOHOL,
 	LYE,
@@ -182,11 +182,11 @@ static func particle_type_get_res(particle: int, outline: bool = false) -> Strin
 		ParticleType.ANTI_MITOCHONDRION:
 			image_name = "sugar"
 		ParticleType.POISON_ALCOHOL:
-			image_name = "poison_flammable"
+			image_name = "toxin_flammable"
 		ParticleType.POISON_LYE:
-			image_name = "poison_corrosive"
+			image_name = "toxin_corrosive"
 		ParticleType.POISON_PLUTONIUM:
-			image_name = "poison_radioactive"
+			image_name = "toxin_radioactive"
 
 	if "ribosome" in image_name and outline:
 		image_name += "_outline"
@@ -213,25 +213,25 @@ static func particle_type_get_color(particle: int) -> Color:
 			return Color.black
 	return Color.black
 
-static func poison_type_get_name(poison: int) -> String:
-	match poison:
-		PoisonType.ALCOHOL:
+static func toxin_type_get_name(toxin: int) -> String:
+	match toxin:
+		ToxinType.ALCOHOL:
 			return "Alcohol"
-		PoisonType.LYE:
+		ToxinType.LYE:
 			return "Lye"
-		PoisonType.PLUTONIUM:
+		ToxinType.PLUTONIUM:
 			return "Plutonium"
-		PoisonType.ANTI_BIOMASS:
+		ToxinType.ANTI_BIOMASS:
 			return "Anti-Biomass"
-	return "Unknown Poison"
+	return "Unknown Toxin"
 
-static func poison_type_get_particle_type(poison: int) -> int:
-	match poison:
-		PoisonType.ALCOHOL:
+static func toxin_type_get_particle_type(toxin: int) -> int:
+	match toxin:
+		ToxinType.ALCOHOL:
 			return ParticleType.POISON_ALCOHOL
-		PoisonType.LYE:
+		ToxinType.LYE:
 			return ParticleType.POISON_LYE
-		PoisonType.PLUTONIUM:
+		ToxinType.PLUTONIUM:
 			return ParticleType.POISON_PLUTONIUM
 	return -1
 

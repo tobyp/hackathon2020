@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/toxin_flammable.png-6271f36097877210f4a121cf9a879250.stex"
+path="res://.import/toxin_radioactive.png-108e79d0ccd4b6b11b285e82c87ca15b.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://textures/toxin_flammable.png"
-dest_files=[ "res://.import/toxin_flammable.png-6271f36097877210f4a121cf9a879250.stex" ]
+source_file="res://textures/toxin_radioactive.png"
+dest_files=[ "res://.import/toxin_radioactive.png-108e79d0ccd4b6b11b285e82c87ca15b.stex" ]
 
 [params]
 

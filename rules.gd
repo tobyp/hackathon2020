@@ -60,9 +60,9 @@ static func apply_tech(tech_type: int, cell: Cell):
 		Globals.TechType.SUGAR_CELL:
 			cell.init_resource(Globals.ParticleType.ANTI_MITOCHONDRION)
 		Globals.TechType.POISON_ALCOHOL:
-			cell.init_poison(Globals.PoisonType.ALCOHOL)
+			cell.init_toxin(Globals.ToxinType.ALCOHOL)
 		Globals.TechType.POISON_LYE:
-			cell.init_poison(Globals.PoisonType.LYE)
+			cell.init_toxin(Globals.ToxinType.LYE)
 		Globals.TechType.DEBUG_PARTICLES:
 			cell.init_captured()
 			cell.add_particles(Globals.ParticleType.PROTEIN_WHITE, 20)
@@ -104,20 +104,20 @@ const SUGAR_DEATH_ORDER: Array = [
 	#Globals.ParticleType.PRO_QUEEN,
 ];
 
-static func particle_type_get_poison_potency(particle: int, poison: int, poisons: Dictionary) -> float:
+static func particle_type_get_toxin_potency(particle: int, toxin: int, toxins: Dictionary) -> float:
 	match particle:
 		Globals.ParticleType.ENZYME_ALCOHOL:
-			if poison == Globals.PoisonType.ALCOHOL:
+			if toxin == Globals.ToxinType.ALCOHOL:
 				return 1.0 / 50.0
 		Globals.ParticleType.ENZYME_LYE:
-			if poison == Globals.PoisonType.LYE:
+			if toxin == Globals.ToxinType.LYE:
 				return 1.0/100.0
 		Globals.ParticleType.PROTEIN_WHITE:
-			if poison == Globals.PoisonType.ANTI_BIOMASS and poisons.size() == 1:  # this only works if there are no other poisons
+			if toxin == Globals.ToxinType.ANTI_BIOMASS and toxins.size() == 1:  # this only works if there are no other toxins
 				return 1.0/25.0
 	return 0.0
 
-static func particle_type_poison_susceptible(particle: int, poison: int) -> bool:
+static func particle_type_toxin_susceptible(particle: int, toxin: int) -> bool:
 	match particle:
 		Globals.ParticleType.POISON_ALCOHOL, Globals.ParticleType.POISON_LYE, Globals.ParticleType.POISON_LYE, Globals.ParticleType.ANTI_MITOCHONDRION:
 			return false

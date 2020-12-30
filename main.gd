@@ -31,7 +31,7 @@ func debug_populate():
 
 	var cell2 = $HexGrid.create_cell(1,0)
 	cell2.init_empty()
-	cell2.poison_recoveries = {Globals.PoisonType.ANTI_BIOMASS: [0.001, 1.0]}
+	cell2.toxin_recoveries = {Globals.ToxinType.ANTI_BIOMASS: [0.001, 1.0]}
 
 	var cell3 = $HexGrid.create_cell(0,1)
 	cell3.init_captured()
@@ -47,7 +47,7 @@ func debug_populate():
 	#cell4.add_particles(Globals.ParticleType.RIBOSOME_ALCOHOL, 1)
 
 	var cell5 = $HexGrid.create_cell(-1,-1)
-	cell5.init_poison(Globals.PoisonType.ALCOHOL)
+	cell5.init_toxin(Globals.ToxinType.ALCOHOL)
 
 	var cell6 = $HexGrid.create_cell(-1,0)
 	cell6.init_resource(Globals.ParticleType.ANTI_MITOCHONDRION)

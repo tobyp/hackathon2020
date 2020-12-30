@@ -21,8 +21,8 @@ var particle_counts = {}  # Dict[ParticleType, int]
 var output_rules = {}  # Dict[ParticleType, Dict[Cell, bool]], output_rules[PARTICLE_*][<Neighbor Cell>] = true/false, default false
 var _input_allowed = {}  # Dict[ParticleType, bool], default true
 var _output_allowed = {}  # Dict[ParticleType, bool], default true
-var poisons: Dictionary = {Globals.PoisonType.ANTI_BIOMASS: 1.0}  # Dict[PoisonType, float]
-var poison_recoveries: Dictionary = {}  # Dict[PoisonType, [float rate, float ceiling]]
+var toxins: Dictionary = {Globals.ToxinType.ANTI_BIOMASS: 1.0}  # Dict[ToxinType, float]
+var toxin_recoveries: Dictionary = {}  # Dict[ToxinType, [float rate, float ceiling]]
 # 0 = Ready
 var auto_recipe_cooldown = 0
 var auto_recipe_cooldown_max = 0
@@ -38,27 +38,27 @@ var _output_valves = {}  # Dict[Cell, float]
 
 ### API
 func init_resource(resource_particle: int, anti_biomass: bool = 0.0):
-	self.set_poison(Globals.PoisonType.ANTI_BIOMASS, anti_biomass)  # otherwise all transporters die on entry
+	self.set_toxin(Globals.ToxinType.ANTI_BIOMASS, anti_biomass)  # otherwise all transporters die on entry
 	self.set_input_allowed([Globals.ParticleType.PROTEIN_TRANSPORTER])  # otherwise particles get trapped
 	self.set_output_allowed([resource_particle])
 	self.add_particles(resource_particle, 1)
 	_set_type(Globals.CellType.RESOURCE)
 
-func init_poison(poison_type: int, strength: float = 1.0, anti_biomass: float = 1.0):
+func init_toxin(toxin_type: int, strength: float = 1.0, anti_biomass: float = 1.0):
 	_set_type(Globals.CellType.TOXIC)
-	self.set_poison(Globals.PoisonType.ANTI_BIOMASS, anti_biomass)
-	self.set_poison(poison_type, strength)
+	self.set_toxin(Globals.ToxinType.ANTI_BIOMASS, anti_biomass)
+	self.set_toxin(toxin_type, strength)
 
 func init_empty(anti_biomass: float = 1.0):
 	_set_type(Globals.CellType.EMPTY)
-	self.set_poison(Globals.PoisonType.ANTI_BIOMASS, anti_biomass)
+	self.set_toxin(Globals.ToxinType.ANTI_BIOMASS, anti_biomass)
 
 func init_captured(anti_biomass: float = 0.0):
-	self.set_poison(Globals.PoisonType.ANTI_BIOMASS, anti_biomass)
+	self.set_toxin(Globals.ToxinType.ANTI_BIOMASS, anti_biomass)
 	_set_type(Globals.CellType.CAPTURED)
 
 func init_undiscovered(anti_biomass: float = 1.0):
-	self.set_poison(Globals.PoisonType.ANTI_BIOMASS, anti_biomass)
+	self.set_toxin(Globals.ToxinType.ANTI_BIOMASS, anti_biomass)
 	_set_type(Globals.CellType.UNDISCOVERED)
 
 # NOTE: this is intended to be checked when configuring walls, not for every actual transfer.
@@ -109,35 +109,35 @@ func set_output_rule(type: int, neighbor: Cell, rule: bool) -> bool:
 	self.output_rules[type][neighbor] = rule
 	return rule
 
-func set_poison(poison: int, value: float):
+func set_toxin(toxin: int, value: float):
 	if value <= 0.0:
-		if poisons.has(poison):
-			var poison_particle_type = Globals.poison_type_get_particle_type(poison)
-			if poison_particle_type != -1:
-				assert(self.particle_counts.get(poison_particle_type, 0) == 1, "There should only ever be one particle per poison type")
-				self.remove_particles(poison_particle_type, self.particle_counts.get(poison_particle_type, 0))
-		self.poisons.erase(poison)
-		self.poison_recoveries.erase(poison)  # once it's broken down, it can't recover
+		if toxins.has(toxin):
+			var toxin_particle_type = Globals.toxin_type_get_particle_type(toxin)
+			if toxin_particle_type != -1:
+				assert(self.particle_counts.get(toxin_particle_type, 0) == 1, "There should only ever be one particle per toxin type")
+				self.remove_particles(toxin_particle_type, self.particle_counts.get(toxin_particle_type, 0))
+		self.toxins.erase(toxin)
+		self.toxin_recoveries.erase(toxin)  # once it's broken down, it can't recover
 		self._detect_type()
 	else:
-		if not self.poisons.has(poison):
-			var poison_particle_type = Globals.poison_type_get_particle_type(poison)
-			if poison_particle_type != -1:
-				self.add_particles(poison_particle_type, 1)
-		self.poisons[poison] = value
+		if not self.toxins.has(toxin):
+			var toxin_particle_type = Globals.toxin_type_get_particle_type(toxin)
+			if toxin_particle_type != -1:
+				self.add_particles(toxin_particle_type, 1)
+		self.toxins[toxin] = value
 		self._detect_type()
-	if poison == Globals.PoisonType.ANTI_BIOMASS:
+	if toxin == Globals.ToxinType.ANTI_BIOMASS:
 		$Gfx.material.set_shader_param("percentage", 1.0 - clamp(value, 0, 1.0))
 
-func get_poison(poison: int) -> float:
-	return self.poisons.get(poison, 0.0)
+func get_toxin(toxin: int) -> float:
+	return self.toxins.get(toxin, 0.0)
 
 # Add *new* particles - particle nodes will be created as necessary
 func add_particles(type: int, count: int = 1, anywhere: bool = true):
 	var recv_result = self._recv_particles(type, count)
 	if recv_result[1] > 0:
 		var type_name = Globals.particle_type_get_name(type)
-		print("%s: tried to add %d %s particles, but they were destroyed (by poison etc.)" % [self, count, type_name])
+		print("%s: tried to add %d %s particles, but they were destroyed (by toxin etc.)" % [self, count, type_name])
 	count = recv_result[0]
 	var old_count = particle_counts.get(type, 0)
 	var new_count = old_count + count
@@ -161,11 +161,11 @@ func _detect_type() -> int:
 	if type == Globals.CellType.UNDISCOVERED:
 		return Globals.CellType.UNDISCOVERED
 
-	var poisons_count = self.poisons.size()
-	var needs_biomass = self.poisons.has(Globals.PoisonType.ANTI_BIOMASS)
+	var toxins_count = self.toxins.size()
+	var needs_biomass = self.toxins.has(Globals.ToxinType.ANTI_BIOMASS)
 	if needs_biomass:
-		poisons_count -= 1
-	if poisons_count > 0:
+		toxins_count -= 1
+	if toxins_count > 0:
 		return _set_type(Globals.CellType.TOXIC)
 
 	var contains_resource = false
@@ -208,7 +208,7 @@ func _set_type(type_: int) -> int:
 # Called every game step.
 func simulate(delta):
 	if Rules.cell_type_has_toxin_recovery(type):
-		_process_poison_recovery(delta)
+		_process_toxin_recovery(delta)
 	if type == Globals.CellType.CAPTURED:
 		pass # _process_sugar_usage(delta)  # TODO reenable this, it's just commented to ease debugging
 		_process_pressure(delta)
@@ -295,26 +295,26 @@ func _recv_particles(type: int, count: int = 1) -> Array:
 	var type_name = Globals.particle_type_get_name(type)
 	# print("%s got %d %s" % [self, count, type_name])
 	var susceptible = false
-	if self.poisons.size() > 0:
-		for poison_type in self.poisons:
-			if not Rules.particle_type_poison_susceptible(type, poison_type):
+	if self.toxins.size() > 0:
+		for toxin_type in self.toxins:
+			if not Rules.particle_type_toxin_susceptible(type, toxin_type):
 				continue
 			susceptible = true
-			var potency = Rules.particle_type_get_poison_potency(type, poison_type, self.poisons)
+			var potency = Rules.particle_type_get_toxin_potency(type, toxin_type, self.toxins)
 			if potency <= 0.0:
 				continue
-			var poison_name = Globals.poison_type_get_name(poison_type)
-			var poison_value = self.poisons[poison_type]
-			var delta_poison = min(poison_value, count * potency)
-			if delta_poison >= poison_value:
+			var toxin_name = Globals.toxin_type_get_name(toxin_type)
+			var toxin_value = self.toxins[toxin_type]
+			var delta_toxin = min(toxin_value, count * potency)
+			if delta_toxin >= toxin_value:
 				susceptible = false
-			self.set_poison(poison_type, poison_value - delta_poison)
-			var delta_particles = max(count, ceil(delta_poison / potency))  # rounding sometimes makes the max necessary
-			# print("%s %d %s breaking down %f %s" % [self, delta_particles, type_name, delta_poison, poison_name])
+			self.set_toxin(toxin_type, toxin_value - delta_toxin)
+			var delta_particles = max(count, ceil(delta_toxin / potency))  # rounding sometimes makes the max necessary
+			# print("%s %d %s breaking down %f %s" % [self, delta_particles, type_name, delta_toxin, toxin_name])
 			n_destroyed = delta_particles
 	var n_accepted = count - n_destroyed
 	if susceptible:
-		# print("%s %d %s died due to %s" % [self, count, type_name, self.poisons])
+		# print("%s %d %s died due to %s" % [self, count, type_name, self.toxins])
 		n_accepted = 0
 		n_destroyed = count
 	# print("%s recv %d %s: %d accept, %d destroyed" % [self, count, type_name, n_accepted, n_destroyed])
@@ -357,10 +357,10 @@ func _process(delta):
 func _to_string():
 	return "Cell_%s @ %s" % [self.get_index(), pos]
 
-func _process_poison_recovery(delta):
-	for t in self.poison_recoveries:
-		var rate_and_ceil = self.poison_recoveries[t]
-		self.set_poison(t, min(self.get_poison(t) + delta * rate_and_ceil[0], rate_and_ceil[1]))
+func _process_toxin_recovery(delta):
+	for t in self.toxin_recoveries:
+		var rate_and_ceil = self.toxin_recoveries[t]
+		self.set_toxin(t, min(self.get_toxin(t) + delta * rate_and_ceil[0], rate_and_ceil[1]))
 	pass
 
 func _process_pressure(delta):
@@ -565,8 +565,8 @@ func _display_debug():
 	if Rules.debug_visual:
 		var dbg = "[b][i]%s[/i][/b] (%s)\n" % [self, Globals.cell_type_get_name(type)];
 		# dbg += "[i]Neighbors:[/i] %s\n" % [self.neighbors];
-		for poison in Globals.PoisonType:
-			dbg += "[b][u]%s:[/u][/b] %f\n" % [poison, self.poisons.get(Globals.PoisonType[poison], 0)]
+		for toxin in Globals.ToxinType:
+			dbg += "[b][u]%s:[/u][/b] %f\n" % [toxin, self.toxins.get(Globals.ToxinType[toxin], 0)]
 		for particle in Globals.ParticleType:
 			dbg += "[b][u]%s:[/u][/b] %d" % [particle, self.particle_counts.get(Globals.ParticleType[particle], 0)]
 			var p_rules = self.output_rules.get(Globals.ParticleType[particle], {})
