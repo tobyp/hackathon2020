@@ -217,6 +217,8 @@ static func diffuse_func(budget: int, normalized_pressure: float, total_pressure
 	# return budget * 0.55 * exp(-4 * demand) * delta
 
 static func cell_is_discoverable(cell: Cell) -> bool:
+	if cell.type != Globals.CellType.UNDISCOVERED:
+		return false
 	for n in cell.neighbors:
 		if n.type == Globals.CellType.CAPTURED:
 			return true
@@ -256,8 +258,9 @@ func select_cell(cell):
 		oldcell.selected = false
 	_selected_cells = [cell]
 	cell.selected = true
-	if cell_is_discoverable(cell):
-		cell.emit_signal("discover", cell)
+
+func is_selected(cell):
+	return _selected_cells.has(cell)
 
 func _input(event):
 	if event is InputEventKey:

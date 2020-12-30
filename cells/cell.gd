@@ -346,7 +346,7 @@ func _send_particles(type: int, dest: Cell, count: int):
 
 ### OVERRIDES
 func _ready():
-	$ClickArea.connect("input_event", self, "_on_cell_click")
+	$ClickArea.connect("input_event", self, "_on_input")
 	$Gfx.set_material($Gfx.get_material().duplicate())
 
 func _process(delta):
@@ -516,16 +516,16 @@ func _update_recipe_cooldown():
 	else:
 		auto_recipe_material.set_shader_param("percentage", 1 - auto_recipe_cooldown / auto_recipe_cooldown_max)
 
-func _on_cell_click(viewport, event, shape_idx):
+func _on_input(viewport, event, shape_idx):
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT and event.is_pressed():
 			print("Clicked: %s ev: %s" % [self, event])
 			Rules.select_cell(self)
 
 func _set_selected(_selected: bool):
-	if _selected != self.selected:
-		emit_signal("selected", self, _selected)
+	if _selected != selected:
 		selected = _selected
+		emit_signal("selected", self, _selected)
 	$CellSelector.visible = _selected
 
 func _get_selected() -> bool:

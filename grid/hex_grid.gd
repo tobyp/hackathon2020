@@ -29,7 +29,8 @@ func create_tunnels(position, rotation, start_cell, end_cell):
 	tunnelCollection.rotate(rotation)
 	tunnelCollection.start_cell = start_cell
 	tunnelCollection.end_cell = end_cell
-	add_child(tunnelCollection)
+	tunnelCollection.visible = false
+	$Tunnels.add_child(tunnelCollection)
 
 func get_undirected_node_connections():
 	# mappings of all "(start_x, start_y)" to lists of Vector2s [(end_x, end_y), (end_x2, end_y2)]]
@@ -126,10 +127,7 @@ var tech_tree;
 func generate_grid(size: int):
 	tech_tree = Rules.new_tech_tree()
 
-	# Generate Basic Space
-	var root = create_cell(0,0)
-
-	for s in range(1, size):
+	for s in size + 1:
 		var ring = _get_ring(s)
 		for hex in ring:
 			var cell = create_cell(hex.x, hex.y)
@@ -137,9 +135,11 @@ func generate_grid(size: int):
 			cell.connect("selected", self, "_cell_selected")
 			cell.connect("type_changed", self, "_cell_type_changed")
 	
-	discover_cell(root)
+	discover_cell(grid[Vector2.ZERO])
 
 func _cell_selected(cell, selection_state):
+	for tunnel in $Tunnels.get_children():
+		tunnel.visible = Rules.is_selected(tunnel.start_cell) or Rules.is_selected(tunnel.end_cell)
 	if Rules.cell_is_discoverable(cell):
 		discover_cell(cell)
 
@@ -189,7 +189,7 @@ func discover_cell(cell):
 
 func _get_ring(size: int) -> Array:
 	if size == 0:
-		return []
+		return [Hex.new(0,0)]
 	var coords = []
 	var hex = Hex.new(0,0)
 	for r in range(size):
