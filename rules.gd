@@ -189,6 +189,23 @@ static func particle_type_is_toxin(particle: int) -> bool:
 			return true
 	return false
 
+# If a particle of `type` is clicked and dragged across cell boundaries, for which particles should corresponding rules be created, and in what direction?
+# return [particle_type, direction_out], where particle_type can be null
+static func particle_type_drag_rule_type(particle: int) -> Array:
+	match particle:
+		Globals.ParticleType.ANTI_MITOCHONDRION:
+			return [Globals.ParticleType.SUGAR, true]
+		Globals.ParticleType.POISON_ALCOHOL:
+			return [Globals.ParticleType.ENZYME_ALCOHOL, false]
+		Globals.ParticleType.POISON_LYE:
+			return [Globals.ParticleType.ENZYME_LYE, false]
+		Globals.ParticleType.POISON_PLUTONIUM:
+			return [null, false]
+		Globals.ParticleType.QUEEN, Globals.ParticleType.PRO_QUEEN, Globals.ParticleType.RIBOSOME_TRANSPORTER, Globals.ParticleType.RIBOSOME_ALCOHOL, Globals.ParticleType.RIBOSOME_LYE:
+			return [null, true]
+		_:
+			return [particle, true]
+
 # calculate pressure between own cell (having `own` particles) and another cell (having `other` particles).
 # There's a lot of tuning to be had here.
 # If the result is <= 0, no particles will be transferred
