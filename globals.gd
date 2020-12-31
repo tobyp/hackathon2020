@@ -105,50 +105,8 @@ static func particle_type_get_name(particle: int) -> String:
 		ParticleType.POISON_PLUTONIUM:
 			return "Plutonium"
 	return "Unknown Particle"
-	
-static func particle_type_get_mnemonic(particle: int) -> String:
-	match particle:
-		ParticleType.PROTEIN_WHITE:
-			return "x"
-		ParticleType.SUGAR:
-			return "s"
-		ParticleType.ANTI_MITOCHONDRION:
-			return "S"
-		ParticleType.AMINO_PHE:
-			return "p*"
-		ParticleType.PROTEIN_TRANSPORTER:
-			return "p"
-		ParticleType.RIBOSOME_TRANSPORTER:
-			return "P"
-		ParticleType.AMINO_ALA:
-			return "a*"
-		ParticleType.ENZYME_ALCOHOL:
-			return "a"
-		ParticleType.RIBOSOME_ALCOHOL:
-			return "A"
-		ParticleType.POISON_ALCOHOL:
-			return "(A)"
-		ParticleType.AMINO_LYS:
-			return "l*"
-		ParticleType.ENZYME_LYE:
-			return "l"
-		ParticleType.RIBOSOME_LYE:
-			return "L"
-		ParticleType.POISON_LYE:
-			return "(L)"
-		ParticleType.AMINO_TYR:
-			return "q*"
-		ParticleType.QUEEN:
-			return "Q"
-		ParticleType.AMINO_PRO:
-			return "o*"
-		ParticleType.PRO_QUEEN:
-			return "O"
-		ParticleType.POISON_PLUTONIUM:
-			return "(U)"
-	return "?"
 
-static func particle_type_get_res(particle: int, outline: bool = false) -> String:
+static func particle_type_get_res(particle: int, outline: bool = false) -> Texture:
 	var image_name = "white_prot"
 	match particle:
 		ParticleType.PROTEIN_TRANSPORTER:
@@ -191,7 +149,7 @@ static func particle_type_get_res(particle: int, outline: bool = false) -> Strin
 	if "ribosome" in image_name and outline:
 		image_name += "_outline"
 
-	return "res://textures/%s.png" % image_name
+	return load("res://textures/%s.png" % image_name) as Texture
 
 static func particle_type_get_color(particle: int) -> Color:
 	match particle:

@@ -19,7 +19,7 @@ func _physics_process(delta):
 		var collision = move_and_collide(motion)
 		if collision != null:
 			var reflect = collision.remainder.bounce(collision.normal)
-			# This is a Box-Muller transform, to get a normal distributed sample, scaled by 2 so 
+			# This is a Box-Muller transform, to get a normal distributed sample
 			var phi = deg2rad(sqrt(-1 * log(Rules.rng.randf())) * cos(2 * PI * Rules.rng.randf()))
 			velocity = velocity.bounce(collision.normal).rotated(phi)
 			collision = move_and_collide(reflect)
@@ -39,7 +39,7 @@ func _get_collision_radius():
 
 func _set_type(type_: int):
 	type = type_
-	var image_res = Globals.particle_type_get_res(type)
+	var tex = Globals.particle_type_get_res(type)
 	scale = Vector2(1, 1)
 	$InnerSprite.scale = Vector2(1, 1)
 
@@ -48,7 +48,7 @@ func _set_type(type_: int):
 			$InnerSprite.scale = Vector2(0.2, 0.2)
 		Globals.ParticleType.ANTI_MITOCHONDRION:
 			scale = Vector2(5, 5)
-		Globals.ParticleType.POISON_ALCOHOL:
+		Globals.ParticleType.POISON_ALCOHOL, Globals.ParticleType.POISON_LYE, Globals.ParticleType.POISON_PLUTONIUM:
 			scale = Vector2(2.5, 2.5)
 		Globals.ParticleType.POISON_LYE:
 			scale = Vector2(2.5, 2.5)
@@ -56,11 +56,11 @@ func _set_type(type_: int):
 			scale = Vector2(2.5, 2.5)
 
 	if Rules.particle_type_is_in_transporter(type):
-		$InnerSprite.texture = load(image_res)
-		$Sprite.texture = load("res://textures/green_enzyme.png")
+		$InnerSprite.texture = tex
+		$Sprite.texture = preload("res://textures/green_enzyme.png")
 	else:
 		$InnerSprite.texture = null
-		$Sprite.texture = load(image_res)
+		$Sprite.texture = tex
 
 func _get_type() -> int:
 	return type

@@ -254,8 +254,11 @@ static func cell_type_renders_particles(cell_type: int, particle_type: int) -> b
 	return false
 
 static func cell_type_processes_recipes(type: int) -> bool:
-	return type == Globals.CellType.RESOURCE or type == Globals.CellType.CAPTURED
-	
+	return type == Globals.CellType.CAPTURED or type == Globals.CellType.RESOURCE
+
+static func cell_type_processes_pressure(type: int) -> bool:
+	return type == Globals.CellType.CAPTURED or type == Globals.CellType.RESOURCE
+
 static func cell_type_has_toxin_recovery(type: int) -> bool:
 	return type == Globals.CellType.TOXIC or type == Globals.CellType.EMPTY
 

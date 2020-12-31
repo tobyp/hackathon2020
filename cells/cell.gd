@@ -40,7 +40,7 @@ var _output_valves = {}  # Dict[Cell, float]
 func init_resource(resource_particle: int, anti_biomass: bool = 0.0):
 	self.set_toxin(Globals.ToxinType.ANTI_BIOMASS, anti_biomass)  # otherwise all transporters die on entry
 	self.set_input_allowed([Globals.ParticleType.PROTEIN_TRANSPORTER])  # otherwise particles get trapped
-	self.set_output_allowed([resource_particle])
+	self.set_output_allowed([Rules.particle_type_resource_output(resource_particle)])
 	self.add_particles(resource_particle, 1)
 	_set_type(Globals.CellType.RESOURCE)
 
@@ -70,7 +70,7 @@ func input_allowed(type: int) -> bool:
 	if self.type != Globals.CellType.CAPTURED and self.type != Globals.CellType.RESOURCE and self.type != Globals.CellType.TOXIC and self.type != Globals.CellType.EMPTY:
 		return false
 	# Sacrificing your particles to toxins is allowed...
-	assert(self.type != Globals.CellType.RESOURCE or self.input_allowed.size() > 0, "RESOURCE cells should have explicit input_allowed values")
+	assert(self.type != Globals.CellType.RESOURCE or self._input_allowed.size() > 0, "RESOURCE cells should have explicit input_allowed values")
 	return self._input_allowed.get(type, true)
 
 func set_output_allowed(allowed: Array):
@@ -209,7 +209,7 @@ func _set_type(type_: int) -> int:
 func simulate(delta):
 	if Rules.cell_type_has_toxin_recovery(type):
 		_process_toxin_recovery(delta)
-	if type == Globals.CellType.CAPTURED:
+	if Rules.cell_type_processes_pressure(type):
 		pass # _process_sugar_usage(delta)  # TODO reenable this, it's just commented to ease debugging
 		_process_pressure(delta)
 	if Rules.cell_type_processes_recipes(type):
@@ -477,7 +477,7 @@ func _process_recipes(delta):
 		else:
 			# Add button
 			var button = TextureButton.new()
-			var texture = load(Globals.particle_type_get_res(r.outputs.keys()[0], true))
+			var texture = Globals.particle_type_get_res(r.outputs.keys()[0], true)
 			button.texture_normal = texture
 			button.expand = true
 			button.rect_min_size = 0.2 * texture.get_size()
@@ -509,7 +509,7 @@ func _craft(r: Recipe):
 		add_particles(t, r.outputs[t], false)
 
 func _update_recipe_cooldown():
-	if not Globals.cell_type_renders_recipe_progress(type):
+	if not Rules.cell_type_renders_recipe_progress(type):
 		return
 	if auto_recipe_cooldown == 0:
 		auto_recipe_material.set_shader_param("percentage", 1.0)
