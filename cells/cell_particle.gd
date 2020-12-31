@@ -50,10 +50,8 @@ func _set_type(type_: int):
 			scale = Vector2(5, 5)
 		Globals.ParticleType.POISON_ALCOHOL, Globals.ParticleType.POISON_LYE, Globals.ParticleType.POISON_PLUTONIUM:
 			scale = Vector2(2.5, 2.5)
-		Globals.ParticleType.POISON_LYE:
-			scale = Vector2(2.5, 2.5)
-		Globals.ParticleType.POISON_PLUTONIUM:
-			scale = Vector2(2.5, 2.5)
+		Globals.ParticleType.RESOURCE_AMINO_ALA, Globals.ParticleType.RESOURCE_AMINO_LYS, Globals.ParticleType.RESOURCE_AMINO_PHE, Globals.ParticleType.RESOURCE_AMINO_PRO, Globals.ParticleType.RESOURCE_AMINO_TYR:
+			scale = Vector2(10, 10)
 
 	if Rules.particle_type_is_in_transporter(type):
 		$InnerSprite.texture = tex

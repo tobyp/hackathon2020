@@ -28,6 +28,12 @@ enum ParticleType {
 	POISON_ALCOHOL,
 	POISON_LYE,
 	POISON_PLUTONIUM,
+	
+	RESOURCE_AMINO_PHE,
+	RESOURCE_AMINO_ALA,
+	RESOURCE_AMINO_LYS,
+	RESOURCE_AMINO_TYR,
+	RESOURCE_AMINO_PRO,
 }
 
 enum CellType {
@@ -104,6 +110,16 @@ static func particle_type_get_name(particle: int) -> String:
 			return "Lye"
 		ParticleType.POISON_PLUTONIUM:
 			return "Plutonium"
+		ParticleType.RESOURCE_AMINO_PHE:
+			return "Penylalanin Resource"
+		ParticleType.RESOURCE_AMINO_ALA:
+			return "Alanin Resource"
+		ParticleType.RESOURCE_AMINO_LYS:
+			return "Lysin Resource"
+		ParticleType.RESOURCE_AMINO_TYR:
+			return "Tyrosin Resource"
+		ParticleType.RESOURCE_AMINO_PRO:
+			return "Prolin Resource"
 	return "Unknown Particle"
 
 static func particle_type_get_res(particle: int, outline: bool = false) -> Texture:
@@ -119,15 +135,15 @@ static func particle_type_get_res(particle: int, outline: bool = false) -> Textu
 			image_name = "purple_ribosome"
 		ParticleType.PRO_QUEEN:
 			image_name = "pink_ribosome"
-		ParticleType.AMINO_PHE:
+		ParticleType.AMINO_PHE, ParticleType.RESOURCE_AMINO_PHE:
 			image_name = "green_amino"
-		ParticleType.AMINO_ALA:
+		ParticleType.AMINO_ALA, ParticleType.RESOURCE_AMINO_ALA:
 			image_name = "yellow_amino"
-		ParticleType.AMINO_LYS:
+		ParticleType.AMINO_LYS, ParticleType.RESOURCE_AMINO_LYS:
 			image_name = "blue_amino"
-		ParticleType.AMINO_TYR:
+		ParticleType.AMINO_TYR, ParticleType.RESOURCE_AMINO_TYR:
 			image_name = "purple_amino"
-		ParticleType.AMINO_PRO:
+		ParticleType.AMINO_PRO, ParticleType.RESOURCE_AMINO_PRO:
 			image_name = "pink_amino"
 		ParticleType.SUGAR:
 			image_name = "sugar"
@@ -157,15 +173,15 @@ static func particle_type_get_color(particle: int) -> Color:
 			return Color.gray
 		ParticleType.SUGAR, ParticleType.ANTI_MITOCHONDRION:
 			return Color.white
-		ParticleType.AMINO_PHE, ParticleType.PROTEIN_TRANSPORTER, ParticleType.RIBOSOME_TRANSPORTER:
+		ParticleType.AMINO_PHE, ParticleType.PROTEIN_TRANSPORTER, ParticleType.RIBOSOME_TRANSPORTER, ParticleType.RESOURCE_AMINO_PHE:
 			return Color("#72f281")  # Green
-		ParticleType.AMINO_ALA, ParticleType.ENZYME_ALCOHOL, ParticleType.RIBOSOME_ALCOHOL, ParticleType.POISON_ALCOHOL:
+		ParticleType.AMINO_ALA, ParticleType.ENZYME_ALCOHOL, ParticleType.RIBOSOME_ALCOHOL, ParticleType.POISON_ALCOHOL, ParticleType.RESOURCE_AMINO_ALA:
 			return Color("#fae06e")  # Yellow
-		ParticleType.AMINO_LYS, ParticleType.ENZYME_LYE, ParticleType.RIBOSOME_LYE, ParticleType.POISON_LYE:
+		ParticleType.AMINO_LYS, ParticleType.ENZYME_LYE, ParticleType.RIBOSOME_LYE, ParticleType.POISON_LYE, ParticleType.RESOURCE_AMINO_LYS:
 			return Color("#72daf2")  # Cyan
-		ParticleType.AMINO_TYR, ParticleType.QUEEN:
+		ParticleType.AMINO_TYR, ParticleType.QUEEN, ParticleType.RESOURCE_AMINO_TYR:
 			return Color("#6e00fa")  # Violet
-		ParticleType.AMINO_PRO, ParticleType.PRO_QUEEN:
+		ParticleType.AMINO_PRO, ParticleType.PRO_QUEEN, ParticleType.RESOURCE_AMINO_PRO:
 			return Color("#fa0090")  # Pink
 		ParticleType.POISON_PLUTONIUM:
 			return Color.black

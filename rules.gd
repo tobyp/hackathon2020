@@ -102,7 +102,7 @@ const SUGAR_DEATH_ORDER: Array = [
 	#Globals.ParticleType.RIBOSOME_ALCOHOL,
 	#Globals.ParticleType.RIBOSOME_LYE,
 	#Globals.ParticleType.PRO_QUEEN,
-];
+]
 
 static func particle_type_get_toxin_potency(particle: int, toxin: int, toxins: Dictionary) -> float:
 	match particle:
@@ -119,7 +119,7 @@ static func particle_type_get_toxin_potency(particle: int, toxin: int, toxins: D
 
 static func particle_type_toxin_susceptible(particle: int, toxin: int) -> bool:
 	match particle:
-		Globals.ParticleType.POISON_ALCOHOL, Globals.ParticleType.POISON_LYE, Globals.ParticleType.POISON_LYE, Globals.ParticleType.ANTI_MITOCHONDRION:
+		Globals.ParticleType.POISON_ALCOHOL, Globals.ParticleType.POISON_LYE, Globals.ParticleType.POISON_LYE, Globals.ParticleType.ANTI_MITOCHONDRION, Globals.ParticleType.RESOURCE_AMINO_PHE, Globals.ParticleType.RESOURCE_AMINO_ALA, Globals.ParticleType.RESOURCE_AMINO_LYS, Globals.ParticleType.RESOURCE_AMINO_TYR, Globals.ParticleType.RESOURCE_AMINO_PRO:
 			return false
 	return true
 
@@ -179,7 +179,7 @@ static func particle_type_is_in_transporter(particle: int) -> bool:
 
 static func particle_type_is_resource(particle: int) -> bool:
 	match particle:
-		Globals.ParticleType.ANTI_MITOCHONDRION:
+		Globals.ParticleType.ANTI_MITOCHONDRION, Globals.ParticleType.RESOURCE_AMINO_PHE, Globals.ParticleType.RESOURCE_AMINO_ALA, Globals.ParticleType.RESOURCE_AMINO_LYS, Globals.ParticleType.RESOURCE_AMINO_TYR, Globals.ParticleType.RESOURCE_AMINO_PRO:
 			return true
 	return false
 
@@ -188,6 +188,22 @@ static func particle_type_is_toxin(particle: int) -> bool:
 		Globals.ParticleType.POISON_ALCOHOL, Globals.ParticleType.POISON_LYE, Globals.ParticleType.POISON_PLUTONIUM:
 			return true
 	return false
+
+static func particle_type_resource_output(particle: int) -> int:
+	match particle:
+		Globals.ParticleType.ANTI_MITOCHONDRION:
+			return Globals.ParticleType.SUGAR
+		Globals.ParticleType.RESOURCE_AMINO_ALA:
+			return Globals.ParticleType.AMINO_ALA
+		Globals.ParticleType.RESOURCE_AMINO_LYS:
+			return Globals.ParticleType.AMINO_LYS
+		Globals.ParticleType.RESOURCE_AMINO_PHE:
+			return Globals.ParticleType.AMINO_PHE
+		Globals.ParticleType.RESOURCE_AMINO_PRO:
+			return Globals.ParticleType.AMINO_PRO
+		Globals.ParticleType.RESOURCE_AMINO_TYR:
+			return Globals.ParticleType.AMINO_TYR
+	return -1
 
 # If a particle of `type` is clicked and dragged across cell boundaries, for which particles should corresponding rules be created, and in what direction?
 # return [particle_type, direction_out], where particle_type can be null
