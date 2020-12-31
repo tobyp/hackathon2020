@@ -500,11 +500,11 @@ func _manual_craft(r: Recipe):
 	_add_sound(Globals.PARTICLE_CRAFT_SOUND)
 
 func _craft(r: Recipe):
+	for t in r.catalysators:
+		assert(particle_counts.get(t, 0) >= r.catalysators[t], "Cannot craft…")
 	for t in r.inputs:
 		assert(particle_counts.get(t, 0) >= r.inputs[t], "Cannot craft…")
-		if !Rules.particle_type_is_factory(t):
-			# Factories are not used
-			remove_particles(t, r.inputs[t])
+		remove_particles(t, r.inputs[t])
 	for t in r.outputs:
 		add_particles(t, r.outputs[t], false)
 

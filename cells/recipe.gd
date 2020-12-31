@@ -2,6 +2,7 @@ class_name Recipe
 
 var inputs = {}
 var outputs = {}
+var catalysators = {}
 var automatic: bool
 # Cooldown of the recipe in seconds
 var cooldown: float
@@ -14,11 +15,12 @@ static func matches(particle_counts: Dictionary) -> Array:
 			rs.push_back(r)
 	return rs
 
-func _init(input: Dictionary, output: Dictionary, auto: bool = false, cool: float = 1):
+func _init(input: Dictionary, output: Dictionary, catalysators: Dictionary = {}, auto: bool = false, cooldown: float = 1):
 	self.inputs = input
 	self.outputs = output
+	self.catalysators = catalysators
 	self.automatic = auto
-	self.cooldown = cool
+	self.cooldown = cooldown
 	for t in outputs:
 		if Rules.particle_type_is_factory(t):
 			_output_has_factory = true
@@ -27,6 +29,8 @@ func _init(input: Dictionary, output: Dictionary, auto: bool = false, cool: floa
 func recipe_matches(particle_counts: Dictionary) -> bool:
 	for t in Globals.ParticleType.values():
 		if inputs.has(t) and particle_counts.get(t, 0) < inputs[t]:
+			return false
+		if catalysators.has(t) and particle_counts.get(t, 0) < catalysators[t]:
 			return false
 		# Only one factory type per cell is allowed
 		if _output_has_factory and Rules.particle_type_is_factory(t) and !outputs.has(t) and particle_counts.get(t, 0) > 0:

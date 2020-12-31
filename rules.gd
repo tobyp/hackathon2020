@@ -20,19 +20,25 @@ func _init_recipes():
 		Recipe.new({ Globals.ParticleType.PROTEIN_WHITE: 100, Globals.ParticleType.AMINO_TYR: 1, }, { Globals.ParticleType.QUEEN: 1, }),
 		Recipe.new({ Globals.ParticleType.PROTEIN_WHITE: 1000, Globals.ParticleType.AMINO_PRO: 1, }, { Globals.ParticleType.PRO_QUEEN: 1, }),
 		# Bootstrap by creating a transporter from a queen
-		Recipe.new({ Globals.ParticleType.QUEEN: 1, }, { Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }),
+		Recipe.new({}, { Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }, {  Globals.ParticleType.QUEEN: 1, }),
 
 		# Auto recipes
 		# Creating White Protein
-		Recipe.new({ Globals.ParticleType.QUEEN: 1, Globals.ParticleType.SUGAR: 1, }, { Globals.ParticleType.PROTEIN_TRANSPORTER: 1, Globals.ParticleType.PROTEIN_WHITE: 1, }, true),
+		Recipe.new({ Globals.ParticleType.SUGAR: 1, }, { Globals.ParticleType.PROTEIN_TRANSPORTER: 1, Globals.ParticleType.PROTEIN_WHITE: 1, }, { Globals.ParticleType.QUEEN: 1, }, true),
 		# Creating Queens
-		Recipe.new({ Globals.ParticleType.PRO_QUEEN: 1, Globals.ParticleType.PROTEIN_WHITE: 10, }, { Globals.ParticleType.QUEEN: 1, }, true),
+		Recipe.new({ Globals.ParticleType.PROTEIN_WHITE: 10, }, { Globals.ParticleType.QUEEN: 1, }, { Globals.ParticleType.PRO_QUEEN: 1, }, true),
 		# Creating Enzymes
-		Recipe.new({ Globals.ParticleType.RIBOSOME_TRANSPORTER: 1, Globals.ParticleType.PROTEIN_WHITE: 1, }, { Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }, true),
-		Recipe.new({ Globals.ParticleType.RIBOSOME_ALCOHOL: 1, Globals.ParticleType.PROTEIN_WHITE: 1, }, { Globals.ParticleType.ENZYME_ALCOHOL: 1, }, true),
-		Recipe.new({ Globals.ParticleType.RIBOSOME_LYE: 1, Globals.ParticleType.PROTEIN_WHITE: 1, }, { Globals.ParticleType.ENZYME_LYE: 1, }, true),
+		Recipe.new({ Globals.ParticleType.PROTEIN_WHITE: 1, }, { Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }, { Globals.ParticleType.RIBOSOME_TRANSPORTER: 1, }, true),
+		Recipe.new({ Globals.ParticleType.PROTEIN_WHITE: 1, }, { Globals.ParticleType.ENZYME_ALCOHOL: 1, }, { Globals.ParticleType.RIBOSOME_ALCOHOL: 1, }, true),
+		Recipe.new({ Globals.ParticleType.PROTEIN_WHITE: 1, }, { Globals.ParticleType.ENZYME_LYE: 1, }, { Globals.ParticleType.RIBOSOME_LYE: 1, }, true),
 		# Creating Resources
-		Recipe.new({ Globals.ParticleType.ANTI_MITOCHONDRION: 1, Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }, { Globals.ParticleType.SUGAR: 1, }, true, 0.05),
+		Recipe.new({ Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }, { Globals.ParticleType.SUGAR: 1, }, { Globals.ParticleType.ANTI_MITOCHONDRION: 1, }, true, 0.05),
+		Recipe.new({ Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }, { Globals.ParticleType.AMINO_ALA: 1, }, { Globals.ParticleType.RESOURCE_AMINO_ALA: 1, }, true, 30.0),
+		Recipe.new({ Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }, { Globals.ParticleType.AMINO_LYS: 1, }, { Globals.ParticleType.RESOURCE_AMINO_LYS: 1, }, true, 40.0),
+		Recipe.new({ Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }, { Globals.ParticleType.AMINO_PHE: 1, }, { Globals.ParticleType.RESOURCE_AMINO_PHE: 1, }, true, 60.0),
+		Recipe.new({ Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }, { Globals.ParticleType.AMINO_PRO: 1, }, { Globals.ParticleType.RESOURCE_AMINO_PRO: 1, }, true, 90.0),
+		Recipe.new({ Globals.ParticleType.PROTEIN_TRANSPORTER: 1, }, { Globals.ParticleType.AMINO_TYR: 1, }, { Globals.ParticleType.RESOURCE_AMINO_TYR: 1, }, true, 200.0),
+		
 	];
 
 static func new_tech_tree() -> Array:
