@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://textures/green_amino.png" type="Texture" id=1]
+[ext_resource path="res://hud_info_entry.gd" type="Script" id=2]
+[ext_resource path="res://fonts/hack.tres" type="DynamicFont" id=3]
+
+[node name="HBoxContainer" type="HBoxContainer"]
+margin_right = 48.0
+margin_bottom = 32.0
+mouse_filter = 2
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextureRect" type="TextureRect" parent="."]
+margin_right = 32.0
+margin_bottom = 33.0
+mouse_filter = 2
+texture = ExtResource( 1 )
+stretch_mode = 1
+
+[node name="Label" type="Label" parent="."]
+margin_left = 36.0
+margin_right = 52.0
+margin_bottom = 33.0
+custom_fonts/font = ExtResource( 3 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+text = "0"

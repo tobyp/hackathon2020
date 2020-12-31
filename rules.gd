@@ -3,6 +3,7 @@ extends Node
 var rng: RandomNumberGenerator
 var debug_visual: bool = false
 var _selected_cells = []
+signal selection_changed(new_selection)
 
 func _ready():
 	_init_recipes()
@@ -228,6 +229,24 @@ static func particle_type_drag_rule_type(particle: int) -> Array:
 		_:
 			return [particle, true]
 
+static func particle_type_rendered_in_hud(type: int) -> bool:
+	return [
+		Globals.ParticleType.PROTEIN_WHITE,
+		Globals.ParticleType.PROTEIN_TRANSPORTER,
+		Globals.ParticleType.ENZYME_ALCOHOL,
+		Globals.ParticleType.ENZYME_LYE,
+		Globals.ParticleType.AMINO_PHE,
+		Globals.ParticleType.AMINO_ALA,
+		Globals.ParticleType.AMINO_LYS,
+		Globals.ParticleType.AMINO_TYR,
+		Globals.ParticleType.AMINO_PRO,
+		Globals.ParticleType.QUEEN,
+		Globals.ParticleType.PRO_QUEEN,
+		Globals.ParticleType.RIBOSOME_TRANSPORTER,
+		Globals.ParticleType.RIBOSOME_ALCOHOL,
+		Globals.ParticleType.RIBOSOME_LYE,
+	].has(type)
+
 # calculate pressure between own cell (having `own` particles) and another cell (having `other` particles).
 # There's a lot of tuning to be had here.
 # If the result is <= 0, no particles will be transferred
@@ -300,6 +319,7 @@ func select_cell(cell):
 		oldcell.selected = false
 	_selected_cells = [cell]
 	cell.selected = true
+	emit_signal("selection_changed", _selected_cells)
 
 func is_selected(cell):
 	return _selected_cells.has(cell)

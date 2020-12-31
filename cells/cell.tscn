@@ -30,7 +30,7 @@ b = Vector2( 443, -256 )
 a = Vector2( 443, -256 )
 b = Vector2( 0, -512 )
 
-[sub_resource type="Animation" id=9]
+[sub_resource type="Animation" id=7]
 length = 2.0
 loop = true
 tracks/0/type = "value"
@@ -91,7 +91,7 @@ scale = Vector2( 0.85, 0.85 )
 texture = ExtResource( 4 )
 
 [node name="WarningAnimationPlayer" type="AnimationPlayer" parent="."]
-anims/Warning = SubResource( 9 )
+anims/Warning = SubResource( 7 )
 
 [node name="WarningAnimationSprite" type="Sprite" parent="."]
 visible = false
