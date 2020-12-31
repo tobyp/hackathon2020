@@ -2,8 +2,6 @@ extends Node
 
 var rng: RandomNumberGenerator
 var debug_visual: bool = false
-var _selected_cells = []
-signal selection_changed(new_selection)
 
 func _ready():
 	_init_recipes()
@@ -282,6 +280,9 @@ static func cell_is_discoverable(cell: Cell) -> bool:
 			return true
 	return false
 
+static func tunnel_is_rendered(tunnel) -> bool:
+	return tunnel.start_cell.type != Globals.CellType.UNDISCOVERED and tunnel.end_cell.type != Globals.CellType.UNDISCOVERED
+
 static func cell_blocks_win(cell: Cell) -> bool:
 	return cell.type != Globals.CellType.CAPTURED and cell.type != Globals.CellType.RESOURCE
 
@@ -313,16 +314,6 @@ static func cell_type_texture_resource(type: int) -> Array:
 		return [null, null]
 	else:
 		return [preload("res://textures/hex_gray.png"), preload("res://textures/hex_gray.png")]
-
-func select_cell(cell):
-	for oldcell in _selected_cells:
-		oldcell.selected = false
-	_selected_cells = [cell]
-	cell.selected = true
-	emit_signal("selection_changed", _selected_cells)
-
-func is_selected(cell):
-	return _selected_cells.has(cell)
 
 func _input(event):
 	if event is InputEventKey:

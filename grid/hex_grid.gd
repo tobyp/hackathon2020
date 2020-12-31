@@ -11,6 +11,11 @@ var timer: Timer
 onready var CellTscn = load("res://cells/cell.tscn")
 onready var TunnelsTscn = load("res://ui/ui.tscn")
 
+var _selection: Array = []
+signal cell_added(grid, cell)
+signal cell_selection_state_changed(grid, cell, selection_state)
+signal cell_type_changed(grid, cell, old_type, new_type)
+
 func _ready():
 	timer = Timer.new()
 	timer.autostart = true
@@ -67,6 +72,9 @@ func create_cell(x: int, y: int):
 		add_child(cell)
 		cell.translate(Vector2(pos_x, pos_y))
 		grid[pos] = cell
+		cell.connect("clicked", self, "_cell_clicked")
+		cell.connect("type_changed", self, "_cell_type_changed")
+		emit_signal("cell_added", self, cell)
 	var to_update = get_neighbors_coord(x,y)
 	to_update.append(pos)
 	_update_neighbors(to_update)
@@ -132,25 +140,36 @@ func generate_grid(size: int):
 		for hex in ring:
 			var cell = create_cell(hex.x, hex.y)
 			cell.ring_level = s
-			cell.connect("selected", self, "_cell_selected")
-			cell.connect("type_changed", self, "_cell_type_changed")
 	
 	discover_cell(grid[Vector2.ZERO])
 
-func _cell_selected(cell, selection_state):
-	for tunnel in $Tunnels.get_children():
-		tunnel.visible = Rules.is_selected(tunnel.start_cell) or Rules.is_selected(tunnel.end_cell)
+func _cell_clicked(cell, event):
+	if not event.shift:
+		for selected_cell in _selection:
+			selected_cell.get_node("CellSelector").visible = false
+			emit_signal("cell_selection_state_changed", self, selected_cell, false)
+		_selection = [cell]
+		cell.get_node("CellSelector").visible = true
+		emit_signal("cell_selection_state_changed", self, cell, true)
+	else:
+		if _selection.has(cell):
+			_selection.erase(cell)
+			cell.get_node("CellSelector").visible = false
+			emit_signal("cell_selection_state_changed", self, cell, false)
+		else:
+			_selection.append(cell)
+			cell.get_node("CellSelector").visible = true
+			emit_signal("cell_selection_state_changed", self, cell, true)
 	if Rules.cell_is_discoverable(cell):
 		discover_cell(cell)
+	for tunnel in $Tunnels.get_children():
+		tunnel.visible = (self.is_selected(tunnel.start_cell) or self.is_selected(tunnel.end_cell)) and Rules.tunnel_is_rendered(tunnel)
 
-func _cell_type_changed(cell, old_type, new_type):
-	var win = true
-	for cell in grid.values():
-		if Rules.cell_blocks_win(cell):
-			win = false
-			break
-	if win:
-		print("You win!")
+func is_selected(cell) -> bool:
+	return _selection.has(cell)
+
+func _cell_type_changed(cell, old_type: int, new_type: int):
+	emit_signal("cell_type_changed", self, cell, old_type, new_type)
 
 func discover_cell(cell):
 	var rng = RandomNumberGenerator.new()

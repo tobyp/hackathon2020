@@ -7,7 +7,8 @@ signal output_rule_changed(cell, neighbor, type, old_rule, new_rule)  # rule is 
 # Gets called when a cell gets visible, so that the hexgrid manager can
 # initialize it with the tech scripting engine
 signal type_changed(cell, old_type, new_type)
-signal selected(cell, status)
+signal clicked(cell, event)
+signal mouse_motion(cell, event)
 
 ### MEMBERS
 # Own index position. Just for debugging
@@ -28,7 +29,6 @@ var auto_recipe_cooldown = 0
 var auto_recipe_cooldown_max = 0
 var auto_recipe_material: ShaderMaterial = load(Globals.PROGRESS_MATERIAL).duplicate()
 export var type = Globals.CellType.UNDISCOVERED setget _set_type, _get_type
-var selected: bool = false setget _set_selected, _get_selected
 
 ### PRIVATE MEMBERS
 # since transferring an integer number of particles each tick makes it impossible to see any changes,
@@ -519,17 +519,9 @@ func _update_recipe_cooldown():
 func _on_input(viewport, event, shape_idx):
 	if event is InputEventMouseButton:
 		if event.button_index == BUTTON_LEFT and event.is_pressed():
-			print("Clicked: %s ev: %s" % [self, event])
-			Rules.select_cell(self)
-
-func _set_selected(_selected: bool):
-	if _selected != selected:
-		selected = _selected
-		emit_signal("selected", self, _selected)
-	$CellSelector.visible = _selected
-
-func _get_selected() -> bool:
-	return selected
+			emit_signal("clicked", self, event)
+	elif event is InputEventMouseMotion:
+			emit_signal("mouse_motion", self, event)
 
 func _add_sound(path: String):
 	var sound = AudioStreamPlayer2D.new()

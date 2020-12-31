@@ -9,13 +9,19 @@ func _ready():
 			t_entry.count = 0
 			$VBoxContainer.add_child(t_entry)
 
-
-func set_particle_counts(counts: Dictionary):
+func track_cell(cell):
 	for entry in $VBoxContainer.get_children():
-		entry.count = counts.get(entry.particle_type, 0)
+		entry.count += cell.particle_counts.get(entry.particle_type, 0)
+	cell.connect("particle_count_changed", self, "_cell_particle_count_changed")
 
-func update_particle_count(type: int, count: int):
+func untrack_cell(cell):
+	cell.disconnect("particle_count_changed", self, "_cell_particle_count_changed")
 	for entry in $VBoxContainer.get_children():
-		if entry.particle_type == type:
-			entry.count += count
+		entry.count -= cell.particle_counts.get(entry.particle_type, 0)
+
+func _cell_particle_count_changed(cell, particle_type, old_count, new_count):
+	for entry in $VBoxContainer.get_children():
+		if entry.particle_type == particle_type:
+			entry.count -= old_count
+			entry.count += old_count
 			break
