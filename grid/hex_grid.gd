@@ -144,6 +144,8 @@ func generate_grid(size: int):
 	discover_cell(grid[Vector2.ZERO])
 
 func _cell_clicked(cell, event):
+	if not Rules.cell_is_selectable(cell):
+		return
 	if not event.shift:
 		for selected_cell in _selection:
 			selected_cell.get_node("CellSelector").visible = false

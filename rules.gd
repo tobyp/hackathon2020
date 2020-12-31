@@ -280,6 +280,12 @@ static func cell_is_discoverable(cell: Cell) -> bool:
 			return true
 	return false
 
+static func cell_is_selectable(cell: Cell) -> bool:
+	for n in cell.neighbors:
+		if n.type == Globals.CellType.CAPTURED:
+			return true
+	return false
+
 static func tunnel_is_rendered(tunnel) -> bool:
 	return tunnel.start_cell.type != Globals.CellType.UNDISCOVERED and tunnel.end_cell.type != Globals.CellType.UNDISCOVERED
 

@@ -23,5 +23,5 @@ func _cell_particle_count_changed(cell, particle_type, old_count, new_count):
 	for entry in $VBoxContainer.get_children():
 		if entry.particle_type == particle_type:
 			entry.count -= old_count
-			entry.count += old_count
+			entry.count += new_count
 			break
