@@ -235,13 +235,10 @@ static func _random_velocity() -> Vector2:
 ### UTILTIY/PRIVATE
 func _particle_init(particle: CellParticle, anywhere: bool = true):
 	if Rules.particle_type_is_factory(particle.type):
-		particle.translate(Vector2.ZERO)
-		particle.velocity = Vector2.ZERO
 		particle.set_texture_material(auto_recipe_material)
-	else:
-		if anywhere:
-			particle.translate(_random_coord_in_cell(particle.collision_radius))
-		particle.velocity = _random_velocity()
+	if anywhere:
+		particle.translate(_random_coord_in_cell(particle.collision_radius))
+	particle.velocity = _random_velocity()
 
 ## PARTICLE NODE FUNCTIONS - these do not modify `particle_counts`!
 func _create_particle_nodes(type: int, count: int = 1, anywhere: bool = true) -> Array:

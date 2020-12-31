@@ -145,54 +145,41 @@ static func particle_type_z_index(particle: int) -> float:
 	return 0.0
 
 static func particle_type_is_factory(particle: int) -> bool:
-	match particle:
-		Globals.ParticleType.QUEEN:
-			return true
-		Globals.ParticleType.PRO_QUEEN:
-			return true
-		Globals.ParticleType.RIBOSOME_TRANSPORTER:
-			return true
-		Globals.ParticleType.RIBOSOME_ALCOHOL:
-			return true
-		Globals.ParticleType.RIBOSOME_LYE:
-			return true
-		Globals.ParticleType.ANTI_MITOCHONDRION:
-			return true
-		Globals.ParticleType.POISON_ALCOHOL:
-			return true
-		Globals.ParticleType.POISON_LYE:
-			return true
-		Globals.ParticleType.POISON_PLUTONIUM:
-			return true
-	return false
+	return [
+		Globals.ParticleType.QUEEN,
+		Globals.ParticleType.PRO_QUEEN,
+		Globals.ParticleType.RIBOSOME_TRANSPORTER,
+		Globals.ParticleType.RIBOSOME_ALCOHOL,
+		Globals.ParticleType.RIBOSOME_LYE,
+	].has(particle)
 
 static func particle_type_is_in_transporter(particle: int) -> bool:
-	match particle:
-		Globals.ParticleType.AMINO_PHE:
-			return true
-		Globals.ParticleType.AMINO_ALA:
-			return true
-		Globals.ParticleType.AMINO_LYS:
-			return true
-		Globals.ParticleType.AMINO_TYR:
-			return true
-		Globals.ParticleType.AMINO_PRO:
-			return true
-		Globals.ParticleType.SUGAR:
-			return true
-	return false
+	return [
+		Globals.ParticleType.AMINO_PHE,
+		Globals.ParticleType.AMINO_ALA,
+		Globals.ParticleType.AMINO_LYS,
+		Globals.ParticleType.AMINO_TYR,
+		Globals.ParticleType.AMINO_PRO,
+		Globals.ParticleType.SUGAR,
+	].has(particle)
 
 static func particle_type_is_resource(particle: int) -> bool:
-	match particle:
-		Globals.ParticleType.ANTI_MITOCHONDRION, Globals.ParticleType.RESOURCE_AMINO_PHE, Globals.ParticleType.RESOURCE_AMINO_ALA, Globals.ParticleType.RESOURCE_AMINO_LYS, Globals.ParticleType.RESOURCE_AMINO_TYR, Globals.ParticleType.RESOURCE_AMINO_PRO:
-			return true
-	return false
+	return [
+		Globals.ParticleType.ANTI_MITOCHONDRION,
+		Globals.ParticleType.RESOURCE_AMINO_PHE,
+		Globals.ParticleType.RESOURCE_AMINO_ALA,
+		Globals.ParticleType.RESOURCE_AMINO_LYS,
+		Globals.ParticleType.RESOURCE_AMINO_TYR,
+		Globals.ParticleType.RESOURCE_AMINO_PRO,
+	].has(particle)
 
 static func particle_type_is_toxin(particle: int) -> bool:
-	match particle:
-		Globals.ParticleType.POISON_ALCOHOL, Globals.ParticleType.POISON_LYE, Globals.ParticleType.POISON_PLUTONIUM:
-			return true
-	return false
+	return [
+		Globals.ParticleType.POISON_ALCOHOL,
+		Globals.ParticleType.POISON_LYE,
+		Globals.ParticleType.POISON_PLUTONIUM,
+	].has(particle)
+
 static func particle_type_craft_allowed_in_cell(particle: int, cell: Cell) -> bool:
 	if particle_type_is_factory(particle):
 		var present_factory_types = []
@@ -209,7 +196,34 @@ static func particle_type_craft_allowed_in_cell(particle: int, cell: Cell) -> bo
 		return false
 	return true
 
-static func particle_type_resource_output(particle: int) -> int:
+static func particle_type_render_hover_center(particle: int) -> bool:
+	return [
+		Globals.ParticleType.ANTI_MITOCHONDRION,
+		Globals.ParticleType.POISON_ALCOHOL,
+		Globals.ParticleType.POISON_LYE,
+		Globals.ParticleType.POISON_PLUTONIUM,
+		Globals.ParticleType.PRO_QUEEN,
+		Globals.ParticleType.QUEEN,
+		Globals.ParticleType.RESOURCE_AMINO_ALA,
+		Globals.ParticleType.RESOURCE_AMINO_LYS,
+		Globals.ParticleType.RESOURCE_AMINO_PHE,
+		Globals.ParticleType.RESOURCE_AMINO_PRO,
+		Globals.ParticleType.RESOURCE_AMINO_TYR,
+		Globals.ParticleType.RIBOSOME_ALCOHOL,
+		Globals.ParticleType.RIBOSOME_LYE,
+		Globals.ParticleType.RIBOSOME_TRANSPORTER,
+	].has(particle)
+
+static func particle_type_render_orbit_center(particle: int) -> bool:
+	return [
+		Globals.ParticleType.AMINO_ALA,
+		Globals.ParticleType.AMINO_LYS,
+		Globals.ParticleType.AMINO_PHE,
+		Globals.ParticleType.AMINO_PRO,
+		Globals.ParticleType.AMINO_TYR,
+	].has(particle)
+
+static func particle_type_resource_output_type(particle: int) -> int:
 	match particle:
 		Globals.ParticleType.ANTI_MITOCHONDRION:
 			return Globals.ParticleType.SUGAR
@@ -242,7 +256,7 @@ static func particle_type_drag_rule_type(particle: int) -> Array:
 		_:
 			return [particle, true]
 
-static func particle_type_rendered_in_hud(type: int) -> bool:
+static func particle_type_rendered_in_hud(particle: int) -> bool:
 	return [
 		Globals.ParticleType.PROTEIN_WHITE,
 		Globals.ParticleType.PROTEIN_TRANSPORTER,
@@ -258,7 +272,7 @@ static func particle_type_rendered_in_hud(type: int) -> bool:
 		Globals.ParticleType.RIBOSOME_TRANSPORTER,
 		Globals.ParticleType.RIBOSOME_ALCOHOL,
 		Globals.ParticleType.RIBOSOME_LYE,
-	].has(type)
+	].has(particle)
 
 # calculate pressure between own cell (having `own` particles) and another cell (having `other` particles).
 # There's a lot of tuning to be had here.

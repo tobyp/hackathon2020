@@ -1,8 +1,7 @@
 extends KinematicBody2D
 class_name CellParticle
 
-var velocity = Vector2(-1000, 0)
-var origin = null
+var velocity = Vector2(0, 0)
 var _time = 0.0
 
 export var type = Globals.ParticleType.PROTEIN_WHITE setget _set_type, _get_type
@@ -14,7 +13,14 @@ func set_texture_material(mat: Material):
 	$Sprite.material = mat
 
 func _physics_process(delta):
-	if velocity.x != 0 or velocity.y != 0:
+	if Rules.particle_type_render_hover_center(type):
+		# Move a little random
+		_time += delta
+		position = Vector2(sin(_time * 0.3) * sin(_time), cos(_time * 0.3) * sin(_time * 0.4)) * 30
+	elif Rules.particle_type_render_orbit_center(type):
+		_time += delta
+		position = Vector2(200 + 5 * sin(_time * 2.1) * cos(_time), 0).rotated(_time * 0.5)
+	else:
 		var motion = velocity * delta
 		var collision = move_and_collide(motion)
 		if collision != null:
@@ -23,13 +29,6 @@ func _physics_process(delta):
 			var phi = deg2rad(sqrt(-1 * log(Rules.rng.randf())) * cos(2 * PI * Rules.rng.randf()))
 			velocity = velocity.bounce(collision.normal).rotated(phi)
 			collision = move_and_collide(reflect)
-	else:
-		# Move a little random
-		if origin == null:
-			origin = position
-		_time += delta / 3
-		var offset = Vector2(sin(_time) * sin(_time * 3), cos(_time) * sin(_time * 1.2)) * 30
-		position = origin + offset
 
 func _set_collision_radius(v):
 	collision_shape.radius = v

@@ -16,8 +16,8 @@ enum ParticleType {
 	AMINO_PRO,  # Pink (Pro Queen)
 	
 	## These are factories, can't travel, and are limited to one per cell:
-	QUEEN,  # Violet
-	PRO_QUEEN,  # Pink
+	QUEEN,  # Violet  # NOTE: PRO_QUEEN must come after QUEEN in definition, see Rules.particle_type_craft_allowed_in_cell
+	PRO_QUEEN,  # Pink  # NOTE: PRO_QUEEN must come after QUEEN in definition, see Rules.particle_type_craft_allowed_in_cell
 	RIBOSOME_TRANSPORTER,  # Green 
 	RIBOSOME_ALCOHOL,  # Yellow
 	RIBOSOME_LYE,  # Cyan
