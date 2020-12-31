@@ -193,6 +193,21 @@ static func particle_type_is_toxin(particle: int) -> bool:
 		Globals.ParticleType.POISON_ALCOHOL, Globals.ParticleType.POISON_LYE, Globals.ParticleType.POISON_PLUTONIUM:
 			return true
 	return false
+static func particle_type_craft_allowed_in_cell(particle: int, cell: Cell) -> bool:
+	if particle_type_is_factory(particle):
+		var present_factory_types = []
+		for type in Globals.ParticleType.values():
+			if particle_type_is_factory(type) and cell.particle_counts.get(type, 0) > 0:
+				present_factory_types.append(type)
+		if not present_factory_types.has(particle):
+			present_factory_types.append(particle)
+		present_factory_types.sort()
+		if present_factory_types.size() > 1 and not present_factory_types != [Globals.ParticleType.QUEEN, Globals.ParticleType.PRO_QUEEN]:
+			return false
+		return true
+	elif particle_type_is_resource(particle) or particle_type_is_toxin(particle):
+		return false
+	return true
 
 static func particle_type_resource_output(particle: int) -> int:
 	match particle:

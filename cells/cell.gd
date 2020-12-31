@@ -40,7 +40,7 @@ var _output_valves = {}  # Dict[Cell, float]
 func init_resource(resource_particle: int, anti_biomass: bool = 0.0):
 	self.set_toxin(Globals.ToxinType.ANTI_BIOMASS, anti_biomass)  # otherwise all transporters die on entry
 	self.set_input_allowed([Globals.ParticleType.PROTEIN_TRANSPORTER])  # otherwise particles get trapped
-	self.set_output_allowed([Rules.particle_type_resource_output(resource_particle)])
+	self.set_output_allowed([Rules.particle_type_resource_output_type(resource_particle)])
 	self.add_particles(resource_particle, 1)
 	_set_type(Globals.CellType.RESOURCE)
 
@@ -451,7 +451,7 @@ func _enable_sugar_warning(enable: bool):
 
 func _process_recipes(delta):
 	var buttonContainer = $RecipeButtons/Container
-	var recipes = Recipe.matches(particle_counts)
+	var recipes = Recipe.matches(self)
 	for c in buttonContainer.get_children():
 		var found = false
 		var i = 0
